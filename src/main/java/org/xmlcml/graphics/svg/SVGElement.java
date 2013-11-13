@@ -16,42 +16,18 @@
 
 package org.xmlcml.graphics.svg;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import nu.xom.Attribute;
-import nu.xom.Comment;
-import nu.xom.Element;
-import nu.xom.Elements;
-import nu.xom.Node;
-import nu.xom.Nodes;
-import nu.xom.ParentNode;
-import nu.xom.ProcessingInstruction;
-import nu.xom.Text;
+import nu.xom.*;
 import nu.xom.canonical.Canonicalizer;
-
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Angle;
-import org.xmlcml.euclid.Real;
-import org.xmlcml.euclid.Real2;
-import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.euclid.RealArray;
-import org.xmlcml.euclid.RealRange;
+import org.xmlcml.euclid.*;
 import org.xmlcml.euclid.RealRange.Direction;
-import org.xmlcml.euclid.RealRangeArray;
-import org.xmlcml.euclid.RealSquareMatrix;
-import org.xmlcml.euclid.Transform2;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
+
+import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /** base class for lightweight generic SVG element.
  * no checking - i.e. can take any name or attributes
@@ -101,12 +77,12 @@ public class SVGElement extends GraphicsElement {
 	}
 
 	public SVGElement(SVGElement element) {
-        super((GraphicsElement) element);
+        super(element);
         this.userElement = element.userElement;
 	}
 	
 	public SVGElement(SVGElement element, String tag) {
-        super((GraphicsElement) element, tag);
+        super(element, tag);
         this.userElement = element.userElement;
 	}
 	
@@ -172,7 +148,7 @@ public class SVGElement extends GraphicsElement {
 	 */
 	public static SVGElement readAndCreateSVG(File file) {
 		Element element = XMLUtil.parseQuietlyToDocument(file).getRootElement();
-		return (element == null) ? null : (SVGElement) readAndCreateSVG(element);
+		return (element == null) ? null : readAndCreateSVG(element);
 	}
 	
 	/** converts an SVG file to SVGElement
@@ -182,7 +158,7 @@ public class SVGElement extends GraphicsElement {
 	 */
 	public static SVGElement readAndCreateSVG(InputStream is) {
 		Element element = XMLUtil.parseQuietlyToDocument(is).getRootElement();
-		return (element == null) ? null : (SVGElement) readAndCreateSVG(element);
+		return (element == null) ? null : readAndCreateSVG(element);
 	}
 	
 	protected static void createSubclassedChildren(Element oldElement, SVGElement newElement) {

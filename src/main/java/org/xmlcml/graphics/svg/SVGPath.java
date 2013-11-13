@@ -16,35 +16,26 @@
 
 package org.xmlcml.graphics.svg;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.util.ArrayList;
-import java.util.List;
-
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Angle;
+import org.xmlcml.euclid.*;
 import org.xmlcml.euclid.Angle.Units;
-import org.xmlcml.euclid.Real2;
-import org.xmlcml.euclid.Real2Array;
-import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.euclid.RealArray;
-import org.xmlcml.euclid.RealRange;
-import org.xmlcml.euclid.Transform2;
-import org.xmlcml.euclid.Vector2;
 import org.xmlcml.graphics.svg.path.Arc;
 import org.xmlcml.graphics.svg.path.ClosePrimitive;
 import org.xmlcml.graphics.svg.path.CubicPrimitive;
 import org.xmlcml.graphics.svg.path.PathPrimitiveList;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
+import java.util.ArrayList;
+import java.util.List;
 
 /** draws a straight line.
  * 
@@ -91,7 +82,7 @@ public class SVGPath extends SVGShape {
 	/** constructor
 	 */
 	public SVGPath(SVGPath element) {
-        super((SVGElement) element);
+        super(element);
 	}
 	
 	/** constructor
@@ -689,8 +680,8 @@ public class SVGPath extends SVGShape {
 		return SVGPath.extractPaths(SVGUtil.getQuerySVGElements(svgElement, ALL_PATH_XPATH));
 	}
 
-	public static List<SVGPath> extractSelfAndDescendantPaths(SVGG g) {
-		return SVGPath.extractPaths(SVGUtil.getQuerySVGElements(g, ALL_PATH_XPATH));
+	public static List<SVGPath> extractSelfAndDescendantPaths(SVGElement svgElement) {
+		return SVGPath.extractPaths(SVGUtil.getQuerySVGElements(svgElement, ALL_PATH_XPATH));
 	}
 
 	/** not finished

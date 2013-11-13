@@ -16,27 +16,18 @@
 
 package org.xmlcml.graphics.svg;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
-import java.util.ArrayList;
-import java.util.List;
-
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
-
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Angle;
-import org.xmlcml.euclid.Line2;
-import org.xmlcml.euclid.Real;
-import org.xmlcml.euclid.Real2;
-import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.euclid.RealRange;
-import org.xmlcml.euclid.Transform2;
+import org.xmlcml.euclid.*;
 import org.xmlcml.xml.XMLConstants;
+
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /** draws a straight line.
  * 
@@ -72,7 +63,7 @@ public class SVGLine extends SVGShape {
 	/** constructor
 	 */
 	public SVGLine(SVGElement element) {
-        super((SVGElement) element);
+        super(element);
 	}
 	
 	/** constructor
@@ -196,7 +187,7 @@ public class SVGLine extends SVGShape {
 
 	public void applyAttributes(Graphics2D g2d) {
 		if (g2d != null) {
-			double width = (double) this.getStrokeWidth();
+			double width = this.getStrokeWidth();
 			Stroke s = new BasicStroke((float)width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 			g2d.setStroke(s);
 			super.applyAttributes(g2d);

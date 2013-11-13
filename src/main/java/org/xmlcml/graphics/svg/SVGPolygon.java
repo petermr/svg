@@ -20,13 +20,11 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Array;
-import org.xmlcml.xml.XMLConstants;
 
 /** draws a straight line.
  * 
@@ -51,14 +49,14 @@ public class SVGPolygon extends SVGPoly {
 	/** constructor
 	 */
 	public SVGPolygon(SVGElement element) {
-        super((SVGElement) element);
+        super(element);
         init();
 	}
 	
 	/** constructor
 	 */
 	public SVGPolygon(Element element) {
-        super((SVGElement) element);
+        super(element);
         init();
 	}
 	

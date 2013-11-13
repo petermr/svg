@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.ParentNode;
@@ -30,7 +29,6 @@ import nu.xom.ParentNode;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
-import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
 
 /** draws a straight line.
@@ -77,7 +75,7 @@ public class SVGPolyline extends SVGPoly {
 	/** constructor
 	 */
 	public SVGPolyline(SVGElement element) {
-        super((SVGElement) element);
+        super(element);
 	}
 	
 	/** constructor

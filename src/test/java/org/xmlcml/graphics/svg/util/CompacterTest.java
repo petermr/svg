@@ -1,26 +1,20 @@
 package org.xmlcml.graphics.svg.util;
 
+import nu.xom.Attribute;
+import nu.xom.Element;
+import org.junit.Assert;
+import org.junit.Test;
+import org.xmlcml.graphics.svg.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import nu.xom.Attribute;
-import nu.xom.Element;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.xmlcml.graphics.svg.Fixtures;
-import org.xmlcml.graphics.svg.SVGElement;
-import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.SVGText;
-
 public class CompacterTest {
 
-	List<String> ATTNAMES = Arrays.asList(new String[] {"a", "b", "x"});
-	List<String> SVGNAMES = Arrays.asList(new String[] {
-			"stroke", "fill", "clip-path", "fontName", "font-family", "font-weight", "font-size", "font-style", "stroke-width"
-			/*"x", "y", "width"*/});
+	List<String> ATTNAMES = Arrays.asList("a", "b", "x");
+	List<String> SVGNAMES = Arrays.asList("stroke", "fill", "clip-path", "fontName", "font-family", "font-weight", "font-size", "font-style", "stroke-width"
+			/*"x", "y", "width"*/);
 	
 	@Test
 	public void testRemoveAttributes() {

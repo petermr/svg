@@ -1,17 +1,6 @@
 package org.xmlcml.graphics.svg;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import nu.xom.Attribute;
-import nu.xom.Builder;
-import nu.xom.Element;
-import nu.xom.Node;
-import nu.xom.Nodes;
-
+import nu.xom.*;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
@@ -19,6 +8,12 @@ import org.xmlcml.euclid.Transform2;
 import org.xmlcml.euclid.Vector2;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SVGUtil {
 
@@ -101,7 +96,7 @@ public class SVGUtil {
 
 	public static Double decimalPlaces(Double width, int i) {
 		int ii = (int) Math.pow(10., i);
-		return (double)Math.round(width*(int)ii) / (double)ii;
+		return (double)Math.round(width* ii) / (double)ii;
 	}
 
 	/** applies to leaf nodes
@@ -194,7 +189,7 @@ public class SVGUtil {
 			g.getAttribute("font-size").detach();
 			List<SVGElement> texts = SVGUtil.getQuerySVGElements(g, "./svg:text[not(@font-size)]");
 			for (SVGElement text : texts) {
-				((SVGElement)text).setFontSize(fontSize);
+				text.setFontSize(fontSize);
 			}
 		}
 	}

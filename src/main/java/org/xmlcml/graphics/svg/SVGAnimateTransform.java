@@ -18,7 +18,6 @@ package org.xmlcml.graphics.svg;
 
 import nu.xom.Element;
 import nu.xom.Node;
-
 import org.xmlcml.euclid.Real2;
 
 /** draws a straight line.
@@ -44,7 +43,7 @@ public class SVGAnimateTransform extends AbstractAnimate {
 	/** constructor
 	 */
 	public SVGAnimateTransform(SVGElement element) {
-        super((SVGElement) element);
+        super(element);
 	}
 	
 	/** constructor

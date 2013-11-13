@@ -16,14 +16,13 @@
 
 package org.xmlcml.graphics.svg;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import nu.xom.Element;
 import nu.xom.Node;
-
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** draws text.
  * 
@@ -53,7 +52,7 @@ public class SVGTSpan extends SVGText {
 	/** constructor
 	 */
 	public SVGTSpan(SVGTSpan element) {
-        super((SVGElement) element, TAG);
+        super(element, TAG);
 	}
 	
 	/** constructor

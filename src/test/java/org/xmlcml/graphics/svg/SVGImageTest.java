@@ -1,20 +1,6 @@
 package org.xmlcml.graphics.svg;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-
 import junit.framework.Assert;
-
 import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,6 +9,13 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.graphics.svg.image.CannyEdgeDetector;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+import java.io.*;
+import java.net.URL;
 
 public class SVGImageTest {
 
@@ -246,8 +239,8 @@ public class SVGImageTest {
 	@Test
 	public void testReadSVG() throws Exception {
 		SVGElement element = SVGElement.readAndCreateSVG(Fixtures.PLOS_GRAPH_SVG);
-		SVGImage svgImage = 
-				(SVGImage) SVGImage.extractImages(SVGUtil.getQuerySVGElements(element, "//*[local-name()='image']")).get(0);
+		SVGImage svgImage =
+                SVGImage.extractImages(SVGUtil.getQuerySVGElements(element, "//*[local-name()='image']")).get(0);
 		svgImage.writeImage("target/testReadSvg.png", SVGImage.IMAGE_PNG);
 	}
 	
