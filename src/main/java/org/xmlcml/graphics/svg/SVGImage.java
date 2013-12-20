@@ -210,6 +210,15 @@ public class SVGImage extends SVGShape {
 		if (imageType == null) {
 			throw new RuntimeException("Cannot convert mimeType: "+mimeType);
 		}
+		setXYWidthHeight(bufferedImage);
+		
+		String base64 = convertBufferedImageToBase64(bufferedImage, imageType);
+		String attValue = createHrefAttributeValue(mimeType, base64);
+		addXlinkHref(attValue);
+		return attValue;
+	}
+
+	public void setXYWidthHeight(BufferedImage bufferedImage) {
 		double x = bufferedImage.getMinX();
 		double y = bufferedImage.getMinY();
 		double height = bufferedImage.getHeight();
@@ -218,11 +227,6 @@ public class SVGImage extends SVGShape {
 		this.setY(y);
 		this.setWidth(width);
 		this.setHeight(height);
-		
-		String base64 = convertBufferedImageToBase64(bufferedImage, imageType);
-		String attValue = createHrefAttributeValue(mimeType, base64);
-		this.addAttribute(new Attribute(XLINK_PREF+":"+HREF, XLINK_NS, attValue));
-		return attValue;
 	}
 
 	private static String createHrefAttributeValue(String mimeType, String base64) {
@@ -434,7 +438,7 @@ public class SVGImage extends SVGShape {
 			if (!imageData.startsWith(DATA)) {
 				throw new RuntimeException("ImageData must start with "+DATA);
 			}
-			this.addAttribute(new Attribute(XLINK_PREF+":"+HREF, XLINK_NS, imageData));
+			addXlinkHref(imageData);
 		} else {
 			Attribute hrefAttribute = this.getAttribute(HREF, XLINK_NS);
 			if (hrefAttribute != null) {
@@ -443,6 +447,31 @@ public class SVGImage extends SVGShape {
 		}
 	}
 
+/**	
+	<svg width="4in" height="3in" version="1.1"
+		     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+		  <desc>This graphic links to an external image
+		  </desc>
+		  <image x="200" y="200" width="100px" height="100px"
+		         xlink:href="myimage.png">
+		    <title>My image</title>
+		  </image>
+  */
+	public void setHref(String href) {
+		if (href != null) {
+			addXlinkHref(href);
+		} else {
+			Attribute hrefAttribute = this.getAttribute(HREF, XLINK_NS);
+			if (hrefAttribute != null) {
+				hrefAttribute.detach();
+			}
+		}
+	}
+
+private void addXlinkHref(String href) {
+	this.addAttribute(new Attribute(XLINK_PREF+":"+HREF, XLINK_NS, href));
+}
+	
 	/** creates an SVGImage from file.
 	 * 
 	 * <p>will not create a location (may need to set x, y or transform independently);
