@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>org.xml-cml</groupId>
-    <artifactId>svg-dev</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>svg</artifactId>
+    <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>SVG</name>
+    <name>svg</name>
     <description>A Java library for processing SVG</description>
 
     <licenses>
@@ -25,9 +25,9 @@
         </license>
     </licenses>
     <scm>
-        <url>https://bitbucket.org/petermr/svg-dev/src</url>
-        <connection>scm:hg:http://bitbucket.org/petermr/svg-dev</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/petermr/svg-dev</developerConnection>
+        <url>https://bitbucket.org/wwmm/svg/src</url>
+        <connection>scm:hg:http://bitbucket.org/wwmm/svg</connection>
+        <developerConnection>scm:hg:https://bitbucket.org/wwmm/svg</developerConnection>
     </scm>
 
     <developers>
@@ -39,8 +39,8 @@
 
     <inceptionYear>2007</inceptionYear>
     <ciManagement>
-        <system>hudson</system>
-        <url>https://hudson.ch.cam.ac.uk/job/svg-dev/</url>
+        <system>jenkins</system>
+        <url>https://jenkins.ch.cam.ac.uk/job/svg-dev/</url>
     </ciManagement>
 
     <organization>
@@ -73,25 +73,16 @@
     <dependencies>
         <dependency>
             <groupId>org.xml-cml</groupId>
-            <artifactId>euclid-dev</artifactId>
+            <artifactId>euclid</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.2</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        
-        <!-- 
-        <dependency>
-            <groupId>org.xml-cml</groupId>
-            <artifactId>euclid-testutil</artifactId>
-            <version>1.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        -->
         
         <dependency>
             <version>1.1-SNAPSHOT</version>
@@ -103,7 +94,7 @@
         <dependency>
         	<groupId>com.google.guava</groupId>
         	<artifactId>guava</artifactId>
-        	<version>15.0</version>
+        	<version>17.0</version>
         </dependency>
     </dependencies>
     
@@ -172,7 +163,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
+                <version>2.17</version>
                 <configuration>
                     <parallel>classes</parallel>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
