@@ -57,7 +57,7 @@ public class SVGText extends SVGElement {
 	 * Rough average of width of "n" 
 	 */
 	private static final Double N_SPACE = 0.55;
-	public static final Double SPACE_FACTOR = 0.1; //extra space that denotes a space
+	public static final Double SPACE_FACTOR = 0.2; //extra space that denotes a space
 	private Double SPACE_WIDTH1000 = /*274.0*/ 200.;
 	public final static Double DEFAULT_SPACE_FACTOR = 0.05;
 	private static final double MIN_FONT_SIZE = 0.01;
@@ -805,7 +805,7 @@ public class SVGText extends SVGElement {
 	 */
 	public Double getSVGXFontWidth() {
 		String width = SVGUtil.getSVGXAttribute(this, WIDTH);
-		return width == null ? null : new Double(width); 
+		return width == null ? null : Double.valueOf(width); 
 	}
 	
 	/** 
