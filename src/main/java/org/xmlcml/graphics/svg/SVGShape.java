@@ -3,6 +3,10 @@ package org.xmlcml.graphics.svg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.xmlcml.euclid.IntArray;
+
 import nu.xom.Attribute;
 
 /** tags SVG primitives as geometric shapes.
@@ -13,7 +17,11 @@ import nu.xom.Attribute;
  *
  */
 public abstract class SVGShape extends SVGElement {
-	
+	private static final Logger LOG = Logger.getLogger(SVGShape.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
+
 	public static final String ALL_SHAPE_XPATH = "" +
 			".//svg:circle[not(ancestor::svg:defs)] | " +
 			".//svg:ellipse[not(ancestor::svg:defs)] | " +
@@ -120,6 +128,60 @@ public abstract class SVGShape extends SVGElement {
 		return isZeroDimensional;
 	}
 
+	public static void eliminateGeometricalDuplicates(List<? extends SVGShape> shapes, double epsilon) {
+		List<SVGShape> uniqueShapes = new ArrayList<SVGShape>();
+		for (int i = shapes.size() - 1; i >= 0; i--) {
+			SVGShape shape = shapes.get(i);
+			if (SVGShape.indexOfGeometricalEquivalent(uniqueShapes, shape, epsilon) != -1) {
+				shapes.remove(i);
+			} else {
+				uniqueShapes.add(shape);
+			}
+		}
+	}
+
+	public static int indexOfGeometricalEquivalent(List<SVGShape> shapes, SVGShape shape, double epsilon) {
+		int index = -1;
+		if (shape != null) {
+			for (int i = 0; i < shapes.size(); i++) {
+				SVGShape shape1 = shapes.get(i);
+				if (shape1 != null && shape1.isGeometricallyEqualTo(shape, epsilon)) {
+					index = i;
+					break;
+				}
+			}
+		}
+		return index;
+	}
+
+	/** are two shapes geometrically equal?
+	 * are 2 shapes equal within a tolerance? display attributes are ignored.
+	 * 
+	 * @param shape to compare with
+	 * @param epsilon tolerance
+	 * @return equivalence
+	 */
+	protected abstract boolean isGeometricallyEqualTo(SVGShape shape, double epsilon);
+
+	/** indexes of all elements matching shape geometrically
+	 * uses @ isGeometricallyEqualTo(SVGShape shape, double epsilon);
+	 * 
+	 * @param shapes list to search
+	 * @param shape shape to search for 
+	 * @param epsilon tolerance
+	 * @return empty array if none, else serial numbers
+	 */
+	public static IntArray indexesOfGeometricalEquivalent(List<SVGShape> shapes, SVGShape shape, double epsilon) {
+		IntArray intArray = new IntArray();
+		if (shapes != null && shape != null) {
+			for (int i = 0; i < shapes.size(); i++) {
+				if (shapes.get(i).isGeometricallyEqualTo(shape, epsilon)) {
+					intArray.addElement(i);
+				}
+			}
+		}
+		return intArray;
+	}
 
 	
 }

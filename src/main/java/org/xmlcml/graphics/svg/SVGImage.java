@@ -591,5 +591,13 @@ private void addXlinkHref(String href) {
 //		this.debug("XXXXXXXXXXX");
 	}
 
+	@Override
+	/** cannot easily implement this, return false;
+	 * 
+	 */
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		return false;
+	}
+
 
 }

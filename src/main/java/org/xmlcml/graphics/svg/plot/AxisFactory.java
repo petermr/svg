@@ -71,7 +71,7 @@ public class AxisFactory {
 	}
 
 	private void processTitle() {
-		LOG.debug("title NYI");
+		LOG.trace("title NYI");
 	}
 
 	private SVGPhrase processScales() {

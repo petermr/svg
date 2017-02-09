@@ -104,7 +104,6 @@ public class SVGPathPrimitiveTest {
 		 Assert.assertTrue("m", new Real2(110.7, 262.44).isEqualTo(primitiveList.get(0).getFirstCoord(), 0.001));
 		 Assert.assertTrue("l", new Real2(110.82, 261.839).isEqualTo(primitiveList.get(1).getFirstCoord(), 0.001));
 		 Assert.assertTrue("c", new Real2(110.88, 263.1).isEqualTo(primitiveList.get(10).getFirstCoord(), 0.001));
-//		 LOG.debug(primitiveList.get(11).getFirstCoord());
 		 // not sure about this one
 //		 Assert.assertTrue("z", new Real2(110.7, 262.43).isEqualTo(primitiveList.get(11).getLastCoord(), 0.001));
 	}
@@ -115,7 +114,6 @@ public class SVGPathPrimitiveTest {
 		 Assert.assertTrue("m", new Real2(110.7, 262.44).isEqualTo(primitiveList.get(0).getLastCoord(), 0.001));
 		 Assert.assertTrue("l", new Real2(110.82, 261.839).isEqualTo(primitiveList.get(1).getLastCoord(), 0.001));
 		 Assert.assertTrue("c", new Real2(110.7, 262.43).isEqualTo(primitiveList.get(10).getLastCoord(), 0.001));
-//		 LOG.debug(primitiveList.get(11).getLastCoord());
 		 // not sure about this one
 //		 Assert.assertTrue("z", new Real2(110.7, 262.44).isEqualTo(primitiveList.get(11).getLastCoord(), 0.001));
 	}
@@ -134,7 +132,6 @@ public class SVGPathPrimitiveTest {
 	@Test
 	public void testImplicitLine0() {
 		PathPrimitiveList primitiveList = PathPrimitiveList.createPrimitiveList(RELATIVE0);
-		LOG.debug("prim "+primitiveList);
 		primitiveList.format(3);
 		Assert.assertEquals(2, primitiveList.size());
 		 Assert.assertTrue("m", new Real2(1, 2).isEqualTo(primitiveList.get(0).getLastCoord(), 0.001));

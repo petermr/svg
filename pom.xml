@@ -3,32 +3,17 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
-	<parent>
-		<groupId>org.contentmine</groupId>
-		<artifactId>cm-parent</artifactId>
-		<version>6</version>
-	</parent>
 	
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <version>1</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <scm>
-        <url>https://bitbucket.org/wwmm/svg/src</url>
-        <connection>scm:hg:http://bitbucket.org/wwmm/svg</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/wwmm/svg</developerConnection>
-    </scm>
+    <properties>
+       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <developers>
         <developer>
@@ -42,6 +27,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19</version>
 				<configuration>
 					<parallel>classes</parallel>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
@@ -50,103 +36,15 @@
 		</plugins>
 	</build>
 
-    <!-- remove <repositories> for release to maven central -->
-	<!--
-    <repositories>
-        <repository>
-            <id>ucc-repo</id>
-            <name>UCC Maven Repository</name>
-            <url>https://maven.ch.cam.ac.uk/m2repo</url>
-        </repository>
-    </repositories>
--->    
     <dependencies>
         <dependency>
             <groupId>org.contentmine</groupId>
             <artifactId>euclid</artifactId>
-            <version>2</version>
+            <version>2.0.1</version>
         </dependency>
-<!--			
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-			-->
     </dependencies>
     <reporting>
         <plugins>
-        
-        	<!-- 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>index</report>
-                            <report>summary</report>
-                            <report>dependencies</report>
-                            <report>project-team</report>
-                            <report>license</report>
-                            <report>cim</report>
-                            <report>scm</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            -->
-            <!-- 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            -->
-            <!-- 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <configuration>
-                    <targetJdk>1.5</targetJdk>
-                    <linkXRef>true</linkXRef>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>src/test/resources/checkstyle.xml</configLocation>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>apt-maven-plugin</artifactId>
-            </plugin>
-            -->
-				<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
-                <configuration>
-                    <parallel>classes</parallel>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
-                </configuration>
-            </plugin>
--->
         </plugins>
     </reporting>
 </project>

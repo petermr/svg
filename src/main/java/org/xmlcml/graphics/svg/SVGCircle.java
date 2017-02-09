@@ -20,6 +20,7 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.Transform2;
@@ -291,4 +292,24 @@ public class SVGCircle extends SVGShape {
 		return SVGCircle.extractCircles(SVGUtil.getQuerySVGElements(g, ALL_CIRCLE_XPATH));
 	}
 
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape != null && shape instanceof SVGCircle) {
+			SVGCircle circle = (SVGCircle) shape;
+			return (this.getXY().isEqualTo(circle.getXY(), epsilon) &&
+					Real.isEqual(getRad(), circle.getRad(), epsilon));
+		}
+		return false;
+	}
+
+	@Override
+	public Double getX() {
+		return getCX();
+	}
+	
+	@Override
+	public Double getY() {
+		return getCY();
+	}
+	
 }

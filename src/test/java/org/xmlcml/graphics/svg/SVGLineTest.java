@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Real2;
+import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 
 public class SVGLineTest {
@@ -18,6 +20,7 @@ public class SVGLineTest {
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
+	private double epsilon = 0.01;
 
 	private final static Double FP_EPS = 0.000001;
 	private final static Angle ANGLE_EPS = new Angle(0.000001, Angle.Units.RADIANS);
@@ -207,4 +210,49 @@ public class SVGLineTest {
 				"<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" x1=\"36.9\" y1=\"100.0\" x2=\"503.1\" y2=\"100.0\" />",
 				newLine.toXML());
 	}
+	
+	@Test
+	public void testCreatePolygon() {
+		double rad = 15.;
+		SVGLine line = new SVGLine(new Real2(10., 20.), new Real2(25, 45));
+		line.setFill("none");
+		line.setStroke("black");
+		line.setStrokeWidth(1.0);
+		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
+				+ " />", line.toXML());
+		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
+		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
+		Assert.assertTrue(new Real2(25., 45.).isEqualTo(line.getXY(1), epsilon));
+		Real2Range bbox = line.getBoundingBox();
+		Assert.assertTrue(bbox.isEqualTo(new Real2Range(new RealRange(10., 25.), new RealRange(20., 45.)), epsilon));
+	}
+	
+	@Test
+	public void testCreateLine() {
+		double rad = 15.;
+		SVGLine line = new SVGLine(new Real2(10., 20.), new Real2(25, 45));
+		line.setFill("none");
+		line.setStroke("black");
+		line.setStrokeWidth(1.0);
+		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
+				+ " />", line.toXML());
+		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
+		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
+		Assert.assertTrue(new Real2(25., 45.).isEqualTo(line.getXY(1), epsilon));
+		Real2Range bbox = line.getBoundingBox();
+		Assert.assertTrue(bbox.isEqualTo(new Real2Range(new RealRange(10., 25.), new RealRange(20., 45.)), epsilon));
+	}
+	
+	@Test
+	public void testIsGeometricallyEqualTo() {
+		SVGLine line0 = new SVGLine(new Real2(10., 20.), new Real2(25., 45.));
+		Assert.assertTrue(line0.isGeometricallyEqualTo(
+				new SVGLine(new Real2(10.005, 20.005), new Real2(25.005, 45.005)), epsilon));
+		Assert.assertTrue(line0.isGeometricallyEqualTo(
+				new SVGLine(new Real2(9.995, 20.005), new Real2(24.995, 45.005)), epsilon));
+		Assert.assertFalse(line0.isGeometricallyEqualTo(
+				new SVGLine(new Real2(10.015, 20.005), new Real2(5.005, 15.015)), epsilon));
+	}
+
+
 }

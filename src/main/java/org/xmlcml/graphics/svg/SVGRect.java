@@ -132,18 +132,6 @@ public class SVGRect extends SVGShape {
 		this(bbox.getXMin(), bbox.getYMin(), bbox.getXRange().getRange(), bbox.getYRange().getRange());
 	}
 	
-//	public static SVGRect createSVGRect(Real2Range bbox) {
-//		SVGRect rect = null;
-//		if (bbox != null) {
-//			RealRange xRange = bbox.getXRange();
-//			RealRange yRange = bbox.getYRange();
-//			if (xRange != null && yRange != null) {
-//				rect = new SVGRect(xRange.getMin(), yRange.getMin(), xRange.getRange(), yRange.getRange());
-//			}
-//		}
-//		return rect;
-//	}
-
 	protected void drawElement(Graphics2D g2d) {
 		saveGraphicsSettingsAndApplyTransform(g2d);
 		ensureCumulativeTransform();
@@ -263,5 +251,16 @@ public class SVGRect extends SVGShape {
 	public String toString() {
 		return getBoundingBox().toString();
 	}
-	
+
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape != null && shape instanceof SVGRect) {
+			return this.isEqual((SVGRect) shape, epsilon);
+		}
+		return false;
+	}
+
+	public Real2 getXY() {
+		return new Real2(getX(), getY());
+	}
 }

@@ -573,5 +573,11 @@ public abstract class SVGPoly extends SVGShape {
 		return (String.valueOf(real2Array));
 	}
 	
-
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape != null && shape instanceof SVGPoly && this.getClass().equals(shape.getClass())) {
+			return this.getReal2Array().isEqualTo(((SVGPoly) shape).getReal2Array(), epsilon);
+		}
+		return false;
+	}
 }

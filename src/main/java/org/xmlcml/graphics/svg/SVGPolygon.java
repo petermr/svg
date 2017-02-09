@@ -40,7 +40,6 @@ public class SVGPolygon extends SVGPoly {
 	private static Logger LOG = Logger.getLogger(SVGPolygon.class);
 
 	public final static String ALL_POLYGON_XPATH = ".//svg:polygon";
-
 	public final static String TAG ="polygon";
 	
 	/** constructor
@@ -190,11 +189,9 @@ public class SVGPolygon extends SVGPoly {
 		int npoints2 = npoints / 2;
 		int startIndex = (stIndex + 1) % npoints;
 		int endIndex = stIndex + npoints2;
-		LOG.debug(startIndex + "/" + endIndex);
 		Real2 startPoint = real2Array.get(startIndex);
 		Real2 endPoint = (npoints % 2 == 0) ? real2Array.get(endIndex) :
 			real2Array.get(endIndex).getMidPoint(real2Array.get(endIndex + 1));
-		LOG.debug(startPoint+"/"+endPoint);
 		Line2 line = new Line2(startPoint, endPoint);
 		for (int i = startIndex; i < endIndex; i++) {
 			Real2 ppi = real2Array.get(i % npoints);

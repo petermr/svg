@@ -96,7 +96,7 @@ public class Path2ShapeConverterTest {
 		@Ignore
 		public void bmcLogoTestInSitu() throws IOException {
 			SVGElement svgElement = convertPathsToShapes(Fixtures.PATHS_BMCLOGO_SVG);
-			SVGUtil.debug(svgElement, new FileOutputStream("target/converted"+System.currentTimeMillis()+".svg"), 1);
+//			SVGUtil.debug(svgElement, new FileOutputStream("target/converted"+System.currentTimeMillis()+".svg"), 1);
 			List<SVGElement> svgElements = SVGUtil.getQuerySVGElements(svgElement, "/*/*/svg:*");
 			Assert.assertEquals("converted", 23, svgElements.size());
 			Assert.assertTrue("0 "+svgElements.get(0).getClass().getSimpleName(), svgElements.get(0) instanceof SVGPolygon);
@@ -220,7 +220,6 @@ public class Path2ShapeConverterTest {
 			Assert.assertTrue("2: "+groups.get(6).getChild(3).getClass(), groups.get(6).getChild(3) instanceof SVGLine);
 			SVGLine line63 = (SVGLine) groups.get(6).getChild(3);
 			line63.format(3);
-			LOG.debug("line63 "+line63.toXML());
 //			Assert.assertEquals("2", "77.896 270.218 342.327 270.218 342.327 270.791 77.899 270.791 82.192 270.522", polyline63.getAttribute("points").getValue());
 			//Assert.assertTrue("3", groups.get(6).getChild(5) instanceof SVGPolyline);
 			//Assert.assertEquals("1", "78.231 274.04 342.662 274.04 342.662 274.613 78.234 274.613", ((SVGPolyline) groups.get(6).getChild(5)).getAttribute("points").getValue());

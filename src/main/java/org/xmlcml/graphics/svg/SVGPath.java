@@ -873,4 +873,12 @@ public class SVGPath extends SVGShape {
 		return (signature.equals("MZ") || signature.equals("M"));
 	}
 
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape != null && shape instanceof SVGPath) {
+			return this.hasEqualCoordinates((SVGPath) shape, epsilon);
+		}
+		return false;
+	}
+
 }

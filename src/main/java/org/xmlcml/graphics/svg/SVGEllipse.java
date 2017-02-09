@@ -99,6 +99,16 @@ public class SVGEllipse extends SVGShape {
 		this.setRXY(new Real2(rx, ry));
 	}
 	
+	public SVGEllipse(Real2 cxy, double rx, double ry) {
+		this();
+		this.setCXY(cxy);
+		this.setRXY(new Real2(rx, ry));
+	}
+
+	public SVGEllipse(Real2 cxy, Real2 dxdy) {
+		this(cxy, dxdy.getX(), dxdy.getY());
+	}
+
 	protected void drawElement(Graphics2D g2d) {
 		saveGraphicsSettingsAndApplyTransform(g2d);
 		Real2 xy0 = getCXY();
@@ -228,6 +238,32 @@ public class SVGEllipse extends SVGShape {
 			}
 		}
 		return ellipseOrCircle;
+	}
+
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape != null && shape instanceof SVGEllipse) {
+			SVGEllipse ellipse = (SVGEllipse) shape;
+			return (this.getXY().isEqualTo(ellipse.getXY(), epsilon) &&
+				Real.isEqual(this.getRX(), ellipse.getRX(), epsilon) &&
+				Real.isEqual(this.getRY(), ellipse.getRY(), epsilon));
+		}
+		return false;
+	}
+
+	@Override
+	public Double getX() {
+		return this.getCX();
+	}
+	
+	@Override
+	public Double getY() {
+		return this.getCY();
+	}
+	
+	@Override
+	public Real2 getXY() {
+		return this.getCXY();
 	}
 	
 	

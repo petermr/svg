@@ -16,6 +16,7 @@
 
 package org.xmlcml.graphics.svg;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -24,6 +25,10 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2;
+import org.xmlcml.euclid.Real2Array;
+import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.RealArray;
+import org.xmlcml.euclid.RealRange;
 
 public class SVGPolylineTest {
 	public static final Logger LOG = Logger.getLogger(SVGPolylineTest.class);
@@ -70,6 +75,7 @@ public class SVGPolylineTest {
 	 + "</svg>"
 	;
 
+	private double epsilon = 0.01;
 
 	@Test
 	@Ignore // FIXME ANDY
@@ -135,4 +141,80 @@ public class SVGPolylineTest {
 		poly1.createVerticalOrHorizontalLine(0.03);
 		
 	}
+	
+	@Test
+	public void testCreatePolyline() {
+		SVGPolyline polyline = new SVGPolyline(new Real2Array(
+				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.}))
+				);
+		polyline.setFill("none");
+		polyline.setStroke("black");
+		polyline.setStrokeWidth(1.0);
+		Assert.assertEquals("<polyline xmlns=\"http://www.w3.org/2000/svg\" "
+				+ "points=\"10.0 110.0 20.0 120.0 30.0 130.0 40.0 140.0 50.0 150.0 60.0 160.0\""
+				+ " fill=\"none\" stroke=\"black\" stroke-width=\"1.0\" />", polyline.toXML());
+		Assert.assertTrue(new Real2Array(
+				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})
+				).isEqualTo(polyline.getReal2Array(), epsilon));
+		Assert.assertTrue(new Real2Array(
+				new RealArray(new double[]{ 10.005, 20.005, 30.005, 40.005, 50.005, 60.005}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})
+				).isEqualTo(polyline.getReal2Array(), epsilon));
+		Real2Range bbox = polyline.getBoundingBox();
+		Assert.assertTrue(bbox.isEqualTo(new Real2Range(new RealRange(10., 60.), new RealRange(110., 160.)), epsilon));
+	}
+	
+	@Test
+	public void testCreatePolylineFromLines() {
+		List<SVGLine> lines = new ArrayList<SVGLine>();
+		lines.add(new SVGLine(new Real2(10., 110.), new Real2(20., 120.)));
+		lines.add(new SVGLine(new Real2(20., 120.), new Real2(30., 130.)));
+		lines.add(new SVGLine(new Real2(30., 130.), new Real2(40., 140.)));
+		lines.add(new SVGLine(new Real2(40., 140.), new Real2(50., 150.)));
+		lines.add(new SVGLine(new Real2(50., 150.), new Real2(60., 160.)));
+		lines.add(new SVGLine(new Real2(60., 160.), new Real2(10., 110.)));
+		SVGPolyline polyline = new SVGPolyline(new Real2Array(
+				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.}))
+				);
+		polyline.setFill("none");
+		polyline.setStroke("black");
+		polyline.setStrokeWidth(1.0);
+		Assert.assertEquals("<polyline xmlns=\"http://www.w3.org/2000/svg\" "
+				+ "points=\"10.0 110.0 20.0 120.0 30.0 130.0 40.0 140.0 50.0 150.0 60.0 160.0\""
+				+ " fill=\"none\" stroke=\"black\" stroke-width=\"1.0\" />", polyline.toXML());
+		Assert.assertTrue(new Real2Array(
+				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})
+				).isEqualTo(polyline.getReal2Array(), epsilon));
+		Assert.assertTrue(new Real2Array(
+				new RealArray(new double[]{ 10.005, 20.005, 30.005, 40.005, 50.005, 60.005}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})
+				).isEqualTo(polyline.getReal2Array(), epsilon));
+		Real2Range bbox = polyline.getBoundingBox();
+		Assert.assertTrue(bbox.isEqualTo(new Real2Range(new RealRange(10., 60.), new RealRange(110., 160.)), epsilon));
+	}
+	
+	@Test
+	public void testIsGeometricallyEqualTo() {
+		SVGPolyline polyline = new SVGPolyline(new Real2Array(
+				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.}))
+				);
+		SVGPolyline polyline1 = new SVGPolyline(new Real2Array(
+				new RealArray(new double[]{ 10.005, 20.005, 30.005, 40.005, 50.005, 60.005}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.}))
+				);
+		SVGPolyline polyline2 = new SVGPolyline(new Real2Array(
+				new RealArray(new double[]{ 10.01, 20.01, 30.01, 40.01, 50.01, 60.01}),
+				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.}))
+				);
+		Assert.assertTrue(polyline.isGeometricallyEqualTo(
+				polyline1, epsilon));
+		Assert.assertTrue(polyline2.isGeometricallyEqualTo(polyline1, 0.006));
+		Assert.assertFalse(polyline2.isGeometricallyEqualTo(polyline, 0.006));
+	}
+
 }

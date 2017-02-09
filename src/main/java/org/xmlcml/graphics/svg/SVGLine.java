@@ -835,4 +835,12 @@ public class SVGLine extends SVGShape {
 		return bbox;
 	}
 
+	@Override
+	protected boolean isGeometricallyEqualTo(SVGShape shape, double epsilon) {
+		if (shape instanceof SVGLine) {
+			return SVGLine.isEqual(this, (SVGLine) shape, epsilon);
+		}
+		return false;
+	}
+
 }
