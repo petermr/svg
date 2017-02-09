@@ -12,7 +12,7 @@
 
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.contentmine</groupId>
             <artifactId>euclid</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </dependency>
     </dependencies>
     <reporting>
