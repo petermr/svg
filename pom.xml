@@ -3,10 +3,16 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-	
+
+  <parent>
+  	<groupId>org.contentmine</groupId>
+  	<artifactId>cm-parent</artifactId>
+  	<version>7.0.3</version>
+  </parent>
+
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
@@ -47,4 +53,15 @@
         <plugins>
         </plugins>
     </reporting>
+
+    <repositories>
+    <repository>
+        <id>cm-pom</id>
+        <url>https://raw.github.com/ContentMine/cm-pom/mvn-repo/</url>
+        <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+        </snapshots>
+    </repository>
+	</repositories>
 </project>
