@@ -174,16 +174,13 @@ public class SVGUtil {
 	}
 
 	public static void addIdsToAllElements(SVGSVG svg) {
-		LOG.debug("adding ids");
 		List<SVGElement> elems = SVGUtil.getQuerySVGElements(svg, "//svg:*");
-		LOG.debug("found elements "+elems.size());
 		int i = 0;
 		for (SVGElement elem : elems) {
 			if (elem.getId() == null) {
 				elem.setId(elem.getTag()+(i++));
 			}
 		}
-		LOG.debug("added ids "+elems.size());
 	}
 
 	/**
@@ -446,7 +443,6 @@ public class SVGUtil {
 		List<SVGPath> pathList = SVGPath.extractSelfAndDescendantPaths(svgChunk);
 		SVGSVG.wrapAndWriteAsSVG(svgChunk, new File("target/debug/shapes0.svg"));
 
-		LOG.debug("paths "+pathList.size());
 		SVGSVG.wrapAndWriteAsSVG(pathList, new File("target/debug/paths.svg"));
 		Path2ShapeConverter converter = new Path2ShapeConverter(pathList);
 		List<SVGShape> shapeList = converter.convertPathsToShapes(pathList);

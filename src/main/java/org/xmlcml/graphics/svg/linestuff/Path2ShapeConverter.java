@@ -243,7 +243,7 @@ public class Path2ShapeConverter {
 			for (SVGShape shape : shapeListFromPath) {
 				shapeList.add(shape);
 				if (shape.isZeroDimensional()) {
-					LOG.debug("Zero dimensional shape: "+shape.toXML());
+					LOG.trace("Zero dimensional shape: "+shape.toXML());
 				}
 			}
 		}
