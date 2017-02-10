@@ -121,7 +121,8 @@ public class SVGTriangle extends SVGPolygon {
 	}
 	
 	public String toString() {
-		return polyline.getReal2Array().toString();
+		Real2Array real2Array = (polyline == null) ? null : polyline.getReal2Array();
+		return real2Array == null ? null : real2Array.toString();
 	}
 
 	@Override
