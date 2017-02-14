@@ -4,15 +4,17 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+<!--
   <parent>
-  	<groupId>org.contentmine</groupId>
-  	<artifactId>cm-parent</artifactId>
-  	<version>7.0.3</version>
+      <groupId>org.contentmine</groupId>
+      <artifactId>cm-parent</artifactId>
+      <version>7.0.3</version>
   </parent>
+-->
 
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
@@ -28,25 +30,30 @@
         </developer>
     </developers>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19</version>
-				<configuration>
-					<parallel>classes</parallel>
-					<useUnlimitedThreads>true</useUnlimitedThreads>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <parallel>classes</parallel>
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
             <groupId>org.contentmine</groupId>
             <artifactId>euclid</artifactId>
             <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.imgscalr</groupId>
+            <artifactId>imgscalr-lib</artifactId>
+            <version>4.2</version>
         </dependency>
     </dependencies>
     <reporting>
@@ -63,5 +70,5 @@
             <updatePolicy>always</updatePolicy>
         </snapshots>
     </repository>
-	</repositories>
+    </repositories>
 </project>
