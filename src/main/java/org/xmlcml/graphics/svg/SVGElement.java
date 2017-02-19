@@ -1438,6 +1438,79 @@ public class SVGElement extends GraphicsElement {
 			element.format(nplaces);
 		}
 	}
+	
+	public boolean isBold() {
+		return StyleBundle.isBold(this);
+	}
+	
+	public boolean isItalic() {
+		return StyleBundle.isItalic(this);
+	}
 
+	public String getFontFamily() {
+		String value = StyleBundle.getFontFamily(this);
+		return (value != null) ? value : this.getAttributeValue(StyleBundle.FONT_FAMILY);
+	}
+
+	public String getFontWeight() {
+		String value = StyleBundle.getFontWeight(this);
+		return (value != null) ? value : this.getAttributeValue(StyleBundle.FONT_WEIGHT);
+	}
+
+	public String getFontStyle() {
+		String value = StyleBundle.getFontStyle(this);
+		return (value != null) ? value : this.getAttributeValue(StyleBundle.FONT_STYLE);
+	}
+
+	public String getFill() {
+		String value = StyleBundle.getFill(this);
+		return (value != null) ? value : this.getAttributeValue(StyleBundle.FILL);
+	}
+
+	public String getStroke() {
+		String value = StyleBundle.getStroke(this);
+		return (value != null) ? value : this.getAttributeValue(StyleBundle.STROKE);
+	}
+
+	/** get opacity from opacity attribute and fall through to style attribute
+	 * 
+	 * @return 0.0 if not found
+	 */
+
+	public Double getStrokeWidth() {
+		Double value = StyleBundle.getStrokeWidth(this);
+		if (value == null) {
+			String attVal = this.getAttributeValue(StyleBundle.STROKE_WIDTH);
+			value = attVal == null ? null : StyleBundle.getDouble(attVal);
+		}
+		return value == null ? 0.0 : value;
+	}
+
+	/** get opacity from opacity attribute and fall through to style attribute
+	 * 
+	 * @return 1.0 if not found
+	 */
+
+	public Double getOpacity() {
+		Double value = StyleBundle.getOpacity(this);
+		if (value == null) {
+			String attVal = this.getAttributeValue(StyleBundle.OPACITY);
+			value = attVal == null ? null : StyleBundle.getDouble(attVal);
+		}
+		return value == null ? 1.0 : value;
+	}
+
+	/** get fontSize from font-size attribute and fall through to style attribute
+	 * 
+	 * @return null if none
+	 */
+	public Double getFontSize() {
+		Double value = StyleBundle.getFontSize(this);
+		if (value == null) {
+			String attVal = this.getAttributeValue(StyleBundle.FONT_SIZE);
+			value = attVal == null ? null : StyleBundle.getDouble(attVal);
+		}
+		return value;
+	}
 
 }

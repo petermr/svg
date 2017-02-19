@@ -16,14 +16,16 @@
 
 package org.xmlcml.graphics.svg;
 
-import nu.xom.Attribute;
-import org.apache.log4j.Logger;
-import org.xmlcml.xml.XMLConstants;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.xmlcml.xml.XMLConstants;
+
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 public class StyleBundle implements XMLConstants {
 
@@ -43,6 +45,7 @@ public class StyleBundle implements XMLConstants {
 	// not used in bundle
 	private static final String STROKE_LINECAP = "stroke-linecap";
 
+	// not yet @Deprecated
     static List<String> BUNDLE_ATTRIBUTES;
 	static {
 		String[] bundleAttributes = {
@@ -59,6 +62,26 @@ public class StyleBundle implements XMLConstants {
 		BUNDLE_ATTRIBUTES = Arrays.asList(bundleAttributes);
 	}
 
+	/** not yet used
+	public enum Bundle {
+		CLIP_PATH("clip-path"),
+		FILL("fill"),
+		FONT_FAMILY("font-family"),
+		FONT_SIZE("font-size"),
+		FONT_STYLE("font-style"),
+		FONT_WEIGHT("font-weight"),
+		OPACITY("opacity"),
+		STROKE("stroke"),
+		STROKE_WIDTH("stroke-width");
+		private String name;
+
+		private Bundle(String name) {
+			this.name = name;
+		}
+	}
+*/
+	
+
 	public final static StyleBundle DEFAULT_STYLE_BUNDLE = new StyleBundle(
 		null,	
 		"#000000",
@@ -70,6 +93,34 @@ public class StyleBundle implements XMLConstants {
 		"#000000",
 		0.5
 	);
+	
+	public enum FontWeight {
+		NORMAL("normal"),
+		BOLD("bold");
+		private String value;
+		private FontWeight(String value) {
+			this.value = value;
+		}
+	}
+	
+	public enum FontFamily {
+		SERIF("serif"),
+		SANS_SERIF("sans-serif"),
+		MONOSPACE("monospace");
+		private String value;
+		private FontFamily(String value) {
+			this.value = value;
+		}
+	}
+	
+	public enum FontStyle {
+		NORMAL("normal"),
+		ITALIC("italic");
+		private String value;
+		private FontStyle(String value) {
+			this.value = value;
+		}
+	}
 	
 	private String clipPath;
 	private String fill;
@@ -297,7 +348,7 @@ public class StyleBundle implements XMLConstants {
 		setSubStyle(attName, null);
 	}
 
-	private Double getDouble(String s) {
+	public static Double getDouble(String s) {
 		Double d = null;
 		if (s != null && !"null".equals(s)) {
 			try {
@@ -410,5 +461,78 @@ public class StyleBundle implements XMLConstants {
 		}
 		return s;
 	}
+
+	/** set the attributes from a style bundle
+	 * 
+	 * @param style
+	 */
+	public void setStyle(Element element, StyleBundle styleBundle) {
+		String style = styleBundle == null ? null : styleBundle.toString();
+		if (style != null) {
+			element.addAttribute(new Attribute(STYLE, style));
+		}
+	}
+
+	public static String getStyle(Element element) {
+		return element.getAttributeValue(STYLE);
+	}
+	
+	public static boolean isBold(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		String weight = styleBundle == null ? null : styleBundle.getFontWeight();
+		return StyleBundle.FontWeight.BOLD.equals(weight);
+	}
+	
+	public static boolean isItalic(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		String fontStyle = styleBundle == null ? null : styleBundle.getFontStyle();
+		return StyleBundle.FontStyle.ITALIC.equals(fontStyle);
+	}
+
+	public static String getFill(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getFill();
+	}
+
+	public static Double getFontSize(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getFontSize();
+	}
+
+	public static Double getOpacity(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getOpacity();
+	}
+
+	public static Double getStrokeWidth(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getStrokeWidth();
+	}
+
+	public static String getStroke(Element element) {
+		StyleBundle styleBundle = StyleBundle.getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getStroke();
+	}
+
+	public static String getFontWeight(Element element) {
+		StyleBundle styleBundle = getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getFontWeight();
+	}
+
+	public static String getFontStyle(Element element) {
+		StyleBundle styleBundle = getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getFontStyle();
+	}
+
+	public static String getFontFamily(Element element) {
+		StyleBundle styleBundle = getStyleBundle(element);
+		return styleBundle == null ? null : styleBundle.getFontFamily();
+	}
+
+	public static StyleBundle getStyleBundle(Element element) {
+		String style = element.getAttributeValue(STYLE);
+		return style == null ? null : new StyleBundle(style);
+	}
+	
 
 }
