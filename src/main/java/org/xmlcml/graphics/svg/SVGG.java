@@ -178,8 +178,13 @@ public class SVGG extends SVGElement {
 		return rect == null ? null : rect.getBoundingBox();
 	}
 
-	protected void setStringValueAttribute(String value) {
-		this.addAttribute(new Attribute(STRING_VALUE, value));
+	public void setStringValueAttribute(String value) {
+		if (value == null) {
+			Attribute stringValueAttribute = this.getAttribute(STRING_VALUE);
+			if (stringValueAttribute != null) this.removeAttribute(stringValueAttribute);
+		} else {
+			this.addAttribute(new Attribute(STRING_VALUE, value));
+		}
 	}
 
 	public String getStringValueAttribute() {
