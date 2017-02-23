@@ -4,16 +4,19 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+       <svg.version>1.0.6</svg.version>
+       <!--  upstream -->
+       <euclid.version>2.0.4</euclid.version>
+    </properties>
+
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <version>1.0.6</version>
+    <version>${svg.version}</version>
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
-
-    <properties>
-       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <developers>
         <developer>
@@ -40,7 +43,7 @@
         <dependency>
             <groupId>org.contentmine</groupId>
             <artifactId>euclid</artifactId>
-            <version>2.0.3</version>
+            <version>${euclid.version}</version>
         </dependency>
         <dependency>
             <groupId>org.imgscalr</groupId>

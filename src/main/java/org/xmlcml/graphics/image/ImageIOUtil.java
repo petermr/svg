@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 
-public class ImageUtil {
+public class ImageIOUtil {
 
 
 	/** makes parent directly if not exists.
@@ -34,5 +34,19 @@ public class ImageUtil {
 		}
 	}
 
+
+	/** makes parent directly if not exists.
+	 * 
+	 * calls writeImageQuietly(Image, File)
+	 * 
+	 * selects type from extension; chooses ".png" if none 
+	 * @param image
+	 * @param filename
+	 */
+	public static File writeImageQuietly(BufferedImage image, String filename) {
+		File file = new File(filename);
+		writeImageQuietly(image, new File(filename));
+		return file;
+	}
 
 }

@@ -7,16 +7,13 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
-import org.xmlcml.graphics.svg.plot.AxisFactory;
-
-import junit.framework.Assert;
 
 public class AnnotatedAxisTest {
 

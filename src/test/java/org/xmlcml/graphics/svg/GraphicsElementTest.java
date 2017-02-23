@@ -1,11 +1,11 @@
 package org.xmlcml.graphics.svg;
 
-import junit.framework.Assert;
-import nu.xom.Attribute;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.testutil.TestUtils;
+
+import nu.xom.Attribute;
 
 public class GraphicsElementTest {
 
