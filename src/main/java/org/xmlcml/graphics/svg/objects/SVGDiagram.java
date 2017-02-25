@@ -59,6 +59,9 @@ public class SVGDiagram extends SVGG {
 		newG = new SVGG();
 		for (List<SVGShape> shapeList : shapeListList) {
 			for (SVGShape shape : shapeList) {
+				if (shape == null) {
+					continue;
+				}
 				shape.detach();
 				if (shape instanceof SVGRect) {
 					addNewRect((SVGRect)shape);
@@ -84,7 +87,7 @@ public class SVGDiagram extends SVGG {
 						}
 					}
 				} else {
-					System.err.println("Unknown shape "+shape);
+//					System.err.println("Unknown shape "+shape);
 					shape.setStroke("green");
 					shape.setStrokeWidth(2.0);
 					newG.appendChild(shape.copy());

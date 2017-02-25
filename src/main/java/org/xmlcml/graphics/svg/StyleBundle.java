@@ -351,6 +351,7 @@ public class StyleBundle implements XMLConstants {
 	public static Double getDouble(String s) {
 		Double d = null;
 		if (s != null && !"null".equals(s)) {
+			s = removeTrailingPx(s);
 			try {
 				d = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
@@ -358,6 +359,13 @@ public class StyleBundle implements XMLConstants {
 			}
 		}
 		return d;
+	}
+
+	private static String removeTrailingPx(String s) {
+		if (s.endsWith("px")) {
+			s = s.substring(0,  s.length() - "px".length());
+		}
+		return s;
 	}
 	
 	public String getClipPath() {

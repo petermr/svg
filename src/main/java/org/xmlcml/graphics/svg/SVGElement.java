@@ -851,7 +851,7 @@ public class SVGElement extends GraphicsElement {
 	/**
 	 * get double value of attribute.
 	 * the full spec includes units but here we expect only numbers. Maybe later...
-	 * if coordinate is not guven defaults to ZERO.
+	 * if coordinate is not given defaults to ZERO.
 	 * 
 	 * @param attName
 	 * @return
@@ -860,7 +860,7 @@ public class SVGElement extends GraphicsElement {
 		double d = Double.NaN;
 		String v = this.getAttributeValue(attName);
 		if (v == null) {
-			LOG.warn("DFAULT ZERO");
+			LOG.warn("DEFAULT ZERO "+attName);
 			d = 0.0;
 		} else {
 			try {
