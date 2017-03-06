@@ -5,10 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <svg.version>1.0.7</svg.version>
        <!--  upstream -->
-       <euclid.version>2.0.4</euclid.version>
+       <euclid.version>2.0.5</euclid.version>
     </properties>
 
     <groupId>org.contentmine</groupId>
