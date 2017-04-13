@@ -7,8 +7,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGLine;
-import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
+import org.xmlcml.graphics.svg.SVGShape;
 
 public class SVGPlot extends SVGDiagram {
 	
@@ -18,7 +18,7 @@ public class SVGPlot extends SVGDiagram {
 		LOG.setLevel(Level.DEBUG);
 	}
 	
-	private SVGRect mainRect;
+	private SVGShape mainRect;
 	private List<SVGLine> horizontalList;
 	private List<SVGLine> verticalList;
 

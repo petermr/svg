@@ -639,7 +639,7 @@ public class SVGText extends SVGElement {
 		return (newText != null);
 	}
 	
-	public SVGRect getBoundingSVGRect() {
+	public SVGShape getBoundingSVGRect() {
 		Real2Range r2r = getBoundingBox();
 		SVGRect rect = new SVGRect();
 		rect.setBounds(r2r);

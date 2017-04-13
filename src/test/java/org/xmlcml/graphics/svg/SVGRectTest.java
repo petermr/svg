@@ -53,7 +53,7 @@ private static final Logger LOG = Logger.getLogger(SVGRectTest.class);
 	}
 	@Test
 	public void testIsGeometricallyEqualTo() {
-		SVGRect rect0 = new SVGRect(new Real2(10., 20.), new Real2(25., 45.));
+		SVGShape rect0 = new SVGRect(new Real2(10., 20.), new Real2(25., 45.));
 		Assert.assertTrue(rect0.isGeometricallyEqualTo(
 				new SVGRect(new Real2(10.005, 20.005), new Real2(25.005, 45.005)), epsilon));
 		Assert.assertTrue(rect0.isGeometricallyEqualTo(

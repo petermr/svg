@@ -163,6 +163,11 @@ public abstract class SVGShape extends SVGElement {
 	 */
 	protected abstract boolean isGeometricallyEqualTo(SVGShape shape, double epsilon);
 
+	public void addTitle(String title) {
+		SVGTitle svgTitle = new SVGTitle(title);
+		this.appendChild(svgTitle);
+	}
+
 	/** indexes of all elements matching shape geometrically
 	 * uses @ isGeometricallyEqualTo(SVGShape shape, double epsilon);
 	 * 

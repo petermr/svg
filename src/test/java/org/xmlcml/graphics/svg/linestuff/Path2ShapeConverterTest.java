@@ -397,7 +397,7 @@ public class Path2ShapeConverterTest {
 		Assert.assertEquals(1, shapes.size());
 		SVGShape shape = shapes.get(0);
 		Assert.assertEquals("SVGRect", shape.getClass().getSimpleName());
-		SVGRect rect = (SVGRect) shape;
+		SVGShape rect = (SVGShape) shape;
 		Assert.assertEquals("((34.264,133.58),(165.875,177.159))", rect.toString());
 	}
 
@@ -415,7 +415,7 @@ public class Path2ShapeConverterTest {
 		g.appendChild(path);
 		List<SVGShape> shapes = path2ShapeConverter.convertPathsToShapes(g);
 		Assert.assertEquals(2, shapes.size());
-		SVGRect rect0 = (SVGRect) shapes.get(0);
+		SVGShape rect0 = (SVGShape) shapes.get(0);
 		Assert.assertEquals("((34.264,133.58),(165.875,177.159))", rect0.toString());
 		SVGRect rect1 = (SVGRect) shapes.get(1);
 		rect1.format(3);

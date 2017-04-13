@@ -1071,7 +1071,7 @@ public class SVGElement extends GraphicsElement {
 		this.boundingBoxCached = boundingBoxCached;
 	}
 
-	public SVGRect createGraphicalBoundingBox() {
+	public SVGShape createGraphicalBoundingBox() {
 		Real2Range r2r = this.getBoundingBox();
 		SVGRect rect = createGraphicalBox(r2r, getBBStroke(), getBBFill(), getBBStrokeWidth(), getBBOpacity());
 		if (this.getAttribute("transform") != null) {
@@ -1148,6 +1148,7 @@ public class SVGElement extends GraphicsElement {
 			SVGRect svgBox = SVGElement.drawBox(element.getBoundingBox(), null, stroke, fill, strokeWidth, opacity);
 		}
 	}
+	
 	public static void drawBoxes(List<Real2Range> boxes, SVGElement svgParent, String stroke, String fill, double strokeWidth, double opacity) {
 		for (Real2Range box : boxes) {
 			SVGRect svgBox = SVGElement.drawBox(box, svgParent, stroke, fill, strokeWidth, opacity);

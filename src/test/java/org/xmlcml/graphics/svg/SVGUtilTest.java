@@ -70,7 +70,7 @@ public class SVGUtilTest {
 	public void testAffineTransformationScale() throws Exception { 
 		double[] matrix = new double[6];
 		SVGG svgG = new SVGG();
-		SVGRect rect = new SVGRect(new Real2(100.,  100.), new Real2(150., 170.));
+		SVGShape rect = new SVGRect(new Real2(100.,  100.), new Real2(150., 170.));
 		svgG.appendChild(rect);
 		int width = 300;
 		int height = 300;
@@ -100,7 +100,7 @@ public class SVGUtilTest {
 		Real2 xy00 = new Real2(10.,  10.);
 		SVGCircle circle0 = createCircle(xy00, 20., "red", "black", 2.0);
 		Real2 xy01 = new Real2(50.,  30.);
-		SVGRect rect0 = createRect(xy00, xy01, "red", "black", 1.0);
+		SVGShape rect0 = createRect(xy00, xy01, "red", "black", 1.0);
 		svg.appendChild(circle0);
 		svg.appendChild(rect0);
 		
