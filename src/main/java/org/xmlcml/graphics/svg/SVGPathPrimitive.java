@@ -16,182 +16,36 @@ import java.util.List;
 public abstract class SVGPathPrimitive {
 	private static Logger LOG = Logger.getLogger(SVGPathPrimitive.class);
 
-	public static final char ABS_LINE = 'L';
-	public static final char ABS_MOVE = 'M';
-	public static final char ABS_CUBIC = 'C';
-	public static final char ABS_QUAD = 'Q';
-	public static final char ABS_CLOSE = 'Z';
-	public static final char REL_LINE = 'l';
-	public static final char REL_MOVE = 'm';
-	public static final char REL_CUBIC = 'c';
-	public static final char REL_QUAD = 'q';
-	public static final char REL_CLOSE = 'z';
+	public static final char ARC              = 'A';
+	public static final char CLOSE        = 'Z';
+	public static final char CUBIC        = 'C';
+	public static final char CUBIC_SMOOTH = 'S';
+	public static final char HORIZ        = 'H';
+	public static final char LINE         = 'L';
+	public static final char MOVE         = 'M';
+	public static final char QUAD         = 'Q';
+	public static final char QUAD_SMOOTH  = 'T';
+	public static final char VERT         = 'V';
 
-	public static final String ABS = "ABS";
-	public static final String REL = "REL";
+	public static final String MOVE_S     = "M";
+
+//	public static final String ABS = "ABS";
+//	public static final String REL = "REL";
 	
 	protected Real2Array coordArray;
 	protected Real2 zerothCoord; // from preceding primitive
-	
+
 	public SVGPathPrimitive() {
 		
 	}
 	
 	public abstract String getTag();
 	
-	public static PathPrimitiveList parseDString(String d) {
-		PathPrimitiveList primitiveList = new PathPrimitiveList();
-		if (d == null) {
-			return primitiveList;
-		}
-		List<String> tokenList = extractTokenList(d);
-		int itok = 0;
-		Real2 firstXY = null;
-		Real2 lastXY = null;
-		String mode = null;
-		char t = (char)0;
-		while (itok <tokenList.size()) {
-			String token = tokenList.get(itok);
-			// implicit move/draw
-			if (token.length() != 1 || Character.isDigit(token.charAt(0))) {
-//				double[] dd = readDoubles(tokenList, 2, itok);
-//				throw new RuntimeException("Bad token, expected single char: "+token);
-				if (ABS.equals(mode)) {
-					t = ABS_LINE;
-				} else if (REL.equals(mode)) {
-					t = REL_LINE;
-				} else {
-					throw new RuntimeException("Bad token, expected single char: "+token);
-				}
-			} else {
-				t = token.charAt(0);
-				itok++;
-			}
-			if (ABS_MOVE == t) {
-				double[] dd = readDoubles(tokenList, 2, itok);
-				itok += 2;
-				Real2 r2 = new Real2(dd[0], dd[1]);
-				SVGPathPrimitive pp = new MovePrimitive(r2);
-				primitiveList.add(pp);
-				lastXY = r2;
-				if (mode == null) mode = ABS;
-			} else if (REL_MOVE == t) {
-				double[] dd = readDoubles(tokenList, 2, itok);
-				itok += 2;
-				Real2 r2 = new Real2(dd[0], dd[1]);
-				firstXY = (lastXY == null) ? r2 : r2.plus(lastXY);
-				if (lastXY != null) {
-					r2 = r2.plus(lastXY);
-				}
-				SVGPathPrimitive pp = new MovePrimitive(r2);
-				primitiveList.add(pp);
-				lastXY = r2;
-				if (mode == null) mode = REL;
-			} else if (ABS_LINE == t) {
-				double[] dd = readDoubles(tokenList, 2, itok);
-				itok += 2;
-				Real2 r2 = new Real2(dd[0], dd[1]);
-				SVGPathPrimitive pp = new LinePrimitive(r2);
-				primitiveList.add(pp);
-				lastXY = r2;
-				firstXY = r2;
-			} else if (REL_LINE == t) {
-				double[] dd = readDoubles(tokenList, 2, itok);
-				itok += 2;
-				Real2 r2 = new Real2(dd[0], dd[1]);
-				r2 = r2.plus(lastXY);
-				SVGPathPrimitive pp = new LinePrimitive(r2);
-				primitiveList.add(pp);
-				lastXY = r2;
-			} else if (ABS_CUBIC == t) {
-				Real2Array r2a = readReal2Array(tokenList, 6, itok);
-				itok += 6;
-				SVGPathPrimitive pp = new CubicPrimitive(r2a);
-				primitiveList.add(pp);
-				lastXY = null;
-			} else if (REL_CUBIC == t) {
-				throw new RuntimeException("relative cubic not suported");
-			} else if (ABS_QUAD == t) {
-				Real2Array r2a = readReal2Array(tokenList, 4, itok);
-				itok += 4;
-				SVGPathPrimitive pp = new QuadPrimitive(r2a);
-				primitiveList.add(pp);
-				lastXY = null;
-			} else if (REL_QUAD == t) {
-				throw new RuntimeException("relative quadratic not suported");
-			} else if (ABS_CLOSE == t || REL_CLOSE == t) {
-				lastXY = firstXY;
-				SVGPathPrimitive pp = new ClosePrimitive(lastXY);
-				primitiveList.add(pp);
-			} else {
-				throw new RuntimeException("unknown or unsupported primitive "+t);
-			}
-		}
-//		primitiveList.setFirstPoints();
-		return primitiveList;
-	}
-
-	private static Real2Array readReal2Array(List<String> tokenList, int ntoread, int itok) {
-		double[] dd = readDoubles(tokenList, ntoread, itok);
-		return Real2Array.createFromPairs(new RealArray(dd));
-	}
-
-	private static double[] readDoubles(List<String> tokenList, int ntoread, int itok) {
-		if (itok + ntoread > tokenList.size()) {
-			throw new RuntimeException("Ran out of tokens at "+itok+" wanted "+ntoread);
-		}
-		double[] dd = new double[ntoread];
-		for (int i = 0; i < ntoread; i++) {
-			Double d = null;
-			String token = null;
-			try {
-				token = tokenList.get(itok + i);
-				dd[i] = Double.valueOf(token);
-			} catch (Exception e) {
-				throw new RuntimeException("Cannot parse as double ("+token+") at : "+itok+i);
-			}
-		}
-		return dd;
-	}
-
-	private static List<String> extractTokenList(String d) {
-		List<String> tokenList = new ArrayList<String>();
-		int numberStart = -1;
-		for (int i = 0; i < d.length(); i++) {
-			char c = d.charAt(i);
-			if (Character.isWhitespace(c) ||c == ',') {
-				addCurrentNumber(d, tokenList, numberStart, i);
-				numberStart = -1;
-			} else if (Character.isDigit(c) || c == '+' || c == '-' || c == '.') {
-				if (numberStart == -1) {
-					numberStart = i;
-				}
-			} else if ("EeDd".indexOf(c) != -1) {  // floats
-				LOG.trace("processed E-notation");
-			} else if ("mMcClLqQzZ".indexOf(c) != -1) {
-				addCurrentNumber(d, tokenList, numberStart, i);
-				tokenList.add(String.valueOf(c));
-				numberStart = -1;
-			} else {
-				throw new RuntimeException("Unknown character in dString: "+c+" path: "+d);
-			}
-		}
-		addCurrentNumber(d, tokenList, numberStart, d.length());
-		return tokenList;
-	}
-
-	private static void addCurrentNumber(String d, List<String> tokenList,
-			int numberStart, int i) {
-		if (numberStart != -1) {
-			// add current number
-			tokenList.add(d.substring(numberStart, i));
-		}
-	}
 		
 	public static String formatDString(String d, int places) {
 		PathPrimitiveList primitiveList = null;
 		try {
-			primitiveList = SVGPathPrimitive.parseDString(d);
+			primitiveList = new SVGPathParser().parseDString(d);
 		} catch (RuntimeException e) {
 			LOG.debug("Cannot parse: "+d);
 			throw e;
@@ -204,7 +58,7 @@ public abstract class SVGPathPrimitive {
 	}
 	
 	public static String formatD(String d, int places) {
-		PathPrimitiveList primitiveList = SVGPathPrimitive.parseDString(d);
+		PathPrimitiveList primitiveList = new SVGPathParser().parseDString(d);
 		for (SVGPathPrimitive primitive : primitiveList) {
 			primitive.format(places);
 		}

@@ -29,6 +29,7 @@ import org.xmlcml.graphics.svg.path.Arc;
 import org.xmlcml.graphics.svg.path.LinePrimitive;
 import org.xmlcml.graphics.svg.path.MovePrimitive;
 import org.xmlcml.graphics.svg.path.PathPrimitiveList;
+import org.xmlcml.graphics.svg.path.SVGPathParser;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Attribute;
@@ -174,6 +175,7 @@ public class Path2ShapeConverter {
 		if (removeRedundantMoveCommands) {
 			inputPathList = removeRedundantMoveCommands(inputPathList);
 		}
+		LOG.trace(">inputPath>"+inputPathList);
 		List<List<SVGPath>> pathListList;
 		if (splitAtMoveCommands) {
 			pathListList = splitAtMoveCommands(inputPathList);
@@ -204,6 +206,7 @@ public class Path2ShapeConverter {
 		if (removeDuplicatePaths) {
 			//shapeListOut = removeDuplicateShapes(shapeListOut);
 		}
+		LOG.trace(">shapeListList>"+shapeListList);
 		return shapeListList;
 	}
 
@@ -596,7 +599,7 @@ public class Path2ShapeConverter {
 		String d = path.getDString();
 		if (d != null) {
 			PathPrimitiveList newPrimitives = new PathPrimitiveList();
-			PathPrimitiveList primitives = SVGPathPrimitive.parseDString(d);
+			PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
 			int primitiveCount = primitives.size();
 			SVGPathPrimitive lastPrimitive = null;
 			for (int i = 0; i < primitives.size(); i++) {
@@ -634,7 +637,7 @@ public class Path2ShapeConverter {
 		String d = path.getDString();
 		if (d != null) {
 			PathPrimitiveList newPrimitives = new PathPrimitiveList();
-			PathPrimitiveList primitives = SVGPathPrimitive.parseDString(d);
+			PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
 			int primitiveCount = primitives.size();
 			SVGPathPrimitive lastPrimitive = null;
 			for (int i = 0; i < primitives.size(); i++) {
@@ -693,7 +696,8 @@ public class Path2ShapeConverter {
 
 	private static List<List<SVGPath>> splitAtMoveCommands(List<SVGPath> paths) {
 		List<List<SVGPath>> results = new ArrayList<List<SVGPath>>();
-		for (SVGPath path : paths) {
+		for (int i = 0; i < paths.size(); i++) {
+			SVGPath path = paths.get(i);
 			List<SVGPath> result = splitAtMoveCommands(path);
 			results.add(result);
 		}
@@ -730,22 +734,16 @@ public class Path2ShapeConverter {
 	}
 	
 	private static List<String> splitAtMoveCommandsAndCreateNewDStrings(String d) {
+		LOG.trace(">p2sd>"+d);
 		List<String> strings = new ArrayList<String>();
-		if (d.equals("")) {
-			strings.add("");
-			return strings;
-		}
 		int current = -1;
-		int irel = -1; // maybe not split at REL
+		StringBuilder sb = new StringBuilder(d);
 		while (true) {
-			int iabs = d.indexOf(SVGPathPrimitive.ABS_MOVE, current + 1);
-//			int irel = d.indexOf(SVGPathPrimitive.REL_MOVE, current + 1);
-			int i = Math.max(iabs, irel);
-			if (i == -1 && current >= 0) {
+			int i = sb.indexOf(SVGPathPrimitive.MOVE_S, current + 1);
+			if (i == -1) {
 				strings.add(d.substring(current));
 				break;
-			}
-			if (i > current + 1) {
+			} else if (current > -1) {
 				strings.add(d.substring(current, i));
 			}
 			current = i;

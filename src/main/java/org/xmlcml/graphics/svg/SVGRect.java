@@ -119,6 +119,20 @@ public class SVGRect extends SVGShape {
 		return rect;
 	}
 	
+	/** create from edges
+	 * 
+	 * @param xRange
+	 * @param yRange
+	 * @return null if r2r is null
+	 */
+	public static SVGRect createFromRealRanges(RealRange xRange, RealRange yRange) {
+		SVGRect rect = null;
+		if (xRange != null && yRange != null) {
+			rect = new SVGRect(new Real2(xRange.getMin(), yRange.getMin()), new Real2(xRange.getMax(), yRange.getMax()));
+		}
+		return rect;
+	}
+	
 	/** constructor.
 	 * 
 	 * @param x1 "lower left"

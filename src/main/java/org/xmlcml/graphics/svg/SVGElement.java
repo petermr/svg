@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math.geometry.Rotation;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Real;
@@ -1242,11 +1241,25 @@ public class SVGElement extends GraphicsElement {
 		RealRange range = Direction.HORIZONTAL.equals(direction) ? bbox.getXRange() : bbox.getYRange();
 		return mask.includes(range);
 	}
+	
+	public boolean isIncludedBy(Real2Range bbox) {
+		return bbox == null ? false : bbox.includes(this.getBoundingBox());
+	}
 
 	public boolean isIncludedBy(RealRange mask, Direction direction) {
 		Real2Range bbox = this.getBoundingBox();
 		RealRange range = Direction.HORIZONTAL.equals(direction) ? bbox.getXRange() : bbox.getYRange();
 		return mask.includes(range);
+	}
+	
+	public static List<SVGElement> extractElementsContainedInBox(List<? extends SVGElement> elements, Real2Range bbox) {
+		List<SVGElement> containedElements = new ArrayList<SVGElement>();
+		for (SVGElement element : elements) {
+			if (bbox.includes(element.getBoundingBox())) {
+				containedElements.add(element);
+			}
+		}
+		return containedElements;
 	}
 
 	/** elements filtered by yrange

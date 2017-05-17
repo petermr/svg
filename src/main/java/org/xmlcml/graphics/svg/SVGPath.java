@@ -47,6 +47,7 @@ import org.xmlcml.graphics.svg.path.CubicPrimitive;
 import org.xmlcml.graphics.svg.path.LinePrimitive;
 import org.xmlcml.graphics.svg.path.MovePrimitive;
 import org.xmlcml.graphics.svg.path.PathPrimitiveList;
+import org.xmlcml.graphics.svg.path.SVGPathParser;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
 
@@ -140,6 +141,10 @@ public class SVGPath extends SVGShape {
 		setDString(SVGPathPrimitive.createD(primitiveList));
 	}
 	
+	public SVGPath(PathPrimitiveList primitives) {
+		this(primitives, null);
+	}
+
 	/**
      * Copies node.
      *
@@ -172,7 +177,7 @@ public class SVGPath extends SVGShape {
 	 */
 	public PathPrimitiveList parseDString() {
 		String d = getDString();
-		return (d == null ? null : SVGPathPrimitive.parseDString(d));
+		return (d == null ? null : new SVGPathParser().parseDString(d));
 	}
 	
     private static String createD(Real2Array xy) {
@@ -450,7 +455,7 @@ public class SVGPath extends SVGShape {
 	}
 
 	private PathPrimitiveList createPathPrimitives() {
-		return SVGPathPrimitive.parseDString(getDString());
+		return new SVGPathParser().parseDString(getDString());
 	}
 
 	/** 
@@ -859,6 +864,7 @@ public class SVGPath extends SVGShape {
 			primitiveList = PathPrimitiveList.createPrimitiveList(d);
 			String d1 = primitiveList.getDString();
 			this.setDString(d1);
+			LOG.trace(">path>"+this.toXML());
 		}
 	}
 

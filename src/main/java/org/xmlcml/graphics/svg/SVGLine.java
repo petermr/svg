@@ -65,6 +65,7 @@ public class SVGLine extends SVGShape {
 	private static final String Y = "y";
 
 	public final static String TAG ="line";
+	public final static double EPS = 0.01;
 
 	private Line2D.Double line2;
 	private Line2 euclidLine;
@@ -828,9 +829,16 @@ public class SVGLine extends SVGShape {
 	 * @return bbox (null if no lines)
 	 */
 	public static Real2Range getReal2Range(List<SVGLine> lines) {
-		Real2Range bbox = lines.size() == 0 ? null : lines.get(0).getBoundingBox();
-		for (int i = 1; i < lines.size(); i++) {
-			bbox = bbox.plusEquals(lines.get(i).getBoundingBox());
+		Real2Range bbox = null;
+		if (lines == null) {
+			LOG.debug("null lines");
+		} else if (lines.size() > 0) {
+			bbox = lines.get(0).getBoundingBox();
+			for (int i = 1; i < lines.size(); i++) {
+				bbox = bbox.plusEquals(lines.get(i).getBoundingBox());
+			}
+		} else {
+			LOG.debug("no lines");
 		}
 		return bbox;
 	}
