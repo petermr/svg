@@ -15,7 +15,7 @@ public class AxisTickBox /*extends Real2Range*/ {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private static final double SMALL_DELTA = 3.0;
+	private static final double SMALL_DELTA = 5.0;
 	private static final double LARGE_DELTA = 10.0;
 
 	private LineDirection direction;
@@ -34,7 +34,7 @@ public class AxisTickBox /*extends Real2Range*/ {
 
 		this.bbox = line.getBoundingBox().getReal2RangeExtendedInX(xExtension, xExtension);
 		this.bbox = this.bbox.getReal2RangeExtendedInY(yExtension, yExtension);
-		LOG.debug("BBOX "+bbox);
+		LOG.trace("BBOX "+bbox);
 	}
 
 	public void extractContainedAxialLines(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
@@ -62,5 +62,11 @@ public class AxisTickBox /*extends Real2Range*/ {
 		return sb.toString();
 	}
 	
+	public SVGLineList getPotentialTickLines() {
+		return (LineDirection.HORIZONTAL.equals(direction)) ? verticalLines : horizontalLines;
+	}
 
+	public Real2Range getBoundingBox() {
+		return bbox;
+	}
 }

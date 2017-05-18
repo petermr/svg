@@ -78,6 +78,14 @@ public class SVGPolylineTest {
 	private double epsilon = 0.01;
 
 	@Test
+	public void testFailMe() {
+		double a = Math.sqrt(-1.);
+		double b = a+1;
+		LOG.debug(b);
+		Assert.assertTrue(false);
+	}
+	
+	@Test
 	@Ignore // FIXME ANDY
 	public void testCreateLineList() {
 		String d = "M379.558 218.898 L380.967 212.146 L380.134 212.146 L378.725 218.898 L379.558 218.898";

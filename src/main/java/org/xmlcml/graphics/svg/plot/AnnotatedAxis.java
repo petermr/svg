@@ -14,7 +14,7 @@ import org.xmlcml.euclid.Transform2;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.plot.AxialBox.AxisType;
+import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
 import org.xmlcml.graphics.svg.text.SVGPhrase;
 import org.xmlcml.graphics.svg.text.SVGWord;
 
@@ -42,8 +42,8 @@ public class AnnotatedAxis {
 	static double EPS = 0.01;
 	private LineDirection direction;
 	private RealRange range;
-	private RealArray majorTicksScreenCoords; // the position of the minor ticks
-	private RealArray minorTicksPixels; // the position of the major ticks
+	private RealArray majorTicksScreenCoords; // the position of the major ticks
+	private RealArray minorTicksPixels; // the position of the minor ticks
 	private RealArray tickNumberUserCoords; // the actual numbers in the scale
 	private RealArray tickNumberScreenCoords; // the best estimate of the numbers positions
 	private String tickSignature;
@@ -53,17 +53,19 @@ public class AnnotatedAxis {
 	private Double screenToUserScale;
 	private Double screenToUserConstant;
 	private AxisTickBox axisTickBox;
-	private AxialBox axialBox;
+	private PlotBox axialBox;
 	private List<SVGLine> tickLines;
 	SVGPhrase scalesPhrase;
 	private AxisType axisType;
+	private List<SVGText> textList;
+	private RealRange tickRange;
 
 
-	protected AnnotatedAxis(AxialBox axialBox) {
+	protected AnnotatedAxis(PlotBox axialBox) {
 		this.axialBox = axialBox;
 	}
 	
-	public AnnotatedAxis(AxialBox axialBox, AxisType axisType) {
+	public AnnotatedAxis(PlotBox axialBox, AxisType axisType) {
 		this(axialBox);
 		this.axisType = axisType;
 		this.direction = axisType == null ? null : axisType.getDirection();		
@@ -164,8 +166,20 @@ public class AnnotatedAxis {
 		return scalesPhrase;
 	}
 
-	public void setScalesPhrase(SVGPhrase scalesPhrase) {
-		this.scalesPhrase = scalesPhrase;
+	public RealArray getMajorTicksScreenCoords() {
+		return majorTicksScreenCoords;
+	}
+
+	public Double getScreenToUserScale() {
+		return screenToUserScale;
+	}
+
+	public void setScreenToUserScale(Double screenToUserScale) {
+		this.screenToUserScale = screenToUserScale;
+	}
+
+	public Double getScreenToUserConstant() {
+		return screenToUserConstant;
 	}
 
 	private static RealArray getPixelCoordinatesForTickLines(LineDirection direction, List<SVGLine> tickLines) {
@@ -238,37 +252,38 @@ public class AnnotatedAxis {
 		return majorTicksScreenCoords.getRange().transformToRange(tickNumberUserCoords.getRange(), xscreen);
 	}
 
-	AxisTickBox createTickBoxAndAxialLines(SVGLine h1, List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
+	 AxisTickBox createTickBoxAndAxialLines(SVGLine h1, List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
 		this.axisTickBox = null;
-		if (verticalLines != null && verticalLines.size() > 0) {
+		this.tickLines = LineDirection.HORIZONTAL.equals(direction) ? verticalLines : horizontalLines;
+		if (tickLines.size() > 0) {
 			this.axisTickBox = new AxisTickBox(h1, direction);
 			axisTickBox.extractContainedAxialLines(horizontalLines, verticalLines);
 		}
 		return axisTickBox;
 	}
 
-	private SVGPhrase processScales(AxialBox axialBox) {
+	private SVGPhrase processScales() {
 		this.scalesPhrase = null;
-		if (axialBox.getTextList().size() > 0) {
-			if (LineDirection.HORIZONTAL.equals(this.direction)) {
-				processHorizontalAxis(axialBox);
-			} else {
-				processVerticalAxis(axialBox);
-			}
+		if (LineDirection.HORIZONTAL.equals(this.direction)) {
+			processHorizontalAxis();
+		} else {
+			processVerticalAxis();
 		}
 		return this.scalesPhrase;
 	}
 
-	private void processVerticalAxis(AxialBox axialBox) {
+	private void processVerticalAxis() {
+		this.getOrCreateTextList();
+		if (textList == null || textList.size() == 0) return;
 		List<SVGWord> wordList = new ArrayList<SVGWord>();
-		SVGWord word = new SVGWord(axialBox.getTextList().get(0));
+		SVGWord word = new SVGWord(textList.get(0)); // ?? why
 		wordList.add(word);
-		for (int i = 1; i < axialBox.getTextList().size(); i++) {
-			SVGText text = axialBox.getTextList().get(i);
+		for (int i = 1; i < textList.size(); i++) {
+			SVGText text = textList.get(i);
 			if (word.canAppend(text)) {
 				word.append(text);
 			} else {
-				word = new SVGWord(axialBox.getTextList().get(i));
+				word = new SVGWord(textList.get(i));
 				wordList.add(word);
 			}
 		}
@@ -276,36 +291,59 @@ public class AnnotatedAxis {
 		for (int i = 0; i < wordList.size(); i++) {
 			SVGWord word0 = wordList.get(i);
 			String ss = word0.getStringValue();
-			AxialBox.LOG.trace("ss "+ss);
-			values[i] = new Double(ss);
+			LOG.trace("ss "+ss);
+			values[i] = (ss == null) ? Double.NaN : new Double(ss);
 		}
 		RealArray realArray = new RealArray(values);
 		setTickNumberUserCoords(realArray);
+		LOG.debug("vertical tickNumberUserCoords:"+tickNumberUserCoords);
 	}
 
-	private void processHorizontalAxis(AxialBox axialBox) {
-		scalesPhrase = SVGPhrase.createPhraseFromCharacters(axialBox.getTextList());
-		setTickNumberUserCoords(scalesPhrase.getNumericValues());
+	private List<SVGText> getOrCreateTextList() {
+		if (this.textList == null) {
+			textList = new ArrayList<SVGText>();
+			List<SVGText> textListAll = axialBox.getTextList();
+			for (SVGText text : textListAll) {
+				if (text.isIncludedBy(axisTickBox.getBoundingBox())) {
+					textList.add(text);
+				}
+			}
+		}
+		return textList;
+	}
+
+	private void processHorizontalAxis() {
+		scalesPhrase = SVGPhrase.createPhraseFromCharacters(getOrCreateTextList());
+		if (scalesPhrase != null) {
+			LOG.debug("HOR scalesPhrase: "+scalesPhrase);
+			setTickNumberUserCoords(scalesPhrase.getNumericValues());
+		}
 	}
 
 	private void processTitle() {
-		AxialBox.LOG.trace("AxisTitle title NYI");
+		LOG.trace("AxisTitle title NYI");
 	}
 
-	void createAxisAndRanges(AxialBox axialBox) {
-		LOG.debug("createAxisAndRanges: "+this.axisType+"; tickLines: "+tickLines);
+	void createAxisAndRanges(PlotBox plotBox) {
+//		getOrCreateTickLines();
+		LOG.trace("YYYY createAxisAndRanges: "+this.axisType+"; tickLines: "+tickLines);
 		if (singleLine == null) {
 			throw new RuntimeException("null line in :"+this);
 		}
-		RealRange range = singleLine.getBoundingBox().getXRange();
-		// assume sorted - we'll need to add sort later
-		Real2Range tick2Range = SVGLine.getReal2Range(this.tickLines);
-		RealRange tickRange = LineDirection.HORIZONTAL.equals(this.direction) ? tick2Range.getXRange() : tick2Range.getYRange();
-		if (RealRange.isEqual(range, tickRange, AnnotatedAxis.EPS)) {
-			setRange(range);
-		} else if (axialBox.useRange) {
-			// use length or axis
-			setRange(range);
+		if (tickLines != null && tickLines.size() > 0) {
+			Real2Range bbox = singleLine.getBoundingBox();
+			range = (LineDirection.HORIZONTAL.equals(direction)) ? bbox.getXRange() : bbox.getYRange();
+			range.format(3);
+			// assume sorted - we'll need to add sort later
+			Real2Range tick2Range = SVGLine.getReal2Range(this.tickLines);
+			tickRange = LineDirection.HORIZONTAL.equals(this.direction) ? tick2Range.getXRange() : tick2Range.getYRange();
+			LOG.debug("tickRange: " + tickRange);
+			if (RealRange.isEqual(range, tickRange, AnnotatedAxis.EPS)) {
+//				setRange(range);
+			} else if (plotBox.useRange) {
+				// use length or axis
+				setRange(range);
+			}
 		}
 	}
 
@@ -336,7 +374,7 @@ public class AnnotatedAxis {
 		setMinorTickLength(minorTickLength);
 	}
 
-	private void getTickLinesAndSignature(AxialBox axialBox) {
+	private void getTickLinesAndSignature(PlotBox axialBox) {
 		StringBuilder sb = new StringBuilder();
 		List<SVGLine> majorTickLines = new ArrayList<SVGLine>();
 		List<SVGLine> minorTickLines = new ArrayList<SVGLine>();
@@ -344,10 +382,10 @@ public class AnnotatedAxis {
 			Double l = tickLine.getLength();
 			String ss = null;
 			if (Real.isEqual(l,  getMajorTickLength(), AnnotatedAxis.EPS)) {
-				ss = AxialBox.MAJOR_CHAR;
+				ss = PlotBox.MAJOR_CHAR;
 				majorTickLines.add(tickLine);
 			} else {
-				ss = AxialBox.MINOR_CHAR;
+				ss = PlotBox.MINOR_CHAR;
 				minorTickLines.add(tickLine);
 			}
 			sb.append(ss);
@@ -358,7 +396,7 @@ public class AnnotatedAxis {
 	}
 
 	void createMainAndTickLines(LineDirection direction, SVGLine singleLine, List<SVGLine> tickLines) {
-		LOG.debug("creating ticklines "+singleLine+"; "+tickLines);
+		LOG.trace("creating ticklines "+singleLine+"; "+tickLines);
 		setSingleLine(singleLine);
 		setDirection(direction);
 		this.tickLines = tickLines;
@@ -374,12 +412,12 @@ public class AnnotatedAxis {
 			analyzeMajorAndMinorTickLengths(tickLengths);
 			getTickLinesAndSignature(axialBox);
 		} else {
-			AxialBox.LOG.error("cannot process ticks: "+tickLengths);
+			LOG.trace("cannot process ticks: "+tickLengths);
 		}
 	}
 
-	void processScalesTitle(AxialBox axialBox) {
-		processScales(axialBox);
+	void processScalesTitle() {
+		processScales();
 		processTitle();
 	}
 

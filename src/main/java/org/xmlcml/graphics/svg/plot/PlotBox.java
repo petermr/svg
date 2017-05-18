@@ -23,9 +23,9 @@ import org.xmlcml.graphics.svg.linestuff.AxialLineList;
  * @author pm286
  *
  */
-public class AxialBox {
+public class PlotBox {
 	
-	static final Logger LOG = Logger.getLogger(AxialBox.class);
+	static final Logger LOG = Logger.getLogger(PlotBox.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -90,7 +90,7 @@ public class AxialBox {
 	private SVGElement svgElement;
 	private BoxType boxType;
 
-	public AxialBox() {
+	public PlotBox() {
 		setDefaults();
 	}
 	
@@ -101,10 +101,10 @@ public class AxialBox {
 	private void processPaths() {
 		createHorizontalAndVerticalLines();
 		createAxesAndAxisBox();
-		LOG.debug("axes: "+axisArray);
+		LOG.trace("axes: "+axisArray);
 		for (AnnotatedAxis axis : axisArray) {
 			if (axis != null) {
-				LOG.debug("axis: "+axis);
+				LOG.trace("axis: "+axis);
 				axis.createAxisAndRanges(this);
 			}
 		}
@@ -117,7 +117,7 @@ public class AxialBox {
 		processPaths();
 		for (AnnotatedAxis axis : axisArray) {
 			if (axis != null) {
-				axis.processScalesTitle(this);
+				axis.processScalesTitle();
 			}
 		}
 	}
@@ -174,7 +174,6 @@ public class AxialBox {
 			fullboxYRange = fullboxYRange.format(3);
 			fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
 			fullLineBox.format(3);
-			LOG.debug("full box "+fullLineBox);
 			makeAxesAndAxialTickBoxes();
 		}
 		return fullLineBox;
@@ -192,18 +191,17 @@ public class AxialBox {
 	}
 
 	private void makeAxesAndAxialTickBoxes() {
-		LOG.debug("makeAxesAndAxialTickBoxes");
 		for (AxisType axisType : AxisType.values()) {
 			LOG.debug("AxisType: "+axisType);
 			axisArray[axisType.serial] = null;
 			AnnotatedAxis axis = this.createAxis(axisType);
-//			SVGLine line = this.createEdge(axisType);
-//			axis.setSingleLine(line);
+
 			AxisTickBox axisTickBox = axis.createTickBoxAndAxialLines(axis.getSingleLine(), horizontalLines, verticalLines);
 			if (axisTickBox != null) {
 				axisArray[axisType.serial] = axis;
 				axis.setAxisTickBox(axisTickBox);
-				LOG.debug("axisTickBox "+axisTickBox);
+				axis.createMainAndTickLines(axis.getDirection(), axis.getSingleLine(), axisTickBox.getPotentialTickLines().getLineList());
+
 			}
 		}
 	}
@@ -316,6 +314,11 @@ public class AxialBox {
 	public void setBoxType(BoxType boxType) {
 		this.boxType = boxType;
 	}
+
+	public AnnotatedAxis[] getAxisArray() {
+		return axisArray;
+	}
+
 
 
 

@@ -194,11 +194,13 @@ public class SVGRect extends SVGShape {
      * @return this
      */
     public void format(int places) {
-    	setXY(getXY().format(places));
+    	Real2 xy = getXY();
+    	xy.format(places);
+    	setXY(xy);
     	setHeight(Util.format(getHeight(), places));
     	setWidth(Util.format(getWidth(), places));
     	forceGetBoundingBox();
-    	boundingBox.format(places);
+    	boundingBox = boundingBox.format(places);
     }
 	
 	/** extent of rect
@@ -268,7 +270,10 @@ public class SVGRect extends SVGShape {
 	
 	@Override
 	public String toString() {
-		return getBoundingBox().toString();
+		if (boundingBox == null) {
+			boundingBox = getBoundingBox();
+		}
+		return boundingBox.toString();
 	}
 
 	@Override
