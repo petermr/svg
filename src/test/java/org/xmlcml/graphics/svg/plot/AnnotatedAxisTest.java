@@ -189,7 +189,7 @@ public class AnnotatedAxisTest {
 	}
 	
 	@Test
-	public void testFunnelXYAxisSBarra() throws FileNotFoundException {
+	public void testFunnelFullBoxSBarra() throws FileNotFoundException {
 		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "sbarraplot.svg")));
 		PlotBox plotBox = new PlotBox();
 		plotBox.readAndExtractPrimitives(svgElement);
@@ -208,10 +208,6 @@ public class AnnotatedAxisTest {
 		Assert.assertEquals("axis0", LineDirection.HORIZONTAL, axis0.getDirection());
 		Assert.assertEquals("axis0", "(37.974,112.191,136.931,62.712,87.452,161.671,186.411,211.149,235.889)", 
 				axis0.getMajorTicksScreenCoords().toString());
-//		Assert.assertEquals("axis0", "()", 
-//				axis0.getTickNumberUserCoords().toString());
-//		Assert.assertEquals("axis0 numberScreen", "()", 
-//				axis0.getTickNumberScreenCoords().toString());
 		
 		AnnotatedAxis axis1 = axisArray[1];
 		Assert.assertEquals("axis1", "dir: VERTICAL; range: (65.035,173.959)\n"
@@ -224,12 +220,64 @@ public class AnnotatedAxisTest {
 		Assert.assertEquals("axis1", LineDirection.VERTICAL, axis1.getDirection());
 		Assert.assertEquals("axis1", "(65.023,137.663,83.184,101.344,119.504,155.823,173.992)", 
 				axis1.getMajorTicksScreenCoords().toString());
-//		Assert.assertEquals("axis1", "(0.0,0.1,0.2,0.3,0.4,0.5,0.6)", 
-//				axis1.getTickNumberUserCoords().toString());
-//		Assert.assertEquals("axis1 numberScreen", "(485.07,513.02,540.954,568.877,596.822,624.745,652.679)", 
-//				axis1.getTickNumberScreenCoords().toString());
 	}
 
-	
+	@Test
+	public void testFunnelLCalvinPlot() throws FileNotFoundException {
+		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "calvinplot.svg")));
+		PlotBox plotBox = new PlotBox();
+		plotBox.readAndExtractPrimitives(svgElement);
+		SVGRect fullLineBbox = plotBox.getFullLineBox();
+		fullLineBbox.format(3);
+		Assert.assertEquals("full box",  "((87.096,286.894),(510.354,658.197))", fullLineBbox.toString());
+
+		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
+		Assert.assertEquals("axes", 4,  axisArray.length);
+		AnnotatedAxis axis0 = axisArray[0];
+		Assert.assertEquals("axis0", "dir: HORIZONTAL; range: (87.096,286.894)\n"
+		+"majorTicks: (87.096,106.955,127.108,146.967,167.119,186.978,206.869,226.99,246.881,267.001,286.894)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: (8.0,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2)\n" // FIXME
+		+"tickNumberScreenCoords: (79.268,82.229,102.21,122.19,142.169,162.148,182.129,202.109,222.089,244.988,262.048,282.026)\n",
+		axis0.toString());
+		
+		AnnotatedAxis axis1 = axisArray[1];
+		Assert.assertEquals("axis1", "dir: VERTICAL; range: (510.354,658.197)\n"
+		+"majorTicks: (510.354,526.777,543.2,559.657,576.081,592.504,608.928,625.351,641.774,658.197)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: (0.0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2)\n" //FIXME
+		+"tickNumberScreenCoords: (511.698,528.125,544.552,560.979,577.406,593.833,610.26,626.687,643.113,659.54,667.408)\n",
+		axis1.toString());
+		
+	}
+
+	@Test
+	public void testFunnelLDongPlot() throws FileNotFoundException {
+		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "dongplot.svg")));
+		PlotBox plotBox = new PlotBox();
+		plotBox.readAndExtractPrimitives(svgElement);
+		SVGRect fullLineBbox = plotBox.getFullLineBox();
+		fullLineBbox.format(3);
+		Assert.assertEquals("full box",  "((56.318,384.031),(416.087,581.038))", fullLineBbox.toString());
+
+		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
+		Assert.assertEquals("axes", 4,  axisArray.length);
+		AnnotatedAxis axis0 = axisArray[0];
+		Assert.assertEquals("axis0", "dir: HORIZONTAL; range: (56.318,384.031)\n"
+		+"majorTicks: (56.318,138.257,220.196,302.093,384.031)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: null\n" // FIXME
+		+"tickNumberScreenCoords: (50.998,52.714,134.653,136.368,217.622,219.338,299.517,301.233,379.741,381.456)\n",
+		axis0.toString());
+		
+		AnnotatedAxis axis1 = axisArray[1];
+		Assert.assertEquals("axis1", "dir: VERTICAL; range: (416.087,581.038)\n"
+		+"majorTicks: (416.087,449.207,482.281,514.842,547.919)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: (0.0,1.0,2.0,3.0,4.0,NaN,-10.0)\n" //FIXME
+		+"tickNumberScreenCoords: (418.315,451.435,484.552,517.071,550.189,589.443,589.443)\n",
+		axis1.toString());
+		
+	}
 
 }
