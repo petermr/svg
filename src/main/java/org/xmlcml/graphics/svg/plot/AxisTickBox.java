@@ -15,8 +15,8 @@ public class AxisTickBox /*extends Real2Range*/ {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private static final double SMALL_DELTA = 5.0;
-	private static final double LARGE_DELTA = 10.0;
+	private static final double SMALL_DELTA = 10.0;
+	private static final double LARGE_DELTA = 15.0;
 
 	private LineDirection direction;
 	private double deltaX;

@@ -144,25 +144,31 @@ public class AnnotatedAxisTest {
 		+"majorTicks: (176.127,211.812,247.524,283.223,318.93,354.638,390.327)\n"
 		+"minorTicks: ()\n"
 		+"tickNumberUserCoords: (-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0)\n"
-		+"tickNumberScreenCoords: null\n",
+		+"tickNumberScreenCoords: (135.925,171.61,207.322,243.007,279.626,315.339,351.024,386.732,422.42)\n",
 		axis0.toString());
 		Assert.assertEquals("axis0", LineDirection.HORIZONTAL, axis0.getDirection());
 		Assert.assertEquals("axis0", "(176.127,211.812,247.524,283.223,318.93,354.638,390.327)", 
 				axis0.getMajorTicksScreenCoords().toString());
 		Assert.assertEquals("axis0", "(-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0)", 
 				axis0.getTickNumberUserCoords().toString());
+		Assert.assertEquals("axis0 numberScreen", "(135.925,171.61,207.322,243.007,279.626,315.339,351.024,386.732,422.42)", 
+				axis0.getTickNumberScreenCoords().toString());
+		
 		AnnotatedAxis axis1 = axisArray[1];
 		Assert.assertEquals("axis1", "dir: VERTICAL; range: (483.056,650.628)\n"
 		+"majorTicks: (510.979,538.913,566.837,594.781,622.704)\n"
 		+"minorTicks: ()\n"
 		+"tickNumberUserCoords: (0.0,0.1,0.2,0.3,0.4,0.5,0.6)\n"
-		+"tickNumberScreenCoords: null\n",
+		+"tickNumberScreenCoords: (485.07,513.02,540.954,568.877,596.822,624.745,652.679)\n",
 		axis1.toString());
+		
 		Assert.assertEquals("axis1", LineDirection.VERTICAL, axis1.getDirection());
 		Assert.assertEquals("axis1", "(510.979,538.913,566.837,594.781,622.704)", 
 				axis1.getMajorTicksScreenCoords().toString());
 		Assert.assertEquals("axis1", "(0.0,0.1,0.2,0.3,0.4,0.5,0.6)", 
 				axis1.getTickNumberUserCoords().toString());
+		Assert.assertEquals("axis1 numberScreen", "(485.07,513.02,540.954,568.877,596.822,624.745,652.679)", 
+				axis1.getTickNumberScreenCoords().toString());
 		
 		AnnotatedAxis axis2 = axisArray[2];
 		Assert.assertEquals("axis2", "dir: HORIZONTAL; range: null\n"
@@ -181,6 +187,49 @@ public class AnnotatedAxisTest {
 		axis3.toString());
 		
 	}
+	
+	@Test
+	public void testFunnelXYAxisSBarra() throws FileNotFoundException {
+		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "sbarraplot.svg")));
+		PlotBox plotBox = new PlotBox();
+		plotBox.readAndExtractPrimitives(svgElement);
+		SVGRect fullLineBbox = plotBox.getFullLineBox();
+		fullLineBbox.format(3);
+		Assert.assertEquals("full box",  "((38.028,235.888),(65.035,173.959))", fullLineBbox.toString());
+		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
+		Assert.assertEquals("axes", 4,  axisArray.length);
+		AnnotatedAxis axis0 = axisArray[0];
+		Assert.assertEquals("axis0", "dir: HORIZONTAL; range: (38.028,235.888)\n"
+		+"majorTicks: (37.974,112.191,136.931,62.712,87.452,161.671,186.411,211.149,235.889)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: null\n" // FIXME
+		+"tickNumberScreenCoords: (29.212997,53.954002,78.695,103.436,130.679,155.42,180.161,204.90199,229.64301)\n",
+		axis0.toString());
+		Assert.assertEquals("axis0", LineDirection.HORIZONTAL, axis0.getDirection());
+		Assert.assertEquals("axis0", "(37.974,112.191,136.931,62.712,87.452,161.671,186.411,211.149,235.889)", 
+				axis0.getMajorTicksScreenCoords().toString());
+//		Assert.assertEquals("axis0", "()", 
+//				axis0.getTickNumberUserCoords().toString());
+//		Assert.assertEquals("axis0 numberScreen", "()", 
+//				axis0.getTickNumberScreenCoords().toString());
+		
+		AnnotatedAxis axis1 = axisArray[1];
+		Assert.assertEquals("axis1", "dir: VERTICAL; range: (65.035,173.959)\n"
+		+"majorTicks: (65.023,137.663,83.184,101.344,119.504,155.823,173.992)\n"
+		+"minorTicks: ()\n"
+		+"tickNumberUserCoords: (0.0,0.1,0.2,0.3,0.4,0.5,0.6)\n" //FIXME
+		+"tickNumberScreenCoords: (67.092003,85.251999,103.412,121.57201,139.731,157.89101,176.05)\n",
+		axis1.toString());
+		
+		Assert.assertEquals("axis1", LineDirection.VERTICAL, axis1.getDirection());
+		Assert.assertEquals("axis1", "(65.023,137.663,83.184,101.344,119.504,155.823,173.992)", 
+				axis1.getMajorTicksScreenCoords().toString());
+//		Assert.assertEquals("axis1", "(0.0,0.1,0.2,0.3,0.4,0.5,0.6)", 
+//				axis1.getTickNumberUserCoords().toString());
+//		Assert.assertEquals("axis1 numberScreen", "(485.07,513.02,540.954,568.877,596.822,624.745,652.679)", 
+//				axis1.getTickNumberScreenCoords().toString());
+	}
+
 	
 
 }

@@ -53,7 +53,7 @@ public class AnnotatedAxis {
 	private Double screenToUserScale;
 	private Double screenToUserConstant;
 	private AxisTickBox axisTickBox;
-	private PlotBox axialBox;
+	private PlotBox plotBox;
 	private List<SVGLine> tickLines;
 	SVGPhrase scalesPhrase;
 	private AxisType axisType;
@@ -61,12 +61,12 @@ public class AnnotatedAxis {
 	private RealRange tickRange;
 
 
-	protected AnnotatedAxis(PlotBox axialBox) {
-		this.axialBox = axialBox;
+	protected AnnotatedAxis(PlotBox plotBox) {
+		this.plotBox = plotBox;
 	}
 	
-	public AnnotatedAxis(PlotBox axialBox, AxisType axisType) {
-		this(axialBox);
+	public AnnotatedAxis(PlotBox plotBox, AxisType axisType) {
+		this(plotBox);
 		this.axisType = axisType;
 		this.direction = axisType == null ? null : axisType.getDirection();		
 	}
@@ -103,9 +103,9 @@ public class AnnotatedAxis {
 		return tickNumberScreenCoords;
 	}
 
-	public void setTickNumberScreenCoords(RealArray tickNumberScreenCoords) {
-		this.tickNumberScreenCoords = tickNumberScreenCoords;
-	}
+//	public void setTickNumberScreenCoords(RealArray tickNumberScreenCoords) {
+//		this.tickNumberScreenCoords = tickNumberScreenCoords;
+//	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -275,6 +275,25 @@ public class AnnotatedAxis {
 	private void processVerticalAxis() {
 		this.getOrCreateTextList();
 		if (textList == null || textList.size() == 0) return;
+		List<SVGWord> wordList = createVerticalWordListLadder();
+		createVerticalNumberUserAndScreenCoords(wordList);
+		LOG.debug("vertical tickNumberUserCoords:"+tickNumberUserCoords);
+	}
+
+	private void createVerticalNumberUserAndScreenCoords(List<SVGWord> wordList) {
+		double[] values = new double[wordList.size()];
+		tickNumberScreenCoords = new RealArray();
+		for (int i = 0; i < wordList.size(); i++) {
+			SVGWord word0 = wordList.get(i);
+			tickNumberScreenCoords.addElement(word0.getXY().getY());
+			String ss = word0.getStringValue();
+			LOG.debug("ss "+ss);
+			values[i] = (ss == null) ? Double.NaN : new Double(ss);
+		}
+		tickNumberUserCoords = new RealArray(values);
+	}
+
+	private List<SVGWord> createVerticalWordListLadder() {
 		List<SVGWord> wordList = new ArrayList<SVGWord>();
 		SVGWord word = new SVGWord(textList.get(0)); // ?? why
 		wordList.add(word);
@@ -287,22 +306,13 @@ public class AnnotatedAxis {
 				wordList.add(word);
 			}
 		}
-		double[] values = new double[wordList.size()];
-		for (int i = 0; i < wordList.size(); i++) {
-			SVGWord word0 = wordList.get(i);
-			String ss = word0.getStringValue();
-			LOG.trace("ss "+ss);
-			values[i] = (ss == null) ? Double.NaN : new Double(ss);
-		}
-		RealArray realArray = new RealArray(values);
-		setTickNumberUserCoords(realArray);
-		LOG.debug("vertical tickNumberUserCoords:"+tickNumberUserCoords);
+		return wordList;
 	}
 
 	private List<SVGText> getOrCreateTextList() {
 		if (this.textList == null) {
 			textList = new ArrayList<SVGText>();
-			List<SVGText> textListAll = axialBox.getTextList();
+			List<SVGText> textListAll = plotBox.getTextList();
 			for (SVGText text : textListAll) {
 				if (text.isIncludedBy(axisTickBox.getBoundingBox())) {
 					textList.add(text);
@@ -317,6 +327,13 @@ public class AnnotatedAxis {
 		if (scalesPhrase != null) {
 			LOG.debug("HOR scalesPhrase: "+scalesPhrase);
 			setTickNumberUserCoords(scalesPhrase.getNumericValues());
+			List<SVGWord> wordList = scalesPhrase.getOrCreateWordList();
+			tickNumberScreenCoords = new RealArray();
+			for (SVGWord word : wordList) {
+				tickNumberScreenCoords.addElement(word.getXY().getX());
+			}
+			LOG.debug("xCoords: "+tickNumberScreenCoords);
+			LOG.debug("x diff: "+tickNumberScreenCoords.calculateDifferences().format(3));
 		}
 	}
 
@@ -407,10 +424,10 @@ public class AnnotatedAxis {
 		LOG.debug(">ticks>"+tickLengths);
 		if (tickLengths.elementSet().size() == 1) {
 			setMajorTickLength(tickLengths.elementSet().iterator().next());
-			getTickLinesAndSignature(axialBox);
+			getTickLinesAndSignature(plotBox);
 		} else if (tickLengths.elementSet().size() == 2) {
 			analyzeMajorAndMinorTickLengths(tickLengths);
-			getTickLinesAndSignature(axialBox);
+			getTickLinesAndSignature(plotBox);
 		} else {
 			LOG.trace("cannot process ticks: "+tickLengths);
 		}
