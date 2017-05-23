@@ -23,7 +23,6 @@ public class SVGPathParser {
 	private String d;
 	private SVGPathPrimitive lastPrimitive;
 	
-
 	public PathPrimitiveList parseDString(String d) {
 		LOG.trace(">d>"+d);
 		this.d = d;

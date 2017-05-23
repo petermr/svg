@@ -25,7 +25,7 @@ public class SVGTextBox extends SVGG {
 	}
 
 	private SVGRect rect;
-	private List<SVGText> textList;
+	protected List<SVGText> textList;
 	private Real2Range bbox;
 	private Real2[] corners;
 	private List<Line2> lines;

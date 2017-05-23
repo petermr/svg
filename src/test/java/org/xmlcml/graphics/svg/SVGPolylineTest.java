@@ -76,14 +76,6 @@ public class SVGPolylineTest {
 	;
 
 	private double epsilon = 0.01;
-
-	@Test
-	public void testFailMe() {
-		double a = Math.sqrt(-1.);
-		double b = a+1;
-		LOG.debug(b);
-		Assert.assertTrue(false);
-	}
 	
 	@Test
 	@Ignore // FIXME ANDY

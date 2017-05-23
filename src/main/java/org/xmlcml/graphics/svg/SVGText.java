@@ -5,6 +5,8 @@ import nu.xom.*;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.*;
+import org.xmlcml.euclid.Angle.Units;
+import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.fonts.FontWidths;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
@@ -1088,13 +1090,28 @@ public class SVGText extends SVGElement {
 		SVGSVG.wrapAndWriteAsSVG(g, file);
 	}
 
-	public static List<SVGText> getRotatedElements(List<SVGText> characterList, Angle angle, double eps) {
-		List<SVGElement> elements = SVGElement.getRotatedElementList(characterList, angle, eps);
+	public static List<SVGText> getRotatedTexts(List<SVGText> texts, Angle angle, double eps) {
+		List<SVGElement> elements = SVGElement.getRotatedElementList(texts, angle, eps);
 		List<SVGText> textList = new ArrayList<SVGText>();
 		for (SVGElement element : elements) {
 			textList.add((SVGText) element);
 		}
 		return textList;
 	}
+
+	public static List<SVGText> findHorizontalOrVerticalTexts(List<SVGText> texts, LineDirection direction, double eps) {
+		List<SVGText> textList = new ArrayList<SVGText>();
+		Angle angle = null;
+		if (direction.isHorizontal()) {
+			angle = new Angle(0.0);
+		} else if (direction.isVertical()) {
+			angle = new Angle(Math.PI/2.0, Units.RADIANS);
+		}
+		if (angle != null) {
+			textList = getRotatedTexts(texts, angle, eps);
+		}
+		return textList;
+	}
+
 
 }

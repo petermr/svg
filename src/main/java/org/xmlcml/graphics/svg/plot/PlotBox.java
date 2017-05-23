@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
@@ -52,7 +52,7 @@ public class PlotBox {
 		public static final int LEFT_AXIS   = AxisType.getSerial(AxisType.LEFT);
 		public static final int TOP_AXIS    = AxisType.getSerial(AxisType.TOP);
 		public static final int RIGHT_AXIS  = AxisType.getSerial(AxisType.RIGHT);
-		public LineDirection getDirection() {
+		public LineDirection getLineDirection() {
 			return direction;
 		}
 	}
@@ -74,21 +74,26 @@ public class PlotBox {
 	static final String MAJOR_CHAR = "I";
 	private static Double CORNER_EPS = 0.5; // to start with
 	private static Double BBOX_PADDING = 5.0; // to start with
+	private static int FORMAT_NDEC = 3; // format numbers; to start with
 	
 	private List<SVGPath> pathList;
 	private List<SVGText> textList;
 	private List<SVGLine> lineList;
+	
+	// derived
 	private List<SVGCircle> circleList;
 	
 	private List<SVGLine> horizontalLines;
 	private List<SVGLine> verticalLines;
+	private List<SVGText> horizontalTexts;
+	private List<SVGText> verticalTexts;
 	private AnnotatedAxis[] axisArray;
-	boolean useRange;
 	private AxialLineList longHorizontalEdgeLines;
 	private AxialLineList longVerticalEdgeLines;
 	private SVGRect fullLineBox;
 	private SVGElement svgElement;
 	private BoxType boxType;
+	private int ndecimal = FORMAT_NDEC;
 
 	public PlotBox() {
 		setDefaults();
@@ -96,40 +101,31 @@ public class PlotBox {
 	
 	private void setDefaults() {
 		axisArray = new AnnotatedAxis[AxisType.values().length];
+		for (AxisType axisType : AxisType.values()) {
+			LOG.debug("AxisType: "+axisType);
+			AnnotatedAxis axis = createAxis(axisType);
+			axisArray[axisType.serial] = axis;
+		}
+		ndecimal = FORMAT_NDEC;
 	}
 
-	private void processPaths() {
+	/** MAIN ENTRY METHOD for processing plots.
+	 * 
+	 * @param svgElement
+	 */
+	public void createPlot(SVGElement svgElement) {
+		extractSVGComponents(svgElement);
 		createHorizontalAndVerticalLines();
-		createAxesAndAxisBox();
-		LOG.trace("axes: "+axisArray);
-		for (AnnotatedAxis axis : axisArray) {
-			if (axis != null) {
-				LOG.trace("axis: "+axis);
-				axis.createAxisAndRanges(this);
-			}
-		}
-		return;
-	}
-	
-	void processTextsPathsLines(List<SVGText> textList, List<SVGPath> pathList, List<SVGLine> lineList, boolean useRange) {
-		setPrimitives(textList, pathList, lineList, useRange);
-		
-		processPaths();
-		for (AnnotatedAxis axis : axisArray) {
-			if (axis != null) {
-				axis.processScalesTitle();
-			}
-		}
-	}
-
-	private void setPrimitives(List<SVGText> textList, List<SVGPath> pathList, List<SVGLine> lineList, boolean useRange) {
-		this.pathList = pathList;
-		this.textList = textList;
-		this.useRange = useRange;
-		this.lineList = lineList;
+		createHorizontalAndVerticalTexts();
+		makeLongHorizontalAndVerticalEdges();
+		makeFullLineBoxAndRanges();
+		makeAxesAndAxialTickBoxes();
+		makeRangesForAxes();
+		extractScaleTextsAndMakeScales();
 	}
 
 	private void createHorizontalAndVerticalLines() {
+		LOG.debug("********* make Horizontal/Vertical lines *********");
 		if (lineList == null || lineList.size() == 0) {
 			lineList = SVGPath.createLinesFromPaths(pathList);
 		}
@@ -137,101 +133,50 @@ public class PlotBox {
 		verticalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
 	}
 
-	private void createAxesAndAxisBox() {
-		LOG.debug("createAxesAndAxisBox");
-		// we'll assume one horizontal and many vertical lines 
-		// the first two are probably obsolete in the medium term
-		if (horizontalLines.size() == 0 || verticalLines.size() == 0) {
-			LOG.debug("no lines for box");
-		} else if (horizontalLines.size() == 1 && verticalLines.size() > 1) {
-			AnnotatedAxis axis = new AnnotatedAxis(this);
-			axis.createMainAndTickLines(LineDirection.HORIZONTAL, horizontalLines.get(0), verticalLines);
-		} else if (verticalLines.size() == 1 && horizontalLines.size() > 1) {
-			AnnotatedAxis axis = new AnnotatedAxis(this);
-			axis.createMainAndTickLines(LineDirection.VERTICAL, verticalLines.get(0), horizontalLines);
-		} else {
-			findAxisBox();
+	private void createHorizontalAndVerticalTexts() {
+		LOG.debug("********* make Horizontal/Vertical texts *********");
+		horizontalTexts = SVGText.findHorizontalOrVerticalTexts(textList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+		verticalTexts = SVGText.findHorizontalOrVerticalTexts(textList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+		
+		StringBuilder sb = new StringBuilder();
+		for (SVGText verticalText : verticalTexts) {
+			sb.append("/"+verticalText.getValue());
 		}
+		LOG.trace("TEXT horiz: " + horizontalTexts.size()+"; vert: " + verticalTexts.size()+"; " /*+ "/"+sb*/);
 	}
 
-	private Real2Range findAxisBox() {
+	private void makeLongHorizontalAndVerticalEdges() {
+		LOG.debug("********* make Horizontal/Vertical edges *********");
 		Real2Range lineBbox = SVGElement.createBoundingBox(lineList);
 		longHorizontalEdgeLines = getSortedLinesCloseToEdge(horizontalLines, LineDirection.HORIZONTAL, lineBbox.getXRange());
 		longVerticalEdgeLines = getSortedLinesCloseToEdge(verticalLines, LineDirection.VERTICAL, lineBbox.getYRange());
-		makeFullBox();
-		return lineBbox;
 	}
 
-	/** box with all 4 axes
-	 * 
-	 */
-	private SVGRect makeFullBox() {
+	private void makeFullLineBoxAndRanges() {
+		LOG.debug("********* make FullineBox and Ranges *********");
 		fullLineBox = null;
-		if (longHorizontalEdgeLines != null && longVerticalEdgeLines != null) {
-			RealRange fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
-			fullboxXRange = fullboxXRange.format(3);
-			RealRange fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
-			fullboxYRange = fullboxYRange.format(3);
-			fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
-			fullLineBox.format(3);
-			makeAxesAndAxialTickBoxes();
-		}
-		return fullLineBox;
-	}
-
-	private static RealRange createRange(SVGLineList edgeLines, Direction direction) {
-		SVGLine line0 = edgeLines.get(0);
-		RealRange hRange = line0.getReal2Range().getRealRange(direction);
-		SVGLine line1 = edgeLines.get(1);
-		if (line1 != null && !line1.getReal2Range().getRealRange(direction).isEqualTo(hRange, CORNER_EPS)) {
-			hRange = null;
-//				throw new RuntimeException("Cannot make box from HLines: "+line0+"; "+line1);
-		}
-		return hRange;
+		RealRange fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
+		fullboxXRange = fullboxXRange.format(PlotBox.FORMAT_NDEC);
+		RealRange fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
+		fullboxYRange = fullboxYRange.format(PlotBox.FORMAT_NDEC);
+		fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
+		fullLineBox.format(PlotBox.FORMAT_NDEC);
 	}
 
 	private void makeAxesAndAxialTickBoxes() {
-		for (AxisType axisType : AxisType.values()) {
-			LOG.debug("AxisType: "+axisType);
-			axisArray[axisType.serial] = null;
-			AnnotatedAxis axis = this.createAxis(axisType);
-
-			AxisTickBox axisTickBox = axis.createTickBoxAndAxialLines(axis.getSingleLine(), horizontalLines, verticalLines);
+		LOG.debug("*********  makeAxesAndAxialTickBoxes *********");
+		for (AnnotatedAxis axis : axisArray) {
+			axis.getOrCreateSingleLine();		
+			LOG.debug("AXIS "+axis.toString());
+			AxialBox axisTickBox = AxisTickBox.makeTickBox(axis, horizontalLines, verticalLines);
 			if (axisTickBox != null) {
-				axisArray[axisType.serial] = axis;
-				axis.setAxisTickBox(axisTickBox);
-				axis.createMainAndTickLines(axis.getDirection(), axis.getSingleLine(), axisTickBox.getPotentialTickLines().getLineList());
-
+				axis.makeAxialScaleBox();
 			}
 		}
 	}
-
-	private SVGLine createEdge(AxisType axisType) {
-		SVGLine edge = null;
-		if (axisType != null && fullLineBox != null) {
-			Real2Range bbox = fullLineBox.getBoundingBox();
-			Real2[] corners = bbox.getCorners();
-			if (AxisType.TOP.equals(axisType)) {
-				edge = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
-			} else if (AxisType.BOTTOM.equals(axisType)) {
-				edge = new SVGLine(new Real2(corners[0].getX(), corners[1].getY()), corners[1]); 
-			} else if (AxisType.LEFT.equals(axisType)) {
-				edge = new SVGLine(corners[0], new Real2(corners[0].getX(), corners[1].getY())); 
-			} else if (AxisType.RIGHT.equals(axisType)) {
-				edge = new SVGLine(new Real2(corners[1].getX(), corners[1].getY()), corners[1]); 
-			} else {
-				LOG.error("Unknown axis type: "+axisType);
-			}
-		}
-		return edge;
-	}
-
-//	private AnnotatedAxis createAxis(LineDirection direction) {
-//		return new AnnotatedAxis(this, direction);
-//	}
 
 	private AxialLineList getSortedLinesCloseToEdge(List<SVGLine> lines, LineDirection direction, RealRange range) {
-		RealRange.Direction rangeDirection = LineDirection.HORIZONTAL.equals(direction) ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
+		RealRange.Direction rangeDirection = direction.isHorizontal() ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
 		AxialLineList axialLineList = new AxialLineList(direction);
 		for (SVGLine line : lines) {
 			RealRange lineRange = line.getRealRange(rangeDirection);
@@ -244,21 +189,65 @@ public class PlotBox {
 		return axialLineList;
 	}
 
-	public AnnotatedAxis createAxis(AxisType axisType) {
-		AnnotatedAxis axis = new AnnotatedAxis(this, axisType);
-		axis.setSingleLine(this.createEdge(axisType));
-		return axis;
+	private void extractScaleTextsAndMakeScales() {
+		LOG.debug("********* extractScaleTextsAndMakeScales *********");
+		for (AnnotatedAxis axis : this.axisArray) {
+			axis.extractScaleTextsAndMakeScales();
+		}
 	}
 
-	public void readAndExtractPrimitives(SVGElement svgElement) {
+	private void makeRangesForAxes() {
+		LOG.debug("********* makeRangesForAxes *********");
+		for (AnnotatedAxis axis : this.axisArray) {
+			axis.createAxisRanges();
+		}
+	}
+
+	private void extractSVGComponents(SVGElement svgElement) {
+		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
 		pathList = SVGPath.extractPaths(svgElement);
 		lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		circleList = SVGCircle.extractSelfAndDescendantCircles(svgElement);
-		this.processTextsPathsLines(textList, pathList, lineList, useRange);
 	}
 	
+	// graphics
+	
+	public SVGElement createSVGElement() {
+		SVGG g = new SVGG();
+		g.appendChild(copyOriginalElements());
+		g.appendChild(copyAnnotatedAxes());
+		return g;
+	}
+	
+	private SVGG copyOriginalElements() {
+		SVGG g = new SVGG();
+		addList(g, pathList);
+		addList(g, lineList);
+		addList(g, textList);
+		g.setStroke("pink");
+		return g;
+	}
+
+	private SVGG copyAnnotatedAxes() {
+		SVGG g = new SVGG();
+		g.setClassName("plotBox");
+		for (AnnotatedAxis axis : axisArray) {
+			g.appendChild(axis.getSVGElement().copy());
+		}
+		return g;
+	}
+
+	private void addList(SVGG g, List<? extends SVGElement> list) {
+		for (SVGElement element : list) {
+			g.appendChild(element.copy());
+		}
+	}
+	
+	// getters and setters
+	
+
 	public List<SVGPath> getPathList() {
 		return pathList;
 	}
@@ -319,7 +308,42 @@ public class PlotBox {
 		return axisArray;
 	}
 
+	private AnnotatedAxis createAxis(AxisType axisType) {
+		AnnotatedAxis axis = new AnnotatedAxis(this, axisType);
+		return axis;
+	}
 
+	public int getNdecimal() {
+		return ndecimal;
+	}
+
+	public void setNdecimal(int ndecimal) {
+		this.ndecimal = ndecimal;
+	}
+
+	public List<SVGText> getHorizontalTexts() {
+		return horizontalTexts;
+	}
+
+	public List<SVGText> getVerticalTexts() {
+		return verticalTexts;
+	}
+	
+	// static methods
+	
+	private static RealRange createRange(SVGLineList lines, Direction direction) {
+		RealRange hRange = null;
+		if (lines.size() > 0) {
+			SVGLine line0 = lines.get(0);
+			hRange = line0.getReal2Range().getRealRange(direction);
+			SVGLine line1 = lines.get(1);
+			if (line1 != null && !line1.getReal2Range().getRealRange(direction).isEqualTo(hRange, CORNER_EPS)) {
+				hRange = null;
+	//				throw new RuntimeException("Cannot make box from HLines: "+line0+"; "+line1);
+			}
+		}
+		return hRange;
+	}
 
 
 }
