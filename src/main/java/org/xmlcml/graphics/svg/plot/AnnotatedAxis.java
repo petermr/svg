@@ -1,5 +1,6 @@
 package org.xmlcml.graphics.svg.plot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -13,6 +14,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
+import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
 
@@ -39,12 +41,13 @@ public class AnnotatedAxis {
 	RealRange range;
 	SVGLine singleLine;
 	private AxisTickBox axisTickBox;
-	private AxisTextBox valueTextBox;
+	private AxisTextBox axialScaleTextBox;
 	private PlotBox plotBox;
 	private AxisType axisType;
 	private List<SVGText> textList;
 	private Double screenToUserScale;
 	private Double screenToUserConstant;
+	private AxisTextBox axialTitleTextBox;
 
 
 	protected AnnotatedAxis(PlotBox plotBox) {
@@ -57,16 +60,16 @@ public class AnnotatedAxis {
 		this.lineDirection = axisType == null ? null : axisType.getLineDirection();		
 	}
 
-	void setRange(RealRange range) {
-		this.range = range;
-	}
+//	private void setRange(RealRange range) {
+//		this.range = range;
+//	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("type: "+axisType+ "; dir: "+lineDirection+"; ");
 		sb.append("range: "+range+"\n");
 		sb.append("axisTickBox: "+axisTickBox+"\n");
-		sb.append("tickValues: "+valueTextBox+"\n");
+		sb.append("tickValues: "+axialScaleTextBox+"\n");
 		return sb.toString();
 	}
 
@@ -105,11 +108,11 @@ public class AnnotatedAxis {
 	}
 
 	public AxisTextBox getValueTextBox() {
-		return valueTextBox;
+		return axialScaleTextBox;
 	}
 
 	public void setValueTextBox(AxisTextBox valueTextBox) {
-		this.valueTextBox = valueTextBox;
+		this.axialScaleTextBox = valueTextBox;
 	}
 
 	public Double getScreenToUserScale() {
@@ -117,18 +120,53 @@ public class AnnotatedAxis {
 	}
 
 
+	public PlotBox getPlotBox() {
+		return plotBox;
+	}
+
+	public void setAxisTickBox(AxisTickBox axisTickBox) {
+		this.axisTickBox = axisTickBox;
+	}
+
+	public AxisType getAxisType() {
+		return axisType;
+	}
+
+	SVGLine getOrCreateSingleLine() {
+		if (singleLine == null) {
+			if (plotBox.getFullLineBox() != null) {
+				Real2Range bbox = plotBox.getFullLineBox().getBoundingBox();
+				Real2[] corners = bbox.getCorners();
+				if (AxisType.TOP.equals(axisType)) {
+					singleLine = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
+				} else if (AxisType.BOTTOM.equals(axisType)) {
+					singleLine = new SVGLine(new Real2(corners[0].getX(), corners[1].getY()), corners[1]); 
+				} else if (AxisType.LEFT.equals(axisType)) {
+					singleLine = new SVGLine(corners[0], new Real2(corners[0].getX(), corners[1].getY())); 
+				} else if (AxisType.RIGHT.equals(axisType)) {
+					singleLine = new SVGLine(new Real2(corners[1].getX(), corners[0].getY()), corners[1]); 
+				} else {
+					LOG.error("Unknown axis type: "+axisType);
+				}
+			} else {
+				LOG.warn("no fullLineBox");
+			}
+		}
+		return singleLine;
+	}
+
 	private void mapTicksToTickValues() {
-		if (valueTextBox.getTickNumberValues() == null) {
-			if (valueTextBox.getTickNumberValues() != null && axisTickBox.getMajorTicksScreenCoords() != null) {
-				int missingTickCount = valueTextBox.getTickNumberValues().size() - axisTickBox.getMajorTicksScreenCoords().size();
+		if (axialScaleTextBox.getTickNumberValues() == null) {
+			if (axialScaleTextBox.getTickNumberValues() != null && axisTickBox.getMajorTicksScreenCoords() != null) {
+				int missingTickCount = axialScaleTextBox.getTickNumberValues().size() - axisTickBox.getMajorTicksScreenCoords().size();
 				if (missingTickCount == 0) {
 					// we ought to check values of tick values?
-					valueTextBox.setTickNumberValues(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
+					axialScaleTextBox.setTickNumberValues(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
 				} else if (missingTickCount == 1 || missingTickCount == 2) {
 					int missingEndTicks = axisTickBox.addMissingEndTicks(this);
 					missingTickCount -= missingEndTicks;
 					if (missingTickCount == 0) {
-						valueTextBox.setTickNumberScreenCoords(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
+						axialScaleTextBox.setTickNumberScreenCoords(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
 					} else {
 						LOG.error("missing "+missingTickCount+" from axis");
 					}
@@ -142,9 +180,9 @@ public class AnnotatedAxis {
 	}
 
 	private void createScreenToUserTransform() {
-		if (axisTickBox.getMajorTicksScreenCoords() != null && valueTextBox.getTickNumberValues() != null) {
-			screenToUserScale = axisTickBox.getMajorTicksScreenCoords().getRange().getScaleTo(valueTextBox.getTickNumberValues().getRange());
-			screenToUserConstant = axisTickBox.getMajorTicksScreenCoords().getRange().getConstantTo(valueTextBox.getTickNumberValues().getRange());
+		if (axisTickBox.getMajorTicksScreenCoords() != null && axialScaleTextBox.getTickNumberValues() != null) {
+			screenToUserScale = axisTickBox.getMajorTicksScreenCoords().getRange().getScaleTo(axialScaleTextBox.getTickNumberValues().getRange());
+			screenToUserConstant = axisTickBox.getMajorTicksScreenCoords().getRange().getConstantTo(axialScaleTextBox.getTickNumberValues().getRange());
 			LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
 		} else {
 			LOG.debug("no majorTicksScreenCoords or tickNumberUserCoords");
@@ -156,8 +194,8 @@ public class AnnotatedAxis {
 	 * @param xscreen
 	 * @return
 	 */
-	 public double transformScreenToUser(double xscreen) {
-		return axisTickBox.getMajorTicksScreenCoords().getRange().transformToRange(valueTextBox.getTickNumberValues().getRange(), xscreen);
+	private double transformScreenToUser(double xscreen) {
+		return axisTickBox.getMajorTicksScreenCoords().getRange().transformToRange(axialScaleTextBox.getTickNumberValues().getRange(), xscreen);
 	}
 
 
@@ -195,51 +233,24 @@ public class AnnotatedAxis {
 
 
 	void extractScaleTextsAndMakeScales() {
-		valueTextBox.extractScaleValueList();
-		processTitle();
+		if (axisTickBox == null) {
+			LOG.warn("no ticks so no scale texts captured");
+			return;
+		}
+		this.axialScaleTextBox = new AxisTextBox(this);
+		axialScaleTextBox.makeCaptureBox();
+		this.axialScaleTextBox.setTexts(plotBox.getHorizontalTexts(), plotBox.getVerticalTexts());
+		axialScaleTextBox.extractScaleValueList();
 	}
 
-	public PlotBox getPlotBox() {
-		return plotBox;
-	}
-
-	public void setAxisTickBox(AxisTickBox axisTickBox) {
-		this.axisTickBox = axisTickBox;
-	}
-	
-	public void makeAxialScaleBox() {
-		valueTextBox = new AxisTextBox(this);
+	void extractTitleTextsAndMakeTitles() {
+		axialTitleTextBox = new AxisTextBox(this);
+		this.axialTitleTextBox.setTexts(plotBox.getHorizontalTexts(), plotBox.getVerticalTexts());
+		axialTitleTextBox.extractText();
 	}
 
 	boolean isHorizontal() {
 		return getLineDirection().isHorizontal();
-	}
-
-	public AxisType getAxisType() {
-		return axisType;
-	}
-
-	SVGLine getOrCreateSingleLine() {
-		if (singleLine == null) {
-			if (plotBox.getFullLineBox() != null) {
-				Real2Range bbox = plotBox.getFullLineBox().getBoundingBox();
-				Real2[] corners = bbox.getCorners();
-				if (AxisType.TOP.equals(axisType)) {
-					singleLine = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
-				} else if (AxisType.BOTTOM.equals(axisType)) {
-					singleLine = new SVGLine(new Real2(corners[0].getX(), corners[1].getY()), corners[1]); 
-				} else if (AxisType.LEFT.equals(axisType)) {
-					singleLine = new SVGLine(corners[0], new Real2(corners[0].getX(), corners[1].getY())); 
-				} else if (AxisType.RIGHT.equals(axisType)) {
-					singleLine = new SVGLine(new Real2(corners[1].getX(), corners[0].getY()), corners[1]); 
-				} else {
-					LOG.error("Unknown axis type: "+axisType);
-				}
-			} else {
-				LOG.warn("no fullLineBox");
-			}
-		}
-		return singleLine;
 	}
 
 	public SVGElement getSVGElement() {
@@ -248,6 +259,67 @@ public class AnnotatedAxis {
 		g.appendChild(axisTickBox.createSVGElement());
 		return g;
 	}
+
+	private void buildTickBoxContents(AxisTickBox axisTickBox) {
+		LOG.debug("MADE axisTickBox "+axisTickBox + axisTickBox.hashCode());
+		setAxisTickBox(axisTickBox);
+		SVGLineList potentialTickLines = axisTickBox.getPotentialTickLines();
+		LOG.debug("potential tickLines: "+potentialTickLines.size());
+		axisTickBox.createMainAndTickLines(this, potentialTickLines.getLineList());
+	}
+
+	/** make tick box from knowing only the axis Type
+	 * 
+	 * 
+	 * @param line
+	 * @param lineDirection
+	 */
+	private AxisTickBox createAxisTickBox() {
+		AxisTickBox axisTickBox = null;
+		if (getSingleLine() != null && getAxisType() != null) {
+			axisTickBox = new AxisTickBox(this);
+			axisTickBox.makeCaptureBox();
+		}
+		return axisTickBox;
+	}
+
+	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
+		AxisTickBox.LOG.debug("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getFullLineBox());
+		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
+		if (axisTickBox != null) {
+			buildTickBoxContents(axisTickBox);
+		} else {
+			AxisTickBox.LOG.debug("Null axisTickBox");
+		}
+		return axisTickBox;
+	}
+
+	private AxisTickBox createTickBoxAndAxialLines(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
+		AxisTickBox axisTickBox = null;
+		if (singleLine != null) {
+			List<SVGLine> possibleTickLines = lineDirection.isHorizontal() ? verticalLines : horizontalLines;
+			if (possibleTickLines.size() > 0) {
+				axisTickBox = createAxisTickBox();
+				axisTickBox.extractIntersectingLines(horizontalLines, verticalLines);
+			}
+		} else {
+			AxisTickBox.LOG.warn("no single line for "+this);
+		}
+		return axisTickBox;
+	}
+
+//	private AxisTextBox createAxisTextBox(AxisTextBox axisTextBox2, List<SVGText> textList) {
+//		AxisTextBox axisTextBox = null;
+//		if (this == null) {
+//			throw new RuntimeException("null axis 1");
+//		}
+//		if (this != null && textList != null) {
+//			axisTextBox = new AxisTextBox(this);
+//			axisTextBox.textList = new ArrayList<SVGText>(textList);
+//			axisTextBox.extractIntersectingTexts(getPlotBox().getHorizontalTexts(), getPlotBox().getVerticalTexts());
+//		}
+//		return axisTextBox;
+//	}
 
 	
 }

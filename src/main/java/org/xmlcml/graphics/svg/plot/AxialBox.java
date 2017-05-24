@@ -11,6 +11,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGRect;
+import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
 
 /** managaes the contents of a region associated with an axis.
  * Generally an AnnotatedAxis contains some or all of:
@@ -22,7 +23,7 @@ import org.xmlcml.graphics.svg.SVGRect;
  * @author pm286
  *
  */
-public class AxialBox /*extends SVGG*/ {
+public class AxialBox {
 
 	private static final Logger LOG = Logger.getLogger(AxialBox.class);
 	static {
@@ -53,6 +54,7 @@ public class AxialBox /*extends SVGG*/ {
 	protected Real2Range captureBox;
 	protected List<SVGElement> containedGraphicalElements;
 	protected AnnotatedAxis axis;
+	protected Real2Range bbox;
 	
 	protected AxialBox() {
 		super();
@@ -85,31 +87,38 @@ public class AxialBox /*extends SVGG*/ {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("extendedBox: "+ (captureBox == null ? "null" : captureBox.toString()));
-		sb.append("bbox: "+ getBoundingBox());
-		sb.append(" DIR: " + axis.getLineDirection() + "; inside/outside/line/extension deltas:" + insideWidth+", "+outsideWidth+", "+lineExtension+"\n");
+		sb.append(" bbox: "+ getBoundingBox()+"\n");
+		sb.append("DIR: " + axis.getLineDirection() + "; inside/outside/line/extension deltas:" + insideWidth+", "+outsideWidth+", "+lineExtension+"\n");
 		return sb.toString();
 	}
 
 	protected void makeCaptureBox() {
-		LineDirection lineDirection = axis.getAxisType().getLineDirection();
+		AxisType axisType = axis.getAxisType();
+		LineDirection lineDirection = axisType.getLineDirection();
 		RealRange.Direction rrDirection = lineDirection.getRealRangeDirection();
 		RealRange.Direction perpRRDirection = lineDirection.getPerpendicularLineDirection().getRealRangeDirection();
 		captureBox = new Real2Range(axis.getSingleLine().getBoundingBox());
-		captureBox.extendUpperEndBy(perpRRDirection, this.outsideWidth);
-		captureBox.extendLowerEndBy(perpRRDirection, this.insideWidth);
+		double outside = (axisType.getOutsidePositive() == 1) ? this.outsideWidth : this.insideWidth;
+		double inside = (axisType.getOutsidePositive() == 1) ? this.insideWidth : this.outsideWidth;
+		captureBox.extendUpperEndBy(perpRRDirection, outside);
+		captureBox.extendLowerEndBy(perpRRDirection, inside);
 		captureBox.extendBothEndsBy(rrDirection,
 				this.lineExtension, this.lineExtension);
 		captureBox.format(decimalPlaces());
-		LOG.debug("captureBox: "+axis.getAxisType()+" "+captureBox);
+		LOG.debug("******* captureBox: "+axis.getAxisType()+" "+captureBox);
 	}
 
 	protected int decimalPlaces() {
 		return axis.getPlotBox().getNdecimal();
 	}
 	
-	private Real2Range getBoundingBox() {
+	private Real2Range getContainingBox() {
 		Real2Range containingBox = SVGElement.createBoundingBox(containedGraphicalElements);
 		return containingBox;
+	}
+
+	private Real2Range getBoundingBox() {
+		return bbox;
 	}
 
 	public SVGElement createSVGElement() {
@@ -118,9 +127,18 @@ public class AxialBox /*extends SVGG*/ {
 		for (SVGElement element : containedGraphicalElements) {
 			g.appendChild(element.copy());
 		}
-		SVGRect captureRect = SVGRect.createFromReal2Range(captureBox);
-		captureRect.setStrokeWidth(2.0);
-		captureRect.setStroke("red");
+		addAnnotatedBox(g, captureBox, "red");
+		addAnnotatedBox(g, bbox, "green");
 		return g;
+	}
+
+	private void addAnnotatedBox(SVGG g, Real2Range bbox, String color) {
+		if (bbox != null) {
+			SVGRect rect = SVGRect.createFromReal2Range(bbox);
+			rect.setStrokeWidth(0.2);
+			rect.setFill(color);
+			rect.setOpacity(0.3);
+			g.appendChild(rect);
+		}
 	}
 }

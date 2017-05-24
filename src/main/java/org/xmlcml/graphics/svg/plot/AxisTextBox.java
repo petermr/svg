@@ -7,8 +7,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
-import org.xmlcml.graphics.svg.SVGLine;
-import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.text.SVGPhrase;
 import org.xmlcml.graphics.svg.text.SVGWord;
@@ -29,16 +27,17 @@ public class AxisTextBox extends AxialBox {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private List<SVGText> textList;
-	private List<SVGText> intersectingHorizontalTexts;
-	private List<SVGText> intersectingVerticalTexts;
+	List<SVGText> textList;
+	private List<SVGText> horizontalTexts;
+	private List<SVGText> verticalTexts;
 
 	private SVGPhrase scalesPhrase;
 	private RealArray tickNumberValues; // the actual numbers in the scale
 	private RealArray tickNumberScreenCoords; // the best estimate of the numbers positions
 	
-//	private AnnotatedAxis axis;
 	private AxialBox axialBox;
+	private SVGPhrase horizontalPhrase;
+	private SVGPhrase verticalPhrase;
 
 	protected AxisTextBox() {
 		super();
@@ -52,40 +51,18 @@ public class AxisTextBox extends AxialBox {
 		this.axis = axis;
 	}
 	
-	public static AxisTextBox createAxisTextBox(AnnotatedAxis axis, List<SVGText> textList) {
-		AxisTextBox axisTextBox = null;
-		if (axis == null) {
-			throw new RuntimeException("null axis 1");
-		}
-		if (axis != null && textList != null) {
-			axisTextBox = new AxisTextBox(axis);
-			axisTextBox.textList = new ArrayList<SVGText>(textList);
-			axisTextBox.extractIntersectingTexts(axis.getPlotBox().getHorizontalTexts(), axis.getPlotBox().getVerticalTexts());
-		}
-		return axisTextBox;
+	void setTexts(List<SVGText> horizontalTexts, List<SVGText> verticalTexts) {
+		this.horizontalTexts = extractIntersectingTexts(new ArrayList<SVGText>(horizontalTexts));
+		LOG.debug("hor texts: "+horizontalTexts.size()+"; " + horizontalTexts);
+		this.verticalTexts = extractIntersectingTexts(new ArrayList<SVGText>(verticalTexts));
+		LOG.debug("ver texts: "+verticalTexts.size());
 	}
 
-//	private static AxisTickBox createTickBoxAndAxialLines(AnnotatedAxis axis, List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-//		AxisTickBox axisTickBox = null;
-//		if (axis.singleLine != null) {
-//			List<SVGLine> possibleTickLines = axis.lineDirection.isHorizontal() ? verticalLines : horizontalLines;
-//			if (possibleTickLines.size() > 0) {
-//				axisTickBox = AxisTickBox.createAxisTickBox(axis);
-//				axisTickBox.extractIntersectingLines(horizontalLines, verticalLines);
-//			}
-//		} else {
-//			LOG.warn("no single line for "+axis);
-//		}
-//		return axisTickBox;
-//	}
 
-	private void extractIntersectingTexts(List<SVGText> horizontalTexts, List<SVGText> verticalTexts) {
-		this.intersectingHorizontalTexts = extractIntersectingTexts(new ArrayList<SVGText>(horizontalTexts));
-		LOG.debug("hor texts: "+intersectingHorizontalTexts.size());
-		this.intersectingVerticalTexts = extractIntersectingTexts(new ArrayList<SVGText>(verticalTexts));
-		LOG.debug("ver texts: "+intersectingVerticalTexts.size());
+	void extractText() {
+		horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
+		verticalPhrase = SVGPhrase.createPhraseFromCharacters(verticalTexts);
 	}
-
 
 	private void extractHorizontalScalesAndCoords() {
 		scalesPhrase = SVGPhrase.createPhraseFromCharacters(textList);
@@ -203,7 +180,7 @@ public class AxisTextBox extends AxialBox {
 	 */
 	private List<SVGText> extractIntersectingTexts(List<SVGText> texts) {
 		List<SVGText> textList = new ArrayList<SVGText>();
-		LOG.debug("bbox "+axis);
+		LOG.debug("******* bbox "+captureBox);
 		for (SVGText text : textList) {
 			Real2Range textBBox = text.getBoundingBox();
 			Real2Range inter = textBBox.intersectionWith(this.captureBox);

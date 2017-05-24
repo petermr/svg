@@ -36,12 +36,10 @@ import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
+import org.xmlcml.graphics.svg.SVGLineList;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-
-import org.xmlcml.graphics.svg.SVGLineList;
-import org.xmlcml.graphics.svg.SVGRect;
 
 public class AxisTickBox extends AxialBox {
 	
@@ -69,7 +67,8 @@ public class AxisTickBox extends AxialBox {
 	private Double majorTickLength;
 	private Double minorTickLength;
 
-	private AxisTickBox() {
+
+	AxisTickBox() {
 		setDefaults();
 	}
 
@@ -77,31 +76,12 @@ public class AxisTickBox extends AxialBox {
 		this.maxTickLineLength = DEFAULT_MAX_TICKLENGTH;
 	}
 	
-	private AxisTickBox(AnnotatedAxis axis) {
+	AxisTickBox(AnnotatedAxis axis) {
 		super(axis);
 		setDefaults();
 	}
 	
-	static AxialBox makeTickBox(AnnotatedAxis axis, List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		LOG.debug("****** nmaking tick box for "+axis.getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+axis.getPlotBox().getFullLineBox());
-		AxisTickBox axisTickBox = AxisTickBox.createTickBoxAndAxialLines(axis, horizontalLines, verticalLines);
-		if (axisTickBox != null) {
-			buildTickBoxContents(axis, axisTickBox);
-		} else {
-			LOG.debug("Null axisTickBox");
-		}
-		return axisTickBox;
-	}
-
-	private static void buildTickBoxContents(AnnotatedAxis axis, AxisTickBox axisTickBox) {
-		LOG.debug("MADE axisTickBox "+axisTickBox + axisTickBox.hashCode());
-		axis.setAxisTickBox(axisTickBox);
-		SVGLineList potentialTickLines = axisTickBox.getPotentialTickLines();
-		LOG.debug("potential tickLines: "+potentialTickLines.size());
-		axisTickBox.createMainAndTickLines(axis, potentialTickLines.getLineList());
-	}
-	
-	private void createMainAndTickLines(AnnotatedAxis axis, List<SVGLine> tickLines) {
+	void createMainAndTickLines(AnnotatedAxis axis, List<SVGLine> tickLines) {
 		if (tickLines.size() == 0) {
 			LOG.warn("NO tickLines");
 		}
@@ -129,10 +109,6 @@ public class AxisTickBox extends AxialBox {
 	public double getMaxTickLineLength() {
 		return maxTickLineLength;
 	}
-
-//	public RealArray getMajorTicksPixels() {
-//		return majorTicksScreenCoords;
-//	}
 
 	public void setMajorScreenCoords(RealArray majorTicksPixels) {
 		this.majorTicksScreenCoords = majorTicksPixels;
@@ -187,7 +163,7 @@ public class AxisTickBox extends AxialBox {
 		this.tickRange = tickRange;
 	}
 
-	private void extractIntersectingLines(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
+	void extractIntersectingLines(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
 		this.intersectingHorizontalLines = extractIntersectingLines(new SVGLineList(horizontalLines));
 		this.intersectingVerticalLines = extractIntersectingLines(new SVGLineList(verticalLines));
 	}
@@ -223,7 +199,7 @@ public class AxisTickBox extends AxialBox {
 		return sb.toString();
 	}
 	
-	private SVGLineList getPotentialTickLines() {
+	SVGLineList getPotentialTickLines() {
 		return (axis.getLineDirection().isHorizontal()) ? intersectingVerticalLines : intersectingHorizontalLines;
 	}
 
@@ -237,7 +213,7 @@ public class AxisTickBox extends AxialBox {
 			if (Real.isEqual(l,  this.getMajorTickLength(), AnnotatedAxis.EPS)) {
 				ss = PlotBox.MAJOR_CHAR;
 				majorTickLines.add(tickLine);
-			} else {
+			} else if (l < this.getMajorTickLength()) { // crude
 				ss = PlotBox.MINOR_CHAR;
 				minorTickLines.add(tickLine);
 			}
@@ -246,40 +222,11 @@ public class AxisTickBox extends AxialBox {
 		this.setMajorScreenCoords(this.getPixelCoordinatesForTickLines(majorTickLines));
 		this.setMinorTicksPixels(this.getPixelCoordinatesForTickLines(minorTickLines));
 		this.setTickSignature(sb.toString());
-		Real2Range bbox0 = SVGElement.createBoundingBox(minorTickLines);
+		Real2Range bbox0 = SVGElement.createBoundingBox(majorTickLines);
 		Real2Range bbox1 = SVGElement.createBoundingBox(minorTickLines);
-		captureBox = bbox0.plus(bbox1);
+		bbox = bbox0.plus(bbox1);
 	}
 	
-	private static AxisTickBox createTickBoxAndAxialLines(AnnotatedAxis axis, List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		AxisTickBox axisTickBox = null;
-		if (axis.singleLine != null) {
-			List<SVGLine> possibleTickLines = axis.lineDirection.isHorizontal() ? verticalLines : horizontalLines;
-			if (possibleTickLines.size() > 0) {
-				axisTickBox = AxisTickBox.createAxisTickBox(axis);
-				axisTickBox.extractIntersectingLines(horizontalLines, verticalLines);
-			}
-		} else {
-			LOG.warn("no single line for "+axis);
-		}
-		return axisTickBox;
-	}
-
-	/** make tick box from knowing only the axis Type
-	 * 
-	 * 
-	 * @param line
-	 * @param lineDirection
-	 */
-	private static AxisTickBox createAxisTickBox(AnnotatedAxis axis) {
-		AxisTickBox axisTickBox = null;
-		if (axis.getSingleLine() != null && axis.getAxisType() != null) {
-			axisTickBox = new AxisTickBox(axis);
-			axisTickBox.makeCaptureBox();
-		}
-		return axisTickBox;
-	}
-
 	private void analyzeMajorAndMinorTickLengths(Multiset<Double> tickLengths) {
 		Double majorTickLength = null;
 		Double minorTickLength = null;
@@ -311,6 +258,7 @@ public class AxisTickBox extends AxialBox {
 	}
 
 	int addMissingEndTicks(AnnotatedAxis annotatedAxis) {
+		LOG.debug("Adding end ticks");
 		int added = 0;
 		Double lowAxis = annotatedAxis.range.getMin();
 		Double lowTickPosition = majorTicksScreenCoords.get(0);
@@ -333,10 +281,6 @@ public class AxisTickBox extends AxialBox {
 		for (SVGElement element : containedGraphicalElements) {
 			g.appendChild(element.copy());
 		}
-		SVGRect captureRect = SVGRect.createFromReal2Range(captureBox);
-		captureRect.setStrokeWidth(2.0);
-		captureRect.setStroke("red");
-		g.appendChild(captureRect);
 		return g;
 	}
 

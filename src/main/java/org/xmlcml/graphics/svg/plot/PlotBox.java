@@ -30,15 +30,18 @@ public class PlotBox {
 		LOG.setLevel(Level.DEBUG);
 	}
 	public enum AxisType {
-		BOTTOM(0, LineDirection.HORIZONTAL),
-		LEFT(1, LineDirection.VERTICAL),
-		TOP(2, LineDirection.HORIZONTAL),
-		RIGHT(3, LineDirection.VERTICAL);
+		BOTTOM(0, LineDirection.HORIZONTAL, 1),
+		LEFT(1, LineDirection.VERTICAL, -1),
+		TOP(2, LineDirection.HORIZONTAL, -1),
+		RIGHT(3, LineDirection.VERTICAL, 1);
 		private int serial;
 		private LineDirection direction;
-		private AxisType(int serial, LineDirection direction) {
+		/** if 1 adds outsideWidth to maxBox, else if -1 adds insideWidth */
+		private int outsidePositive;
+		private AxisType(int serial, LineDirection direction, int outsidePositive) {
 			this.serial = serial;
 			this.direction = direction;
+			this.outsidePositive = outsidePositive;
 		}
 		public static int getSerial(AxisType axisType) {
 			for (int i = 0; i < values().length; i++) {
@@ -54,6 +57,18 @@ public class PlotBox {
 		public static final int RIGHT_AXIS  = AxisType.getSerial(AxisType.RIGHT);
 		public LineDirection getLineDirection() {
 			return direction;
+		}
+		/** 
+		 * 
+		 * @return if 1 adds outsideWidth to max dimension of initial box and
+		 *                   insideWidth min dimension
+		 *         if 0 adds outsideWidth to min dimension of initial box and
+		 *                   insideWidth max dimension
+		 *                   
+		 *   
+		 */
+		public int getOutsidePositive() {
+			return outsidePositive;
 		}
 	}
 	public enum BoxType {
@@ -119,9 +134,10 @@ public class PlotBox {
 		createHorizontalAndVerticalTexts();
 		makeLongHorizontalAndVerticalEdges();
 		makeFullLineBoxAndRanges();
-		makeAxesAndAxialTickBoxes();
+		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
 		extractScaleTextsAndMakeScales();
+		extractTitleTextsAndMakeTitles();
 	}
 
 	private void createHorizontalAndVerticalLines() {
@@ -163,36 +179,25 @@ public class PlotBox {
 		fullLineBox.format(PlotBox.FORMAT_NDEC);
 	}
 
-	private void makeAxesAndAxialTickBoxes() {
-		LOG.debug("*********  makeAxesAndAxialTickBoxes *********");
+	private void makeAxialTickBoxesAndPopulateContents() {
+		LOG.debug("*********  makeAxialTickBoxesAndPopulateContents *********");
 		for (AnnotatedAxis axis : axisArray) {
 			axis.getOrCreateSingleLine();		
-			LOG.debug("AXIS "+axis.toString());
-			AxialBox axisTickBox = AxisTickBox.makeTickBox(axis, horizontalLines, verticalLines);
-			if (axisTickBox != null) {
-				axis.makeAxialScaleBox();
-			}
+			/*AxialBox axisTickBox = */ axis.createAndFillTickBox(horizontalLines, verticalLines);
 		}
-	}
-
-	private AxialLineList getSortedLinesCloseToEdge(List<SVGLine> lines, LineDirection direction, RealRange range) {
-		RealRange.Direction rangeDirection = direction.isHorizontal() ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
-		AxialLineList axialLineList = new AxialLineList(direction);
-		for (SVGLine line : lines) {
-			RealRange lineRange = line.getRealRange(rangeDirection);
-			if (lineRange.isEqualTo(range, BBOX_PADDING)) {
-				axialLineList.add(line);
-				line.normalizeDirection(AnnotatedAxis.EPS);
-			}
-		}
-		axialLineList.sort();
-		return axialLineList;
 	}
 
 	private void extractScaleTextsAndMakeScales() {
 		LOG.debug("********* extractScaleTextsAndMakeScales *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.extractScaleTextsAndMakeScales();
+		}
+	}
+
+	private void extractTitleTextsAndMakeTitles() {
+		LOG.debug("********* extractTitleTextsAndMakeTitles *********");
+		for (AnnotatedAxis axis : this.axisArray) {
+			axis.extractTitleTextsAndMakeTitles();
 		}
 	}
 
@@ -214,7 +219,7 @@ public class PlotBox {
 	
 	// graphics
 	
-	public SVGElement createSVGElement() {
+	SVGElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
 		g.appendChild(copyAnnotatedAxes());
@@ -344,6 +349,22 @@ public class PlotBox {
 		}
 		return hRange;
 	}
+	
+	private static AxialLineList getSortedLinesCloseToEdge(List<SVGLine> lines, LineDirection direction, RealRange range) {
+		RealRange.Direction rangeDirection = direction.isHorizontal() ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
+		AxialLineList axialLineList = new AxialLineList(direction);
+		for (SVGLine line : lines) {
+			RealRange lineRange = line.getRealRange(rangeDirection);
+			if (lineRange.isEqualTo(range, BBOX_PADDING)) {
+				axialLineList.add(line);
+				line.normalizeDirection(AnnotatedAxis.EPS);
+			}
+		}
+		axialLineList.sort();
+		return axialLineList;
+	}
+
+
 
 
 }

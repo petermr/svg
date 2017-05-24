@@ -16,7 +16,7 @@ import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGUtil;
 
-@Ignore
+//@Ignore
 public class AnnotatedAxisTest {
 
 	private static final Logger LOG = Logger.getLogger(AnnotatedAxisTest.class);
@@ -39,7 +39,8 @@ public class AnnotatedAxisTest {
 		AxisTickBox axisTickBox0 = axis0.getAxisTickBox();
 		AxisTextBox axisTextBox0 = axis0.getValueTextBox();
 		Assert.assertEquals("axis0", "type: BOTTOM; dir: HORIZONTAL; range: (140.415,426.016)\n"
-			+ "axisTickBox: box: bbox: ((135.415,431.016),(647.628,660.628)) DIR: HORIZONTAL; inside/outside/line/extension deltas:3.0, 10.0, 5.0\n"
+			+ "axisTickBox: box: extendedBox: ((135.415,431.016),(647.628,660.628)) bbox: ((176.127,390.327),(649.397,651.845))\n"
+			+ "DIR: HORIZONTAL; inside/outside/line/extension deltas:3.0, 10.0, 5.0\n"
 			+ "HOR: 1; [line: from((140.415,650.628)) to((426.016,650.628)) v((285.601,0.0))]\n"
 			+ "VERT: 9; [line: from((140.415,483.056)) to((140.415,650.628)) v((0.0,167.57200000000006)), line: from((176.127,649.397)) to((176.127,651.845)) v((0.0,2.447999999999979)), line: from((211.812,649.397)) to((211.812,651.845)) v((0.0,2.447999999999979)), line: from((247.524,649.397)) to((247.524,651.845)) v((0.0,2.447999999999979)), line: from((283.223,649.397)) to((283.223,651.845)) v((0.0,2.447999999999979)), line: from((318.93,649.397)) to((318.93,651.845)) v((0.0,2.447999999999979)), line: from((354.638,649.397)) to((354.638,651.845)) v((0.0,2.447999999999979)), line: from((390.327,649.397)) to((390.327,651.845)) v((0.0,2.447999999999979)), line: from((426.035,483.056)) to((426.035,650.628)) v((0.0,167.57200000000006))]\n"
 			+"majorTicks: (176.127,211.812,247.524,283.223,318.93,354.638,390.327)\n"
