@@ -42,12 +42,11 @@ public class AnnotatedAxis {
 	SVGLine singleLine;
 	private AxisTickBox axisTickBox;
 	private AxisTextBox axialScaleTextBox;
+	private AxisTextBox axialTitleTextBox;
 	private PlotBox plotBox;
 	private AxisType axisType;
-	private List<SVGText> textList;
 	private Double screenToUserScale;
 	private Double screenToUserConstant;
-	private AxisTextBox axialTitleTextBox;
 
 
 	protected AnnotatedAxis(PlotBox plotBox) {
@@ -257,6 +256,7 @@ public class AnnotatedAxis {
 		SVGG g = new SVGG();
 		g.setClassName("axis");
 		g.appendChild(axisTickBox.createSVGElement());
+		g.appendChild(axialScaleTextBox.createSVGElement());
 		return g;
 	}
 
@@ -284,7 +284,7 @@ public class AnnotatedAxis {
 	}
 
 	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		AxisTickBox.LOG.debug("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getFullLineBox());
+		AxisTickBox.LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getFullLineBox());
 		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);

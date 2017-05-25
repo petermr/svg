@@ -9,6 +9,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
+import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.xml.XMLUtil;
@@ -55,6 +56,7 @@ public class SVGPhrase extends SVGG {
 
 	@Override
 	public String toString() {
+		ensureWordList();
 		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (SVGWord word : wordList) {
@@ -148,5 +150,16 @@ public class SVGPhrase extends SVGG {
 		List<String> stringList = getOrCreateStringList();
     	RealArray values = RealArray.createRealArray(stringList);
     	return values;
+	}
+
+	public SVGPhrase removeWordsCompletelyOutsideRange(RealRange range) {
+		getOrCreateWordList();
+		SVGPhrase filteredPhrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			if (word.getBoundingBox().getXRange().intersectsWith(range)) {
+				filteredPhrase.addTrailingWord(word);
+			}
+		}
+		return filteredPhrase;
 	}
 }

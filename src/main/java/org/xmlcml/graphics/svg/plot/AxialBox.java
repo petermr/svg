@@ -133,7 +133,7 @@ public class AxialBox {
 	}
 
 	private void addAnnotatedBox(SVGG g, Real2Range bbox, String color) {
-		if (bbox != null) {
+		if (bbox != null && bbox.isValid()) {
 			SVGRect rect = SVGRect.createFromReal2Range(bbox);
 			rect.setStrokeWidth(0.2);
 			rect.setFill(color);

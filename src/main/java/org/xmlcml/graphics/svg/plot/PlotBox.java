@@ -142,9 +142,6 @@ public class PlotBox {
 
 	private void createHorizontalAndVerticalLines() {
 		LOG.debug("********* make Horizontal/Vertical lines *********");
-		if (lineList == null || lineList.size() == 0) {
-			lineList = SVGPath.createLinesFromPaths(pathList);
-		}
 		horizontalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
 		verticalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
 	}
@@ -158,7 +155,7 @@ public class PlotBox {
 		for (SVGText verticalText : verticalTexts) {
 			sb.append("/"+verticalText.getValue());
 		}
-		LOG.trace("TEXT horiz: " + horizontalTexts.size()+"; vert: " + verticalTexts.size()+"; " /*+ "/"+sb*/);
+		LOG.debug("TEXT horiz: " + horizontalTexts.size()+"; vert: " + verticalTexts.size()+"; " /*+ "/"+sb*/);
 	}
 
 	private void makeLongHorizontalAndVerticalEdges() {
@@ -212,9 +209,10 @@ public class PlotBox {
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
 		pathList = SVGPath.extractPaths(svgElement);
-		lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
+		lineList = SVGPath.createLinesFromPaths(pathList);
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
-		circleList = SVGCircle.extractSelfAndDescendantCircles(svgElement);
+		circleList = SVGPath.createCirclesFromPaths(pathList);
+		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size() + "; texts: " + textList.size() + "; circles: " + circleList.size());
 	}
 	
 	// graphics
@@ -222,6 +220,7 @@ public class PlotBox {
 	SVGElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
+		g.appendChild(copyDerivedElements());
 		g.appendChild(copyAnnotatedAxes());
 		return g;
 	}
@@ -229,9 +228,16 @@ public class PlotBox {
 	private SVGG copyOriginalElements() {
 		SVGG g = new SVGG();
 		addList(g, pathList);
-		addList(g, lineList);
 		addList(g, textList);
 		g.setStroke("pink");
+		return g;
+	}
+
+	private SVGG copyDerivedElements() {
+		SVGG g = new SVGG();
+		addList(g, lineList);
+		addList(g, circleList);
+		g.setFill("orange");
 		return g;
 	}
 

@@ -8,6 +8,8 @@ import org.xmlcml.euclid.*;
 import org.xmlcml.euclid.Angle.Units;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.fonts.FontWidths;
+import org.xmlcml.graphics.svg.text.SVGPhrase;
+import org.xmlcml.graphics.svg.text.SVGWord;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
 
@@ -1109,6 +1111,21 @@ public class SVGText extends SVGElement {
 		}
 		if (angle != null) {
 			textList = getRotatedTexts(texts, angle, eps);
+		}
+		return textList;
+	}
+
+	/** removes characters whose horizontal range does not intersect this.boundingBox.
+	 * 
+	 * @param range
+	 * @return
+	 */
+	public static List<SVGText> removeStringsCompletelyOutsideRange(List<SVGText> texts, RealRange range) {
+		List<SVGText> textList = new ArrayList<SVGText>();
+		for (SVGText text : texts) {
+			if (text.getBoundingBox().getXRange().intersectsWith(range)) {
+				textList.add(text);
+			}
 		}
 		return textList;
 	}
