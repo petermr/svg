@@ -1,22 +1,23 @@
 package org.xmlcml.graphics.svg.plot;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.IntArray;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
-import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
-import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /**
  * An axis (vertical of horizontal) with (probably) one or more
@@ -41,8 +42,8 @@ public class AnnotatedAxis {
 	RealRange range;
 	SVGLine singleLine;
 	private AxisTickBox axisTickBox;
-	private AxisTextBox axialScaleTextBox;
-	private AxisTextBox axialTitleTextBox;
+	private AxisScaleBox axialScaleTextBox;
+	private AxisScaleBox axialTitleTextBox;
 	private PlotBox plotBox;
 	private AxisType axisType;
 	private Double screenToUserScale;
@@ -106,11 +107,11 @@ public class AnnotatedAxis {
 		return screenToUserConstant;
 	}
 
-	public AxisTextBox getValueTextBox() {
+	public AxisScaleBox getValueTextBox() {
 		return axialScaleTextBox;
 	}
 
-	public void setValueTextBox(AxisTextBox valueTextBox) {
+	public void setValueTextBox(AxisScaleBox valueTextBox) {
 		this.axialScaleTextBox = valueTextBox;
 	}
 
@@ -236,14 +237,49 @@ public class AnnotatedAxis {
 			LOG.warn("no ticks so no scale texts captured");
 			return;
 		}
-		this.axialScaleTextBox = new AxisTextBox(this);
+		this.axialScaleTextBox = new AxisScaleBox(this);
 		axialScaleTextBox.makeCaptureBox();
 		this.axialScaleTextBox.setTexts(plotBox.getHorizontalTexts(), plotBox.getVerticalTexts());
 		axialScaleTextBox.extractScaleValueList();
+		RealArray tickValues = axialScaleTextBox.getTickNumberValues();
+		RealArray tickValueCoords = axialScaleTextBox.getTickValueScreenCoords();
+		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
+		LOG.debug("TICK coords\n"+tickCoords+"\n"+tickValueCoords+"\n"+tickValues);
+		if (tickValues != null && tickCoords != null) {
+			int nplaces = 1;
+			Multiset<Double> deltaValueSet = tickValues.createDoubleDifferenceMultiset(nplaces);
+			Multiset<Integer> deltaValueCoordSet = tickValueCoords.createIntegerDifferenceMultiset();
+			Multiset<Integer> deltaTickCoordSet = tickCoords.createIntegerDifferenceMultiset();
+			LOG.debug("DELTA coords\n"+deltaTickCoordSet+"\n"+deltaValueCoordSet+"\n"+deltaValueSet);
+			
+			if (true) { // fill conditions for equality
+				matchTicksToValuesAndCalculateScales(tickValues, tickValueCoords, tickCoords, nplaces);
+			}
+		}
 	}
 
+private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArray tickValueCoords, RealArray tickCoords, int nplaces) {
+	if (tickValueCoords.size() - tickCoords.size() == 2) { // probably missing end points
+		LOG.info("missing 2 ticks; taking axes as ends ticks"); 
+		tickCoords.addElement(range.getMax());
+		tickCoords.insertElementAt(0, range.getMin());
+	} else if (tickValueCoords.size() - tickValues.size() == 1) { // have to work out which end point
+		throw new RuntimeException("cannot match ticks with values; single missing tick");
+	} else if (tickValueCoords.size() == tickValues.size() ) {
+	} else {
+		LOG.error("cannot match ticks with values");
+	}
+	RealArray tick2ValueDiffs = tickCoords.subtract(tickValueCoords);
+	tick2ValueDiffs.format(0);
+	Multiset<Double> tick2ValueSet = tick2ValueDiffs.createDoubleDifferenceMultiset(nplaces);
+	LOG.debug("tick2ValueCoordsDiffs "+tick2ValueSet);
+	screenToUserScale = tickCoords.getRange().getScaleTo(tickValues.getRange());
+	screenToUserConstant = tickCoords.getRange().getConstantTo(tickValues.getRange());
+	LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
+}
+
 	void extractTitleTextsAndMakeTitles() {
-		axialTitleTextBox = new AxisTextBox(this);
+		axialTitleTextBox = new AxisScaleBox(this);
 		this.axialTitleTextBox.setTexts(plotBox.getHorizontalTexts(), plotBox.getVerticalTexts());
 		axialTitleTextBox.extractText();
 	}
@@ -307,19 +343,6 @@ public class AnnotatedAxis {
 		}
 		return axisTickBox;
 	}
-
-//	private AxisTextBox createAxisTextBox(AxisTextBox axisTextBox2, List<SVGText> textList) {
-//		AxisTextBox axisTextBox = null;
-//		if (this == null) {
-//			throw new RuntimeException("null axis 1");
-//		}
-//		if (this != null && textList != null) {
-//			axisTextBox = new AxisTextBox(this);
-//			axisTextBox.textList = new ArrayList<SVGText>(textList);
-//			axisTextBox.extractIntersectingTexts(getPlotBox().getHorizontalTexts(), getPlotBox().getVerticalTexts());
-//		}
-//		return axisTextBox;
-//	}
 
 	
 }

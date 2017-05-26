@@ -23,8 +23,8 @@ import org.xmlcml.graphics.svg.text.SVGWord;
  * @author pm286
  *
  */
-public class AxisTextBox extends AxialBox {
-	private static final Logger LOG = Logger.getLogger(AxisTextBox.class);
+public class AxisScaleBox extends AxialBox {
+	private static final Logger LOG = Logger.getLogger(AxisScaleBox.class);
 
 	static {
 		LOG.setLevel(Level.DEBUG);
@@ -42,11 +42,11 @@ public class AxisTextBox extends AxialBox {
 	private SVGPhrase horizontalPhrase;
 	private SVGPhrase rot90Phrase;
 
-	protected AxisTextBox() {
+	protected AxisScaleBox() {
 		super();
 	}
 	
-	protected AxisTextBox(AnnotatedAxis axis) {
+	protected AxisScaleBox(AnnotatedAxis axis) {
 		super(axis);
 	}
 	
@@ -62,7 +62,6 @@ public class AxisTextBox extends AxialBox {
 
 	void extractText() {
 		// not a good idea as it slices through words
-//		horizontalTexts = SVGText.removeStringsCompletelyOutsideRange(horizontalTexts, axis.getRange());
 		horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
 		if (horizontalPhrase != null) {
 			horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
@@ -73,7 +72,6 @@ public class AxisTextBox extends AxialBox {
 	}
 
 	private void extractHorizontalAxisScalesAndCoords() {
-//		scalesPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
 		scalesPhrase = horizontalPhrase;
 		if (scalesPhrase != null) {
 			LOG.debug("HOR scalesPhrase: "+scalesPhrase);
@@ -97,7 +95,7 @@ public class AxisTextBox extends AxialBox {
 		this.tickNumberValues = tickNumberUserCoords;
 	}
 
-	public RealArray getTickNumberScreenCoords() {
+	public RealArray getTickValueScreenCoords() {
 		return tickNumberScreenCoords;
 	}
 
