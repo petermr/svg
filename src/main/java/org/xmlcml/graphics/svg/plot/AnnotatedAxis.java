@@ -155,29 +155,29 @@ public class AnnotatedAxis {
 		return singleLine;
 	}
 
-	private void mapTicksToTickValues() {
-		if (axialScaleTextBox.getTickNumberValues() == null) {
-			if (axialScaleTextBox.getTickNumberValues() != null && axisTickBox.getMajorTicksScreenCoords() != null) {
-				int missingTickCount = axialScaleTextBox.getTickNumberValues().size() - axisTickBox.getMajorTicksScreenCoords().size();
-				if (missingTickCount == 0) {
-					// we ought to check values of tick values?
-					axialScaleTextBox.setTickNumberValues(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
-				} else if (missingTickCount == 1 || missingTickCount == 2) {
-					int missingEndTicks = axisTickBox.addMissingEndTicks(this);
-					missingTickCount -= missingEndTicks;
-					if (missingTickCount == 0) {
-						axialScaleTextBox.setTickNumberScreenCoords(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
-					} else {
-						LOG.error("missing "+missingTickCount+" from axis");
-					}
-				}
-			} else {
-				LOG.debug("missing tickNumberUserCoords and/or majorTicksScreenCoords");
-			}
-		} else {
-			LOG.debug("Cannot map ticks to pixels");
-		}
-	}
+//	private void mapTicksToTickValues() {
+//		if (axialScaleTextBox.getTickNumberValues() == null) {
+//			if (axialScaleTextBox.getTickNumberValues() != null && axisTickBox.getMajorTicksScreenCoords() != null) {
+//				int missingTickCount = axialScaleTextBox.getTickNumberValues().size() - axisTickBox.getMajorTicksScreenCoords().size();
+//				if (missingTickCount == 0) {
+//					// we ought to check values of tick values?
+//					axialScaleTextBox.setTickNumberValues(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
+//				} else if (missingTickCount == 1 || missingTickCount == 2) {
+//					int missingEndTicks = axisTickBox.addMissingEndTicks(this);
+//					missingTickCount -= missingEndTicks;
+//					if (missingTickCount == 0) {
+//						axialScaleTextBox.setTickNumberScreenCoords(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
+//					} else {
+//						LOG.error("missing "+missingTickCount+" from axis");
+//					}
+//				}
+//			} else {
+//				LOG.debug("missing tickNumberUserCoords and/or majorTicksScreenCoords");
+//			}
+//		} else {
+//			LOG.debug("Cannot map ticks to pixels");
+//		}
+//	}
 
 	private void createScreenToUserTransform() {
 		if (axisTickBox.getMajorTicksScreenCoords() != null && axialScaleTextBox.getTickNumberValues() != null) {
@@ -223,13 +223,13 @@ public class AnnotatedAxis {
 		return plotBox.getNdecimal();
 	}
 
-	/**
-	 * public only because of test
-	 */
-	public void calculateAxisPropertiesAndReturnAxis() {
-		mapTicksToTickValues();
-		createScreenToUserTransform();
-	}
+//	/**
+//	 * public only because of test
+//	 */
+//	private void calculateAxisPropertiesAndReturnAxis() {
+//		mapTicksToTickValues();
+//		createScreenToUserTransform();
+//	}
 
 
 	void extractScaleTextsAndMakeScales() {
