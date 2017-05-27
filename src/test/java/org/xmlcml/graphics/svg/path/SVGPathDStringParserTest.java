@@ -1,11 +1,11 @@
 package org.xmlcml.graphics.svg.path;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.graphics.svg.Fixtures;
@@ -15,8 +15,13 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGPathPrimitive;
 import org.xmlcml.graphics.svg.SVGSVG;
 
-public class SVGPathPrimitiveTest {
-	private static final Logger LOG = Logger.getLogger(SVGPathPrimitiveTest.class);
+/** tests Path/DString parser.
+ * 
+ * @author pm286
+ *
+ */
+public class SVGPathDStringParserTest {
+	private static final Logger LOG = Logger.getLogger(SVGPathDStringParserTest.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -36,25 +41,18 @@ public class SVGPathPrimitiveTest {
 			" C331.779 214.634 331.609 214.794 331.39 214.914 C331.171 215.034 330.893 215.111 330.552 215.145" +
 			" C330.376 215.16 330 215.168 329.424 215.168 L328.176 215.168 L328.654 212.888";
 
-	/*@Test
-	public void testParseD() {
-		List<SVGPathPrimitive> primitives = SVGPathPrimitive.parseD(dString);
-		Assert.assertEquals("primitives", 31, primitives.size());
-	}*/
-
 	@Test
-	@Ignore // fails test on mvn but passes on eclipse
 	public void testParseDString() {
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(dString);
 		Assert.assertEquals("primitives", 31, primitives.size());
 	}
 
-	/*@Test
+	@Test
 	public void testParseD1() {
-		List<SVGPathPrimitive> primitiveList = new SVGPathParser().parseD(dString);
+		PathPrimitiveList primitiveList = new SVGPathParser().parseDString(dString);
 		String sig = SVGPathPrimitive.createSignature(primitiveList);
 		Assert.assertEquals("signature", "MLLCCCLLLCCCCCCCLLLZMLCCCCCCCLL", sig);
-	}*/
+	}
 
 	@Test
 	public void testParseDString1() {
@@ -119,7 +117,6 @@ public class SVGPathPrimitiveTest {
 	}
 
 	@Test
-	@Ignore // FIXME unknown test bug
 	public void testRelativeCubic1() {
 		SVGElement svgElement = SVGSVG.readAndCreateSVG(new File(Fixtures.PATHS_DIR, "relcubics.svg"));
 		SVGPath path = SVGPath.extractPaths(svgElement).get(0);
@@ -129,17 +126,9 @@ public class SVGPathPrimitiveTest {
 		SVGG g = new SVGG();
 		g.appendChild(path);
 		String d = path.getDString();
-		Assert.assertEquals("d",  "M 205.511,173.959 147.341,65.035"
-				+ " m -58.17,108.924 58.17,-108.924"
-				+ " m -10.306,34.147 "
-				+ "    c 0,-0.842 0.549,-1.516 1.236,-1.516"
-				+ "      0.687,0 1.236,0.674 1.236,1.516"
-				+ "      0,0.84 -0.549,1.514 -1.236,1.514"
-				+ "     -0.687,0 -1.236,-0.674 -1.236,-1.514 z"
-				+ " m 0.472,-23.202 c 0,-0.842 0.549,-1.515 1.236,-1.515 0.687,0 1.237,0.673 1.237,1.515 0,0.842 -0.55,1.515 -1.237,1.515 -0.687,0 -1.236,-0.673 -1.236,-1.515 z"
-				+ " m 1.417,15.763 c 0,-0.832 0.55,-1.498 1.236,-1.498 0.686,0 1.236,0.666 1.236,1.498 0,0.831 -0.55,1.497 -1.236,1.497 -0.686,0 -1.236,-0.666 -1.236,-1.497 z"
-				+ " m 0.472,-22.606 c 0,-0.841 0.543,-1.516 1.223,-1.516 0.678,0 1.221,0.675 1.221,1.516 0,0.842 -0.543,1.515 -1.221,1.515 -0.68,0 -1.223,-0.673 -1.223,-1.515 z"
-				+ " m 0,16.588 c 0,-0.836 0.543,-1.506 1.223,-1.506 0.678,0 1.221,0.67 1.221,1.506 0,0.837 -0.543,1.506 -1.221,1.506 -0.68,0 -1.223,-0.669 -1.223,-1.506 z",
+		Assert.assertEquals("d",  "M 400,180 350,60 m -60,120 60,-120"
++" m 0,0 c 0,-8 5,-15 12,-15 6,0 12,6 12,15 0,8 -5,15 -12,15 -6,0 -12,-6 -12,-15 z"
++" m 0,0 c 0,-8 5,-15 12,-15 6,0 12,6 12,15 0,8 -5,15 -12,15 -6,0 -12,-6 -12,-15 z",
 				d);
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
 		for (SVGPathPrimitive primitive : primitives) {
@@ -148,13 +137,7 @@ public class SVGPathPrimitiveTest {
 		SVGPath path1 = new SVGPath(primitives, null);
 		path1.setStroke("blue");
 		String d1 = path1.getDString();
-		Assert.assertEquals("d", "M205.511 173.959 L147.341 65.035"
-				+ " M89.171 173.959 L147.341 65.035"
-				+ " M137.035 99.181 C137.035 98.339 137.584 97.665 138.271 97.665 C138.958 97.665 139.506 98.339 139.506 99.181 C139.506 100.021 138.957 100.695 138.271 100.695 C137.583 100.695 137.035 100.021 137.035 99.181 Z"
-				+ " M137.507 75.137 C137.507 74.295 138.056 73.622 138.743 73.622 C139.43 73.622 139.98 74.295 139.98 75.137 C139.98 75.979 139.429 76.652 138.743 76.652 C138.055 76.652 137.507 75.979 137.507 75.137 Z"
-				+ " M138.924 90.059 C138.924 89.227 139.474 88.561 140.16 88.561 C140.846 88.561 141.396 89.226 141.396 90.059 C141.396 90.89 140.845 91.556 140.16 91.556 C139.474 91.556 138.924 90.89 138.924 90.059 Z"
-				+ " M139.396 66.621 C139.396 65.78 139.939 65.105 140.619 65.105 C141.297 65.105 141.84 65.78 141.84 66.621 C141.84 67.463 141.297 68.136 140.619 68.136 C139.939 68.136 139.396 67.463 139.396 66.621 Z"
-				+ " M139.396 82.368 C139.396 81.532 139.939 80.862 140.619 80.862 C141.297 80.862 141.84 81.532 141.84 82.368 C141.84 83.205 141.297 83.874 140.619 83.874 C139.939 83.874 139.396 83.205 139.396 82.368 Z",
+		Assert.assertEquals("d", "M400.0 180.0 L350.0 60.0 M290.0 180.0 L350.0 60.0 M350.0 60.0 C350.0 52.0 355.0 45.0 362.0 45.0 C368.0 45.0 374.0 51.0 374.0 60.0 C374.0 68.0 369.0 75.0 362.0 75.0 C356.0 75.0 350.0 69.0 350.0 60.0 ZM350.0 60.0 C350.0 52.0 355.0 45.0 362.0 45.0 C368.0 45.0 374.0 51.0 374.0 60.0 C374.0 68.0 369.0 75.0 362.0 75.0 C356.0 75.0 350.0 69.0 350.0 60.0 Z",
 				d1);
 		g.appendChild(path1);
 		SVGSVG.wrapAndWriteAsSVG(g, new File(TARGET_PATH, "relcubic1.svg"));
@@ -194,7 +177,6 @@ public class SVGPathPrimitiveTest {
 	}
 	
 	@Test
-	@Ignore // passes eclipse but fails mvn
 	public void testRelativeCubic2() {
         String d = ""
 		+ "M 100 100 "
@@ -224,8 +206,6 @@ public class SVGPathPrimitiveTest {
 	}
 	
 	@Test
-	@Ignore // passes eclipse but fails mvn
-	// FIXME
 	public void testRelativeCubic3() {
 		SVGG g = new SVGG();
         String d = ""

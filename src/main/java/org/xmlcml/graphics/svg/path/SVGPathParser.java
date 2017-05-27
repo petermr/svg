@@ -16,8 +16,10 @@ public class SVGPathParser {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private static Real2 firstPoint;
-	private static Real2 currentPoint;
+	/** THESE STATICS ARE CODE SMELLS */
+	private /*static*/ Real2 firstPoint;
+	private /*static*/ Real2 currentPoint;
+	
 	private PathPrimitiveList primitiveList;
 	private List<String> tokenList;
 	private String d;
