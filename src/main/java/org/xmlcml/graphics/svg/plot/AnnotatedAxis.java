@@ -8,6 +8,7 @@ import org.xmlcml.euclid.IntArray;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
+import org.xmlcml.euclid.RealArray.Monotonicity;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
@@ -155,48 +156,14 @@ public class AnnotatedAxis {
 		return singleLine;
 	}
 
-//	private void mapTicksToTickValues() {
-//		if (axialScaleTextBox.getTickNumberValues() == null) {
-//			if (axialScaleTextBox.getTickNumberValues() != null && axisTickBox.getMajorTicksScreenCoords() != null) {
-//				int missingTickCount = axialScaleTextBox.getTickNumberValues().size() - axisTickBox.getMajorTicksScreenCoords().size();
-//				if (missingTickCount == 0) {
-//					// we ought to check values of tick values?
-//					axialScaleTextBox.setTickNumberValues(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
-//				} else if (missingTickCount == 1 || missingTickCount == 2) {
-//					int missingEndTicks = axisTickBox.addMissingEndTicks(this);
-//					missingTickCount -= missingEndTicks;
-//					if (missingTickCount == 0) {
-//						axialScaleTextBox.setTickNumberScreenCoords(new RealArray(axisTickBox.getMajorTicksScreenCoords()));
-//					} else {
-//						LOG.error("missing "+missingTickCount+" from axis");
-//					}
-//				}
-//			} else {
-//				LOG.debug("missing tickNumberUserCoords and/or majorTicksScreenCoords");
-//			}
-//		} else {
-//			LOG.debug("Cannot map ticks to pixels");
-//		}
+//	/** transform screen coords on this axis to user coords (numbers on axis).
+//	 * 
+//	 * @param xscreen
+//	 * @return
+//	 */
+//	private double transformScreenToUser(double xscreen) {
+//		return axisTickBox.getMajorTicksScreenCoords().getRange().transformToRange(axialScaleTextBox.getTickNumberValues().getRange(), xscreen);
 //	}
-
-	private void createScreenToUserTransform() {
-		if (axisTickBox.getMajorTicksScreenCoords() != null && axialScaleTextBox.getTickNumberValues() != null) {
-			screenToUserScale = axisTickBox.getMajorTicksScreenCoords().getRange().getScaleTo(axialScaleTextBox.getTickNumberValues().getRange());
-			screenToUserConstant = axisTickBox.getMajorTicksScreenCoords().getRange().getConstantTo(axialScaleTextBox.getTickNumberValues().getRange());
-			LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
-		} else {
-			LOG.debug("no majorTicksScreenCoords or tickNumberUserCoords");
-		}
-	}
-	
-	/** transform screen coords on this axis to user coords (numbers on axis).
-	 * 
-	 * @param xscreen
-	 * @return
-	 */
-	private double transformScreenToUser(double xscreen) {
-		return axisTickBox.getMajorTicksScreenCoords().getRange().transformToRange(axialScaleTextBox.getTickNumberValues().getRange(), xscreen);
-	}
 
 
 	private void processTitle() {
@@ -223,15 +190,6 @@ public class AnnotatedAxis {
 		return plotBox.getNdecimal();
 	}
 
-//	/**
-//	 * public only because of test
-//	 */
-//	private void calculateAxisPropertiesAndReturnAxis() {
-//		mapTicksToTickValues();
-//		createScreenToUserTransform();
-//	}
-
-
 	void extractScaleTextsAndMakeScales() {
 		if (axisTickBox == null) {
 			LOG.warn("no ticks so no scale texts captured");
@@ -243,9 +201,11 @@ public class AnnotatedAxis {
 		axialScaleTextBox.extractScaleValueList();
 		RealArray tickValues = axialScaleTextBox.getTickNumberValues();
 		RealArray tickValueCoords = axialScaleTextBox.getTickValueScreenCoords();
+		Monotonicity tickValueCoordsMonotonicity = tickValueCoords.getMonotonicity();
 		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
-		LOG.debug("TICK coords\n"+tickCoords+"\n"+tickValueCoords+"\n"+tickValues);
-		if (tickValues != null && tickCoords != null) {
+		Monotonicity tickMonotonicity = tickCoords.getMonotonicity();
+		LOG.debug("TICK coords\n"+tickCoords+": "+tickMonotonicity+"\n"+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"+tickValues);
+		if (tickValues != null && !tickValues.hasNaN() && tickCoords != null) {
 			int nplaces = 1;
 			Multiset<Double> deltaValueSet = tickValues.createDoubleDifferenceMultiset(nplaces);
 			Multiset<Integer> deltaValueCoordSet = tickValueCoords.createIntegerDifferenceMultiset();
@@ -263,11 +223,13 @@ private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArra
 		LOG.info("missing 2 ticks; taking axes as ends ticks"); 
 		tickCoords.addElement(range.getMax());
 		tickCoords.insertElementAt(0, range.getMin());
-	} else if (tickValueCoords.size() - tickValues.size() == 1) { // have to work out which end point
+	} else if (tickValueCoords.size() - tickCoords.size() == 1) { // have to work out which end point
 		throw new RuntimeException("cannot match ticks with values; single missing tick");
-	} else if (tickValueCoords.size() == tickValues.size() ) {
+	} else if (tickValueCoords.size() == tickCoords.size() ) {
+		LOG.trace("ok");
 	} else {
-		LOG.error("cannot match ticks with values");
+		LOG.error(axisType+" cannot match ticks with valueCoords: \n"+tickValueCoords+"; ticks "+tickCoords);
+		throw new RuntimeException("cannot match ticks with values; "+axisType+" tickValues: "+tickValueCoords.size()+"; ticks: " + tickCoords.size());
 	}
 	RealArray tick2ValueDiffs = tickCoords.subtract(tickValueCoords);
 	tick2ValueDiffs.format(0);

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
@@ -22,6 +23,12 @@ public class AnnotatedAxisTest {
 	private static final Logger LOG = Logger.getLogger(AnnotatedAxisTest.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
+	}
+	public final static File TARGET_DIR = new File("target/plot/");
+	
+	@Before
+	public void setup() {
+		TARGET_DIR.mkdirs();
 	}
 	
 	@Test
