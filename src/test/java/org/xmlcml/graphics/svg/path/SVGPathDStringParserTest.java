@@ -50,14 +50,14 @@ public class SVGPathDStringParserTest {
 	@Test
 	public void testParseD1() {
 		PathPrimitiveList primitiveList = new SVGPathParser().parseDString(dString);
-		String sig = SVGPathPrimitive.createSignature(primitiveList);
+		String sig = primitiveList.createSignature();
 		Assert.assertEquals("signature", "MLLCCCLLLCCCCCCCLLLZMLCCCCCCCLL", sig);
 	}
 
 	@Test
 	public void testParseDString1() {
 		PathPrimitiveList primitiveList = new SVGPathParser().parseDString(dString);
-		String sig = SVGPathPrimitive.createSignature(primitiveList);
+		String sig = primitiveList.createSignature();
 		Assert.assertEquals("signature", "MLLCCCLLLCCCCCCCLLLZMLCCCCCCCLL", sig);
 	}
 

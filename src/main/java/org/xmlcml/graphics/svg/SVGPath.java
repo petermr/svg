@@ -138,7 +138,7 @@ public class SVGPath extends SVGShape {
 		if (reference != null) {
 			XMLUtil.copyAttributes(reference, this);
 		}
-		setDString(SVGPathPrimitive.createD(primitiveList));
+		setDString(primitiveList.createD());
 	}
 	
 	public SVGPath(PathPrimitiveList primitives) {
@@ -546,7 +546,7 @@ public class SVGPath extends SVGShape {
 		if (signature == null) {
 			if (getDString() != null) {
 				ensurePrimitives();
-				signature = SVGPathPrimitive.createSignature(primitiveList);
+				signature = primitiveList.createSignature();
 			}
 		}
 		return signature;
