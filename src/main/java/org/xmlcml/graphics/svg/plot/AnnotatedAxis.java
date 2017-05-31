@@ -156,16 +156,6 @@ public class AnnotatedAxis {
 		return singleLine;
 	}
 
-//	/** transform screen coords on this axis to user coords (numbers on axis).
-//	 * 
-//	 * @param xscreen
-//	 * @return
-//	 */
-//	private double transformScreenToUser(double xscreen) {
-//		return axisTickBox.getMajorTicksScreenCoords().getRange().transformToRange(axialScaleTextBox.getTickNumberValues().getRange(), xscreen);
-//	}
-
-
 	private void processTitle() {
 		LOG.trace("AxisTitle title NYI");
 	}
@@ -201,9 +191,9 @@ public class AnnotatedAxis {
 		axialScaleTextBox.extractScaleValueList();
 		RealArray tickValues = axialScaleTextBox.getTickNumberValues();
 		RealArray tickValueCoords = axialScaleTextBox.getTickValueScreenCoords();
-		Monotonicity tickValueCoordsMonotonicity = tickValueCoords.getMonotonicity();
+		Monotonicity tickValueCoordsMonotonicity = tickValueCoords == null ? null : tickValueCoords.getMonotonicity();
 		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
-		Monotonicity tickMonotonicity = tickCoords.getMonotonicity();
+		Monotonicity tickMonotonicity = (tickCoords == null) ? null : tickCoords.getMonotonicity();
 		LOG.debug("TICK coords\n"+tickCoords+": "+tickMonotonicity+"\n"+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"+tickValues);
 		if (tickValues != null && !tickValues.hasNaN() && tickCoords != null) {
 			int nplaces = 1;
@@ -253,8 +243,12 @@ private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArra
 	public SVGElement getSVGElement() {
 		SVGG g = new SVGG();
 		g.setClassName("axis");
-		g.appendChild(axisTickBox.createSVGElement());
-		g.appendChild(axialScaleTextBox.createSVGElement());
+		if (axisTickBox != null) {
+			g.appendChild(axisTickBox.createSVGElement());
+		}
+		if (axialScaleTextBox != null) {
+			g.appendChild(axialScaleTextBox.createSVGElement());
+		}
 		return g;
 	}
 

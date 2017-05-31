@@ -1,9 +1,10 @@
 package org.xmlcml.graphics.svg.plot;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -22,7 +23,9 @@ import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
+import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
 
 /** creates axes from ticks, scales, titles.
@@ -117,6 +120,8 @@ public class PlotBox {
 	private BoxType boxType;
 	private int ndecimal = FORMAT_NDEC;
 	private Real2Array screenXYs;
+	private Real2Array scaledXYs;
+	private String csvContent;
 
 	public PlotBox() {
 		setDefaults();
@@ -136,7 +141,14 @@ public class PlotBox {
 	 * 
 	 * @param svgElement
 	 */
-	public void createPlot(SVGElement svgElement) {
+	public void readAndCreatePlot(InputStream inputStream) {
+		readAndCreateCSVPlot(SVGUtil.parseToSVGElement(inputStream));
+	}
+	/** MAIN ENTRY METHOD for processing plots.
+	 * 
+	 * @param svgElement
+	 */
+	public void readAndCreateCSVPlot(SVGElement svgElement) {
 		extractSVGComponents(svgElement);
 		createHorizontalAndVerticalLines();
 		createHorizontalAndVerticalTexts();
@@ -147,33 +159,57 @@ public class PlotBox {
 		extractScaleTextsAndMakeScales();
 		extractTitleTextsAndMakeTitles();
 		extractDataScreenPoints();
-		scalesDataPointsToValues();
+		scaleDataPointsToValues();
+		createCSVContent();
 	}
 
-	private void scalesDataPointsToValues() {
-		Real2Array scaledXYs = new Real2Array();
+	private void scaleDataPointsToValues() {
+		scaledXYs = null;
 		AnnotatedAxis xAxis = axisArray[AxisType.BOTTOM_AXIS];
 		AnnotatedAxis yAxis = axisArray[AxisType.LEFT_AXIS];
-		for (Real2 screenXY : screenXYs) {
-			double x = screenXY.getX();
-			double scaledX = xAxis.getScreenToUserScale() * x + xAxis.getScreenToUserConstant();
-			double y = screenXY.getY();
-			double scaledY = yAxis.getScreenToUserScale() * y + yAxis.getScreenToUserConstant();
-			Real2 scaledXY = new Real2(scaledX, scaledY);
-			scaledXYs.add(scaledXY);
+		if (xAxis.getScreenToUserScale() == null ||
+				xAxis.getScreenToUserConstant() == null ||
+				yAxis.getScreenToUserScale() == null ||
+				yAxis.getScreenToUserConstant() == null) {
+			LOG.error("Cannot get conversion constants: abort");
+			return;
 		}
-		scaledXYs.format(ndecimal + 1);
-		LOG.debug("scaledXY: "+scaledXYs);
-		// use CSVBuilder later
-		StringBuilder sb = new StringBuilder();
-		for (Real2 scaledXY : scaledXYs) {
-			sb.append(scaledXY.getX()+","+scaledXY.getY()+"\n");
+
+		if (screenXYs != null && screenXYs.size() > 0) {
+			scaledXYs = new Real2Array();
+			LOG.debug("screenXY: "+screenXYs);
+			for (int i = 0; i < screenXYs.size(); i++) {
+				Real2 screenXY = screenXYs.get(i);
+				double x = screenXY.getX();
+				double scaledX = xAxis.getScreenToUserScale() * x + xAxis.getScreenToUserConstant();
+				double y = screenXY.getY();
+				double scaledY = yAxis.getScreenToUserScale() * y + yAxis.getScreenToUserConstant();
+				Real2 scaledXY = new Real2(scaledX, scaledY);
+				scaledXYs.add(scaledXY);
+			}
+			scaledXYs.format(ndecimal + 1);
+			LOG.trace("scaledXY: "+scaledXYs);
 		}
+	}
+
+	public void writeCSV(File file) {
 		try {
-			IOUtils.write(sb.toString(), new FileOutputStream(new File("target/plot/bakker0.csv")));
+			IOUtils.write(csvContent, new FileOutputStream(file));
 		} catch (IOException e) {
 			throw new RuntimeException("cannot write CSV: ", e);
 		}
+	}
+
+	private String createCSVContent() {
+		// use CSVBuilder later
+		StringBuilder sb = new StringBuilder();
+		if (scaledXYs != null) {
+			for (Real2 scaledXY : scaledXYs) {
+				sb.append(scaledXY.getX()+","+scaledXY.getY()+"\n");
+			}
+		}
+		csvContent = sb.toString();
+		return csvContent;
 	}
 
 	private void extractDataScreenPoints() {
@@ -205,7 +241,7 @@ public class PlotBox {
 	private void makeLongHorizontalAndVerticalEdges() {
 		LOG.debug("********* make Horizontal/Vertical edges *********");
 		if (lineList != null && lineList.size() > 0) {
-		Real2Range lineBbox = SVGElement.createBoundingBox(lineList);
+			Real2Range lineBbox = SVGElement.createBoundingBox(lineList);
 			LOG.debug("LINES "+lineList);
 			longHorizontalEdgeLines = getSortedLinesCloseToEdge(horizontalLines, LineDirection.HORIZONTAL, lineBbox.getXRange());
 			longVerticalEdgeLines = getSortedLinesCloseToEdge(verticalLines, LineDirection.VERTICAL, lineBbox.getYRange());
@@ -217,11 +253,11 @@ public class PlotBox {
 		fullLineBox = null;
 		RealRange fullboxXRange = null;
 		RealRange fullboxYRange = null;
-		if (longHorizontalEdgeLines.size() > 0) {
+		if (longHorizontalEdgeLines != null && longHorizontalEdgeLines.size() > 0) {
 			fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
 			fullboxXRange = fullboxXRange.format(PlotBox.FORMAT_NDEC);
 		}
-		if (longVerticalEdgeLines.size() > 0) {
+		if (longVerticalEdgeLines != null && longVerticalEdgeLines.size() > 0) {
 			fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
 			fullboxYRange = fullboxYRange.format(PlotBox.FORMAT_NDEC);
 		}
@@ -229,13 +265,14 @@ public class PlotBox {
 			fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
 			fullLineBox.format(PlotBox.FORMAT_NDEC);
 		}
+		LOG.debug("fullbox "+fullLineBox);
 	}
 
 	private void makeAxialTickBoxesAndPopulateContents() {
 		LOG.debug("*********  makeAxialTickBoxesAndPopulateContents *********");
 		for (AnnotatedAxis axis : axisArray) {
 			axis.getOrCreateSingleLine();		
-			/*AxialBox axisTickBox = */ axis.createAndFillTickBox(horizontalLines, verticalLines);
+			axis.createAndFillTickBox(horizontalLines, verticalLines);
 		}
 	}
 
@@ -264,16 +301,72 @@ public class PlotBox {
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
 		pathList = SVGPath.extractPaths(svgElement);
-		lineList = (pathList.size() == 0) ? SVGLine.extractSelfAndDescendantLines(svgElement) : SVGPath.createLinesFromPaths(pathList);
+		pathList = removePathsWithNegativeY(pathList);
+		lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
+		List<SVGLine> pathLineList = SVGPath.createLinesFromPaths(pathList);
+		lineList.addAll(pathLineList);
+		lineList = removeLinesWithNegativeY(lineList);
 		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size());
-		circleList =  (pathList.size() == 0) ? SVGCircle.extractSelfAndDescendantCircles(svgElement) : SVGPath.createCirclesFromPaths(pathList);
+		circleList =  SVGCircle.extractSelfAndDescendantCircles(svgElement);
+		List<SVGCircle> pathCircleList =  SVGPath.createCirclesFromPaths(pathList);
+		circleList.addAll(pathCircleList);
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
+		textList = removeTextsWithNegativeY(textList);
 		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size() + "; texts: " + textList.size() + "; circles: " + circleList.size());
+//		Real2Range bboxTotal = SVGElement.getBoundingBox
 	}
 	
+	/** Texts outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param TextList
+	 * @return
+	 */
+	private List<SVGText> removeTextsWithNegativeY(List<SVGText> textList) {
+		List<SVGText> newTexts = new ArrayList<SVGText>();
+		for (SVGText text : textList) {
+			Real2Range bbox = text.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newTexts.add(text);
+			}
+		}
+		return newTexts;
+	}
+
+	/** lines outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param lineList
+	 * @return
+	 */
+	private List<SVGLine> removeLinesWithNegativeY(List<SVGLine> lineList) {
+		List<SVGLine> newLines = new ArrayList<SVGLine>();
+		for (SVGLine line : lineList) {
+			Real2Range bbox = line.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newLines.add(line);
+			}
+		}
+		return newLines;
+	}
+
+	/** paths outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param pathList
+	 * @return
+	 */
+	private List<SVGPath> removePathsWithNegativeY(List<SVGPath> pathList) {
+		List<SVGPath> newPaths = new ArrayList<SVGPath>();
+		for (SVGPath path : pathList) {
+			Real2Range bbox = path.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newPaths.add(path);
+			}
+		}
+		return newPaths;
+	}
+
 	// graphics
 	
-	SVGElement createSVGElement() {
+	public SVGElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
 		g.appendChild(copyDerivedElements());
@@ -424,6 +517,10 @@ public class PlotBox {
 		}
 		axialLineList.sort();
 		return axialLineList;
+	}
+
+	public void writeProcessedSVG(File file) {
+		SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
 	}
 
 

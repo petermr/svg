@@ -52,23 +52,47 @@ public class AxisScaleBox extends AxialBox {
 	
 	void setTexts(List<SVGText> horTexts, List<SVGText> rot90Txts) {
 		this.horizontalTexts = extractIntersectingTexts(new ArrayList<SVGText>(horTexts));
-		LOG.debug("hor texts: "+horizontalTexts.size() /*+"; " + horizontalTexts*/);
+		LOG.debug(axis.getLineDirection()+" HOR texts: "+horizontalTexts.size() /*+"; " + horizontalTexts*/);
 		this.rot90Texts = extractIntersectingTexts(new ArrayList<SVGText>(rot90Txts));
-		LOG.debug("ver texts: "+rot90Texts.size());
+		LOG.debug(axis.getLineDirection()+" ROT90 texts: "+rot90Texts.size());
 		extractText();
 	}
 
 
 
 	void extractText() {
-		// not a good idea as it slices through words
-		horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
-		if (horizontalPhrase != null) {
-			horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
+		if (axis.isHorizontal()) {
+			// not a good idea as it slices through words
+			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
+			LOG.debug("HOR phrase: "+horizontalPhrase+"; "+horizontalTexts.size());
+			if (horizontalPhrase != null) {
+				horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
+			}
+			if(horizontalPhrase != null) LOG.debug("HOR phrase: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
+		} else {
+			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
+			LOG.trace("Word Ladder?: "+horizontalPhrase+"; "+horizontalTexts.size());
+			if (horizontalPhrase != null) {
+				horizontalPhrase = removeVerticalWordsCompletelyOutsideRange(horizontalPhrase, axis.getRange());
+				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalTexts.size());
+			}
+			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
+			LOG.debug("VERT phrase: "+rot90Phrase+"; "+rot90Texts.size());
 		}
-		LOG.debug("HOR phrase: "+horizontalPhrase+"; "+horizontalTexts.size());
-		rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
-		LOG.debug("VERT phrase: "+rot90Phrase+"; "+rot90Texts.size());
+	}
+
+	
+	private SVGPhrase removeVerticalWordsCompletelyOutsideRange(SVGPhrase horizontalPhrase, RealRange range) {
+		List<SVGWord> wordList = horizontalPhrase.getOrCreateWordList();
+		SVGPhrase filteredPhrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			Real2Range wordBox = word.getBoundingBox();
+			RealRange wordYRange = wordBox.getYRange();
+			if (wordYRange.intersectsWith(range)) {
+				filteredPhrase.addTrailingWord(word);
+			}
+		}
+		return filteredPhrase;
 	}
 
 	private void extractHorizontalAxisScalesAndCoords() {
@@ -149,7 +173,11 @@ public class AxisScaleBox extends AxialBox {
 	}
 
 	private void processVerticalAxis() {
+		String rot90Value = null;
 		if (rot90Texts != null && rot90Texts.size() > 0) {
+			rot90Value = String.valueOf(rot90Texts.get(0).getText());
+		}
+		if (!"null".equals(String.valueOf(rot90Value)) && !rot90Value.trim().equals("")) {
 			processVerticalAxisRotatedChars();
 		} else {
 			processWordLadderScales();
@@ -160,7 +188,9 @@ public class AxisScaleBox extends AxialBox {
 		if (horizontalTexts == null || horizontalTexts.size() == 0) return;
 		LOG.debug("VERTICAL AXIS; Hor (ladder) texts "+horizontalTexts.size());
 		List<SVGWord> wordList = createWordListFromHorizontalTextsWithJoinsIfNecessary();
+		LOG.debug("VERT words0: "+wordList);
 		wordList = removeWordsNotInVerticalRange(axis.getRange(), wordList);
+		LOG.debug("VERT words1: "+wordList);
 		createVerticalNumberUserAndScreenCoords(wordList);
 		LOG.debug("vertical tickNumberUserCoords:"+tickNumberValues);
 	}
@@ -184,7 +214,9 @@ public class AxisScaleBox extends AxialBox {
 	private List<SVGWord> createWordListFromHorizontalTextsWithJoinsIfNecessary() {
 		List<SVGWord> wordList = new ArrayList<SVGWord>();
 		if (horizontalTexts.size() > 0) {
+			LOG.debug("HORTEXTS0 " + horizontalTexts);
 			SVGWord word = new SVGWord(horizontalTexts.get(0)); // ?? why
+			wordList.add(word);
 			for (int i = 1; i < horizontalTexts.size(); i++) {
 				SVGText text = horizontalTexts.get(i);
 				if (false) {
@@ -195,6 +227,7 @@ public class AxisScaleBox extends AxialBox {
 					wordList.add(word);
 				}
 			}
+			LOG.debug("HORTEXTS1 " + wordList);
 		}
 		return wordList;
 	}

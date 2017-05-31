@@ -33,7 +33,7 @@ public class AxialBox {
 	/**
 	 * default outside width of box (assumes ticks are on outside)
 	 */
-	public static final double DEFAULT_OUTSIDE_WIDTH = 10.0;
+	public static final double DEFAULT_OUTSIDE_WIDTH = 18.0;
 	/**
 	 * default inside width of box (assumes ticks are on inside)
 	 */
@@ -106,6 +106,7 @@ public class AxialBox {
 				this.lineExtension, this.lineExtension);
 		captureBox.format(decimalPlaces());
 		LOG.debug("******* captureBox: "+axis.getAxisType()+" "+captureBox);
+		return;
 	}
 
 	protected int decimalPlaces() {
@@ -127,7 +128,7 @@ public class AxialBox {
 		for (SVGElement element : containedGraphicalElements) {
 			g.appendChild(element.copy());
 		}
-		addAnnotatedBox(g, captureBox, "red");
+		addAnnotatedBox(g, captureBox, "yellow");
 		addAnnotatedBox(g, bbox, "green");
 		return g;
 	}
