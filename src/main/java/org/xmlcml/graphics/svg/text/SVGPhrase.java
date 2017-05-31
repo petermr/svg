@@ -156,7 +156,13 @@ public class SVGPhrase extends SVGG {
 		getOrCreateWordList();
 		SVGPhrase filteredPhrase = new SVGPhrase();
 		for (SVGWord word : wordList) {
-			if (word.getBoundingBox().getXRange().intersectsWith(range)) {
+			String value = String.valueOf(word.getStringValue());
+			// FIXME - why is this null?
+			if ("null".equals(value)) continue;
+			LOG.trace("SV "+value);
+			Real2Range wordBox = word.getBoundingBox();
+			RealRange wordXRange = wordBox.getXRange();
+			if (wordXRange.intersectsWith(range)) {
 				filteredPhrase.addTrailingWord(word);
 			}
 		}
