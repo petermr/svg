@@ -3,16 +3,20 @@ package org.xmlcml.graphics.svg.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.xom.Element;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.xml.XMLUtil;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
+import nu.xom.Element;
 
 /** holds a set of words which are geometrically joined into a single unit.
  * 
@@ -105,7 +109,7 @@ public class SVGPhrase extends SVGG {
 
 	public static SVGPhrase createPhraseFromCharacters(List<SVGText> textList) {
 		SVGPhrase phrase = null;
-		LOG.trace("phrase: "+textList);
+		LOG.debug("phrase: "+textList);
 		if (textList != null && textList.size() > 0) {
 			phrase = new SVGPhrase();
 			SVGWord word = new SVGWord(textList.get(0));
@@ -168,4 +172,74 @@ public class SVGPhrase extends SVGG {
 		}
 		return filteredPhrase;
 	}
+
+	/** get the yCoordinates of the words formatted to nplaces.
+	 * 
+	 * @param nplaces
+	 * @return set of coordinates
+	 */
+	public Multiset<Double> createYValueSet(int nplaces) {
+		RealArray yCoords = this.getYValuesOfWords();
+		yCoords.format(nplaces);
+		Multiset<Double> ySet = HashMultiset.create();
+		for (double y : yCoords) {
+			ySet.add(new Double(y));
+		}
+		return ySet;
+	}
+
+	public RealArray getYValuesOfWords() {
+		getOrCreateWordList();
+		RealArray yValues = new RealArray();
+		for (SVGWord word : wordList) {
+			double y = new Double(word.getY());
+			yValues.addElement(y);
+		}
+		return yValues;
+	}
+
+	/** create a new Phrase from words with the commonest Y-value.
+	 * 
+	 * @param nplaces
+	 * @return
+	 */
+	public SVGPhrase getWordsWithCommonestYValue(int nplaces) {
+		Multiset<Double> ySet = this.createYValueSet(nplaces);
+		Double y = org.xmlcml.euclid.util.MultisetUtil.getCommonestValue(ySet);
+		double eps = 1.0 / (Math.pow(10.0, (double)nplaces));
+		SVGPhrase phrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			if (Real.isEqual(word.getY(), y, eps)) {
+				phrase.addTrailingWord(word);
+			}
+		}
+		return phrase;
+	}
+
+	/** create a new Phrase from words with the lowest Y-value.
+	 * 
+	 * @param nplaces
+	 * @return
+	 */
+	public SVGPhrase getWordsWithLowestYValue(int nplaces) {
+		Multiset<Double> ySet = this.createYValueSet(nplaces);
+		Double y = org.xmlcml.euclid.util.MultisetUtil.getLowestValue(ySet);
+		double eps = 1.0 / (Math.pow(10.0, (double)nplaces));
+		SVGPhrase phrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			if (Real.isEqual(word.getY(), y, eps)) {
+				phrase.addTrailingWord(word);
+			}
+		}
+		return phrase;
+	}
+
+	public SVGPhrase emdashToMinus() {
+		ensureWordList();
+		for (SVGWord word : wordList) {
+			word.emdashToMinus();
+		}
+		return this;
+	}
+
 }
