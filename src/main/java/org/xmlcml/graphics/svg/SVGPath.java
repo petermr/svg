@@ -22,17 +22,14 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
-
-import nu.xom.Attribute;
-import nu.xom.Element;
-import nu.xom.Node;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Angle;
-import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Angle.Units;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
@@ -50,6 +47,10 @@ import org.xmlcml.graphics.svg.path.PathPrimitiveList;
 import org.xmlcml.graphics.svg.path.SVGPathParser;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
+
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Node;
 
 /** 
  * @author pm286
@@ -886,5 +887,53 @@ public class SVGPath extends SVGShape {
 		}
 		return false;
 	}
+
+
+	/** some diagrams contain multiple copies of a primitive with different attributes. Remove all but one.
+	 * Example
+	 * 
+	 * <path stroke="black" clip-path="url(#clipPath2)" fill="#cccaca" stroke-width="0.27300000190734863" d="M330.14 556.419 L330.114 556.134 L330.063 555.875 L329.985 555.643 L329.856 555.411 L329.727 555.18 L329.547 554.999 L329.34 554.817 L329.135 554.663 L328.902 554.559 L328.644 554.457 L328.386 554.405 L327.87 554.405 L327.612 554.457 L327.355 554.559 L327.122 554.663 L326.916 554.817 L326.71 554.999 L326.529 555.18 L326.4 555.411 L326.271 555.643 L326.193 555.875 L326.142 556.134 L326.116 556.419 L326.142 556.674 L326.193 556.934 L326.271 557.165 L326.529 557.631 L326.71 557.81 L326.916 557.992 L327.122 558.146 L327.355 558.249 L327.612 558.352 L327.87 558.404 L328.386 558.404 L328.644 558.352 L328.902 558.249 L329.135 558.146 L329.34 557.992 L329.547 557.81 L329.727 557.631 L329.985 557.165 L330.063 556.934 L330.114 556.674 L330.14 556.419 "/>
+	 * <path fill="none" clip-path="url(#clipPath2)" stroke="#292425" stroke-width="0.27300000190734863" d="M330.14 556.419 L330.114 556.134 L330.063 555.875 L329.985 555.643 L329.856 555.411 L329.727 555.18 L329.547 554.999 L329.34 554.817 L329.135 554.663 L328.902 554.559 L328.644 554.457 L328.386 554.405 L327.87 554.405 L327.612 554.457 L327.355 554.559 L327.122 554.663 L326.916 554.817 L326.71 554.999 L326.529 555.18 L326.4 555.411 L326.271 555.643 L326.193 555.875 L326.142 556.134 L326.116 556.419 L326.142 556.674 L326.193 556.934 L326.271 557.165 L326.529 557.631 L326.71 557.81 L326.916 557.992 L327.122 558.146 L327.355 558.249 L327.612 558.352 L327.87 558.404 L328.386 558.404 L328.644 558.352 L328.902 558.249 L329.135 558.146 L329.34 557.992 L329.547 557.81 L329.727 557.631 L329.985 557.165 L330.063 556.934 L330.114 556.674 L330.14 556.419 M328.128 558.404 L328.128 564.415 L326.116 562.429 L328.128 564.415 L330.14 562.429 "/>
+	 * 
+	 * The paths are exactly the same but have different fill / stroke attributes. They are an artefact of the drawing 
+	 * tool and convey exactly the same structural information. To avoid duplicates we delete all but the first version
+	 * 
+	 * Simply compare DStrings. In our experience the shadow has a lexically identical DString, so simply take the
+	 * first. We might later hash this with stroke-width, etc.
+	 * 
+	 * @param pathList
+	 * @return
+	 */
+	public static List<SVGPath> removeShadowedPaths(List<SVGPath> pathList) {
+		List<SVGPath> newPathList = new ArrayList<SVGPath>();
+		Set<String> dStringSet = new HashSet<String>();
+		for (SVGPath path : pathList) {
+			if (path == null) continue;
+			String d = path.getDString();
+			if (dStringSet.contains(d)) {
+				continue;
+			}
+			dStringSet.add(d);
+			newPathList.add(path);
+		}
+		return newPathList;
+	}
+
+	/** paths outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param pathList
+	 * @return
+	 */
+	public static List<SVGPath> removePathsWithNegativeY(List<SVGPath> pathList) {
+		List<SVGPath> newPaths = new ArrayList<SVGPath>();
+		for (SVGPath path : pathList) {
+			Real2Range bbox = path.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newPaths.add(path);
+			}
+		}
+		return newPaths;
+	}
+
 
 }
