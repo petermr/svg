@@ -1527,4 +1527,26 @@ public class SVGElement extends GraphicsElement {
 		return value;
 	}
 
+	/** remove stroke, stroke-width, fill from element.
+	 *  
+	 * @param element
+	 */
+	public static void removeStyleAttributes(SVGElement element) {
+		removeAttributeByName(element, STROKE);
+		removeAttributeByName(element, STROKE_WIDTH);
+		removeAttributeByName(element, FILL);
+	}
+
+	/** remove a no-namespace attribute if it exists else no-op.
+	 * 
+	 * @param element
+	 * @param name
+	 */
+	public static void removeAttributeByName(SVGElement element, String name) {
+		Attribute attribute = element.getAttribute(name);
+		if (attribute != null) {
+			attribute.detach();
+		}
+	}
+
 }
