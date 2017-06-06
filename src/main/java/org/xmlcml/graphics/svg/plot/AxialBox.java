@@ -37,7 +37,7 @@ public class AxialBox {
 	/**
 	 * default inside width of box (assumes ticks are on inside)
 	 */
-	public static final double DEFAULT_INSIDE_WIDTH = 3.0;
+	public static final double DEFAULT_INSIDE_WIDTH = 10.0;
 	/**
 	 * default extension beyond the end of the main axis. Usually small.
 	 * may not be necessary
@@ -105,7 +105,7 @@ public class AxialBox {
 		captureBox.extendBothEndsBy(rrDirection,
 				this.lineExtension, this.lineExtension);
 		captureBox.format(decimalPlaces());
-		LOG.debug("******* captureBox: "+axis.getAxisType()+" "+captureBox);
+		LOG.debug("\n######### captureBox: "+captureBox+" "+axis.getAxisType()+" ##########");
 		return;
 	}
 

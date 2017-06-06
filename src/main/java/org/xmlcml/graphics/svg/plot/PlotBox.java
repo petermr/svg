@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
@@ -24,6 +24,7 @@ import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
@@ -217,6 +218,24 @@ public class PlotBox {
 		for (SVGCircle circle : circleList) {
 			screenXYs.add(circle.getCXY());
 		}
+		if (screenXYs.size() == 0) {
+			LOG.warn("NO CIRCLES IN PLOT");
+		}
+		if (screenXYs.size() == 0) {
+			// this is really messy
+			LOG.debug("trying short pi/4 lines");
+			for (SVGLine line : lineList) {
+				Real2 vector = line.getEuclidLine().getVector();
+				double angle = vector.getAngle();
+				double length = vector.getLength();
+				if (length < 3.0) {
+					LOG.debug(angle + " "+ length + " " +line);
+					if (Real.isEqual(angle, 2.35, 0.03)) {
+						screenXYs.add(line.getMidPoint());
+					}
+				}
+			}
+		}
 		screenXYs.format(getNdecimal());
 	}
 
@@ -301,69 +320,24 @@ public class PlotBox {
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
 		pathList = SVGPath.extractPaths(svgElement);
-		pathList = removePathsWithNegativeY(pathList);
+		pathList = SVGPath.removePathsWithNegativeY(pathList);
+		pathList = SVGPath.removeShadowedPaths(pathList);
 		lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
 		List<SVGLine> pathLineList = SVGPath.createLinesFromPaths(pathList);
 		lineList.addAll(pathLineList);
-		lineList = removeLinesWithNegativeY(lineList);
+		lineList = SVGLine.removeLinesWithNegativeY(lineList);
+		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size());
+		SVGShape.removeShadowedShapes(lineList);
 		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size());
 		circleList =  SVGCircle.extractSelfAndDescendantCircles(svgElement);
 		List<SVGCircle> pathCircleList =  SVGPath.createCirclesFromPaths(pathList);
 		circleList.addAll(pathCircleList);
+		SVGShape.removeShadowedShapes(circleList);
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
-		textList = removeTextsWithNegativeY(textList);
+		textList = SVGText.removeTextsWithNegativeY(textList);
 		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size() + "; texts: " + textList.size() + "; circles: " + circleList.size());
-//		Real2Range bboxTotal = SVGElement.getBoundingBox
 	}
 	
-	/** Texts outside y=0 are not part of the plot but confuse calculation of
-	 * bounding box 
-	 * @param TextList
-	 * @return
-	 */
-	private List<SVGText> removeTextsWithNegativeY(List<SVGText> textList) {
-		List<SVGText> newTexts = new ArrayList<SVGText>();
-		for (SVGText text : textList) {
-			Real2Range bbox = text.getBoundingBox();
-			if (bbox.getYMax() >= 0.0) {
-				newTexts.add(text);
-			}
-		}
-		return newTexts;
-	}
-
-	/** lines outside y=0 are not part of the plot but confuse calculation of
-	 * bounding box 
-	 * @param lineList
-	 * @return
-	 */
-	private List<SVGLine> removeLinesWithNegativeY(List<SVGLine> lineList) {
-		List<SVGLine> newLines = new ArrayList<SVGLine>();
-		for (SVGLine line : lineList) {
-			Real2Range bbox = line.getBoundingBox();
-			if (bbox.getYMax() >= 0.0) {
-				newLines.add(line);
-			}
-		}
-		return newLines;
-	}
-
-	/** paths outside y=0 are not part of the plot but confuse calculation of
-	 * bounding box 
-	 * @param pathList
-	 * @return
-	 */
-	private List<SVGPath> removePathsWithNegativeY(List<SVGPath> pathList) {
-		List<SVGPath> newPaths = new ArrayList<SVGPath>();
-		for (SVGPath path : pathList) {
-			Real2Range bbox = path.getBoundingBox();
-			if (bbox.getYMax() >= 0.0) {
-				newPaths.add(path);
-			}
-		}
-		return newPaths;
-	}
-
 	// graphics
 	
 	public SVGElement createSVGElement() {
@@ -522,8 +496,5 @@ public class PlotBox {
 	public void writeProcessedSVG(File file) {
 		SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
 	}
-
-
-
 
 }

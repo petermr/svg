@@ -14,6 +14,8 @@ import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.text.SVGPhrase;
 import org.xmlcml.graphics.svg.text.SVGWord;
 
+import com.google.common.collect.Multiset;
+
 /** a box to hold text on an Annotated axis.
  * 
  * at least 2 use cases
@@ -68,16 +70,22 @@ public class AxisScaleBox extends AxialBox {
 			if (horizontalPhrase != null) {
 				horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
 			}
-			if(horizontalPhrase != null) LOG.debug("HOR phrase: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
+			if(horizontalPhrase != null) {
+				horizontalPhrase = horizontalPhrase.getWordsWithLowestYValue(0);
+				horizontalPhrase = horizontalPhrase.emdashToMinus();
+				LOG.debug("HOR phrase Y: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
+			}
+			
 		} else {
 			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
-			LOG.trace("Word Ladder?: "+horizontalPhrase+"; "+horizontalTexts.size());
+			LOG.debug("Word Ladder?: "+horizontalPhrase+"; "+horizontalTexts.size());
 			if (horizontalPhrase != null) {
 				horizontalPhrase = removeVerticalWordsCompletelyOutsideRange(horizontalPhrase, axis.getRange());
-				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalTexts.size());
+				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
 			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
-			LOG.debug("VERT phrase: "+rot90Phrase+"; "+rot90Texts.size());
+			LOG.debug("ROT90 phrase: "+rot90Phrase+"; "+rot90Texts.size());
+			LOG.trace("finished vert");
 		}
 	}
 
@@ -178,8 +186,10 @@ public class AxisScaleBox extends AxialBox {
 			rot90Value = String.valueOf(rot90Texts.get(0).getText());
 		}
 		if (!"null".equals(String.valueOf(rot90Value)) && !rot90Value.trim().equals("")) {
-			processVerticalAxisRotatedChars();
-		} else {
+			LOG.debug("skip processing rot90 text");
+//			processVerticalAxisRotatedChars();
+		}
+		if (true) {
 			processWordLadderScales();
 		}
 	}
@@ -232,19 +242,6 @@ public class AxisScaleBox extends AxialBox {
 		return wordList;
 	}
 	
-//	private List<SVGText> getOrCreateTextList() {
-//		if (this.textList == null) {
-//			textList = new ArrayList<SVGText>();
-//			List<SVGText> textListAll = axis.getPlotBox().getTextList();
-//			for (SVGText text : textListAll) {
-//				if (text.isIncludedBy(captureBox)) {
-//					textList.add(text);
-//				}
-//			}
-//		}
-//		return textList;
-//	}
-
 	/** get all lines intersecting with this.boundingBox.
 	 * 
 	 * @param lines
