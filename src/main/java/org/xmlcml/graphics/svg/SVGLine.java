@@ -869,4 +869,21 @@ public class SVGLine extends SVGShape {
 		return false;
 	}
 
+	/** lines outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param lineList
+	 * @return
+	 */
+	public static List<SVGLine> removeLinesWithNegativeY(List<SVGLine> lineList) {
+		List<SVGLine> newLines = new ArrayList<SVGLine>();
+		for (SVGLine line : lineList) {
+			Real2Range bbox = line.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newLines.add(line);
+			}
+		}
+		return newLines;
+	}
+
+
 }
