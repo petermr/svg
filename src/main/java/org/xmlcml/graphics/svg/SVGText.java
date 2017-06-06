@@ -278,7 +278,7 @@ public class SVGText extends SVGElement {
 		Nodes nodes = query("./text()");
 		return (nodes.size() == 1 ? nodes.get(0).getValue() : null);
 	}
-
+	
 	/**
 	 * Clears text and replaces if not null
 	 * 
@@ -1129,6 +1129,23 @@ public class SVGText extends SVGElement {
 		}
 		return textList;
 	}
+
+	/** Texts outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param TextList
+	 * @return
+	 */
+	public static List<SVGText> removeTextsWithNegativeY(List<SVGText> textList) {
+		List<SVGText> newTexts = new ArrayList<SVGText>();
+		for (SVGText text : textList) {
+			Real2Range bbox = text.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newTexts.add(text);
+			}
+		}
+		return newTexts;
+	}
+
 
 
 }
