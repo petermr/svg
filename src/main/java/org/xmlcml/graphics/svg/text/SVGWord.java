@@ -20,6 +20,7 @@ import org.xmlcml.xml.XMLUtil;
 public class SVGWord extends SVGG {
 
 	
+	private static final char EMDASH = (char)8211;
 	private static final double DELTA_Y_TEXT = 0.3;
 	private static final Logger LOG = Logger.getLogger(SVGWord.class);
 	static {
@@ -80,13 +81,6 @@ public class SVGWord extends SVGG {
 		return text == null ? null : text.getBoundingBox();
 	}
 	
-//	public boolean canGeometricallyAdd(SVGText svgText) {
-//		SVGText lastChar = textList.get(textList.size() - 1);
-//		double gap = svgWord.gapFollowing(lastWord);
-//		LOG.trace("GAP "+gap+"; "+lastWord.getChildRectBoundingBox()+"; "+svgWord.getChildRectBoundingBox());
-//		return gap < interWordGap;
-//	}
-
 	public Double getFontSize() {
 		SVGElement text = this.getSVGText();
 		return text == null ? null : text.getFontSize();
@@ -123,15 +117,36 @@ public class SVGWord extends SVGG {
 		SVGText text = getSVGText();
 		return (text == null) ? null : text.getText();
 	}
-
+	
 	public Real2 getXY() {
 		SVGText text = getSVGText();
 		return (text == null) ? null : text.getXY();
 	}
 
+	public Double getX() {
+		Real2 xy = getXY();
+		return xy == null ? null : new Double(xy.getX());
+	}
+	
+	public Double getY() {
+		Real2 xy = getXY();
+		return xy == null ? null : new Double(xy.getY());
+	}
+	
 	public String getSVGTextValue() {
 		SVGElement text = this.getSVGText();
 		return text == null ? null : text.getValue();
+	}
+
+	public void emdashToMinus() {
+		String s = this.getStringValue();
+		if (s != null && s.contains(String.valueOf(EMDASH))) {
+			String s1 = s.replaceAll(String.valueOf(EMDASH), S_MINUS);
+			this.getSVGText().setText(s1);
+			if (!s.equals(s1)) {
+				LOG.debug("EMDASH: "+s+" => "+s1);
+			}
+		}
 	}
 
 }
