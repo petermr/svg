@@ -43,6 +43,8 @@ public class GraphicsElement extends Element implements SVGConstants {
 
 	public static final String NONE = "none";
 	public static final String FILL = "fill";
+	public static final String STROKE = "stroke";
+	public static final String STROKE_WIDTH = "stroke-width";
 
 	public enum FontWeight {
 		BOLD,
