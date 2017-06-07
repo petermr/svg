@@ -29,6 +29,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.euclid.Util;
+import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 
 import nu.xom.Element;
 import nu.xom.Node;
@@ -287,4 +288,34 @@ public class SVGRect extends SVGShape {
 	public Real2 getXY() {
 		return new Real2(getX(), getY());
 	}
+
+	/** rects outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param rectList
+	 * @return
+	 */
+	public static List<SVGRect> removeRectsWithNegativeY(List<SVGRect> rectList) {
+		List<SVGRect> newRects = new ArrayList<SVGRect>();
+		for (SVGRect rect : rectList) {
+			Real2Range bbox = rect.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newRects.add(rect);
+			}
+		}
+		return newRects;
+	}
+	
+//	public static List<SVGRect> createRectsFromPaths(List<SVGPath> pathList) {
+//		List<SVGRect> allRects = new ArrayList<SVGRect>();
+//		for (SVGPath path : pathList) {
+//			List<SVGRect> rectList = path.createRectListFromRepeatedML(null);
+//			if (rectList != null) {
+//				allRects.addAll(rectList.getRectList());
+//			}
+//		}
+//		return allRects;
+//	}
+
+
+
 }
