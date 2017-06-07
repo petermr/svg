@@ -192,11 +192,13 @@ public class Path2ShapeConverter {
 			List<SVGShape> shapeList = new ArrayList<SVGShape>();
 			for (SVGPath path : pathList) {
 				SVGShape shape = convertPathToShape(path);
-				if (shape != null) {
-					shape.setId(shape.getClass().getSimpleName().toLowerCase().substring(SVG.length())+"."+id);
-					shapeList.add(shape);
-					id++;
+				// unconverted path, add as raw
+				if (shape == null) {
+					shape = path;
 				}
+				shape.setId(shape.getClass().getSimpleName().toLowerCase().substring(SVG.length())+"."+id);
+				shapeList.add(shape);
+				id++;
 			}
 			if (splitPolylines) {
 				shapeList = splitPolylines(shapeList);
