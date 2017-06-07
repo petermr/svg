@@ -1,9 +1,7 @@
 package org.xmlcml.graphics.svg.linestuff;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -24,6 +22,7 @@ import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.xml.XMLUtil;
 
 
 public class Path2ShapeConverterTest {
@@ -449,14 +448,25 @@ public class Path2ShapeConverterTest {
 			Assert.assertEquals(8, shapes.size());
 			writeColouredShapes(shapes, new File("target/tables/multipleRect.svg"));
 	}
+		
+    @Test
+    public void testMakeRect() {
+    	String pathXML = "<path id=\"path1676\" d=\"M128.441 668.122 L135.743 668.122 L135.743 559.484 L128.441 559.484 Z\" stroke-width=\"0.31\" fill=\"#cccccc\" clip-path=\"url(#clipPath1)\" stroke=\"black\"/>";
+    	SVGPath path = (SVGPath) SVGElement.readAndCreateSVG(XMLUtil.parseXML(pathXML));
+    	SVGShape shape = new Path2ShapeConverter().convertPathToShape(path);
+    	Assert.assertEquals(shape.getClass(), SVGRect.class);
+    }
 
-		private void writeColouredShapes(List<SVGShape> shapes, File file) {
-			SVGG gg = new SVGG();
-			for (int i = 0; i < shapes.size(); i++) {
-				SVGShape shape = shapes.get(i);
-				shape.setFill(COLORS[i % COLORS.length]);
-				gg.appendChild(shape.copy());
-			}
-			SVGSVG.wrapAndWriteAsSVG(gg, file);
+
+	// =============================
+	
+	private void writeColouredShapes(List<SVGShape> shapes, File file) {
+		SVGG gg = new SVGG();
+		for (int i = 0; i < shapes.size(); i++) {
+			SVGShape shape = shapes.get(i);
+			shape.setFill(COLORS[i % COLORS.length]);
+			gg.appendChild(shape.copy());
 		}
+		SVGSVG.wrapAndWriteAsSVG(gg, file);
+	}
 }

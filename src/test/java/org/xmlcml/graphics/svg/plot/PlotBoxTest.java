@@ -67,6 +67,25 @@ public class PlotBoxTest {
 		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
 	}
 	
+	
+	@Test
+	public void testFunnelPlot1() throws IOException {
+		String fileRoot = "6400831a1";
+		PlotBox plotBox = new PlotBox();
+		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
+		plotBox.readAndCreatePlot(new FileInputStream(inputSVGFile));
+		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
+	}
+	
+	@Test
+	public void testScatter13148() throws IOException {
+		String fileRoot = "13148-016-0230-5fig2";
+		PlotBox plotBox = new PlotBox();
+		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
+		plotBox.readAndCreatePlot(new FileInputStream(inputSVGFile));
+		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
+	}
+	
 
 	
 }
