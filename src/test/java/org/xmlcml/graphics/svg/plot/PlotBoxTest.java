@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 
@@ -13,6 +15,10 @@ import org.xmlcml.graphics.svg.Fixtures;
  *
  */
 public class PlotBoxTest {
+	private static final Logger LOG = Logger.getLogger(PlotBoxTest.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
 
 	@Test
 	public void testBakker() throws IOException {
@@ -25,11 +31,13 @@ public class PlotBoxTest {
 	
 	@Test
 	public void testSingle() throws IOException {
+//		String fileRoot = "bakker";
 		String fileRoot = "calvin";
 //		String fileRoot = "kerr";
 //		String fileRoot = "dong";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+"plot.svg");
+		LOG.debug("reading: "+inputSVGFile);
 		plotBox.readAndCreatePlot(new FileInputStream(inputSVGFile));
 		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
 		plotBox.writeCSV(new File("target/plot/"+fileRoot+".csv"));
@@ -38,7 +46,7 @@ public class PlotBoxTest {
 	@Test
 	public void testConvertAllSVG2CSV() throws IOException {
 		String[] fileRoots = {
-				"bakker",
+				"bakkerplot",
 				"calvinplot",
 				"dongplot",
 				"kerrplot",
