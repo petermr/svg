@@ -128,7 +128,7 @@ public class ShapeExtractor {
 				"paths: "+pathList.size() 
 		+ "; circles: " + circleList.size()
 		+ "; ellipses: " + ellipseList.size()
-		+ "; lines: " + lineList.size() 
+		+ "; polylines: " + polylineList.size() 
 		+ "; polygons: " + polygonList.size() 
 		+ "; polylines: " + polylineList.size() 
 		+ "; rects: " + rectList.size() 
@@ -138,7 +138,7 @@ public class ShapeExtractor {
 
 	public SVGG createSVG() {
 		SVGG g = new SVGG();
-		addList(g, lineList);
+		addList(g, polylineList);
 		addList(g, circleList);
 		g.setFill("orange");
 		return g;
@@ -148,6 +148,20 @@ public class ShapeExtractor {
 		for (SVGElement element : list) {
 			g.appendChild(element.copy());
 		}
+	}
+
+	public void extractPrimitives(SVGElement svgElement) {
+		List<SVGCircle> circles = SVGCircle.extractSelfAndDescendantCircles(svgElement);
+		circleList.addAll(circles);
+		List<SVGEllipse> ellipses = SVGEllipse.extractSelfAndDescendantEllipses(svgElement);
+		ellipseList.addAll(ellipses);
+		List<SVGLine> lines = SVGLine.extractSelfAndDescendantLines(svgElement);
+		lineList.addAll(lines);
+		List<SVGPolygon> polygons = SVGPolygon.extractSelfAndDescendantPolygons(svgElement);
+		polygonList.addAll(polygons);
+		List<SVGPolyline> polylines = SVGPolyline.extractSelfAndDescendantPolylines(svgElement);
+		polylineList.addAll(polylines);
+		
 	}
 
 }
