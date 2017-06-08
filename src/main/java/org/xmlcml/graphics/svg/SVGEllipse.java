@@ -18,6 +18,8 @@ package org.xmlcml.graphics.svg;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
@@ -39,6 +41,7 @@ public class SVGEllipse extends SVGShape {
 
 	public static final String ELLIPSE_MCCCC = "MCCCC";
 	public static final String ELLIPSE_MCCCCZ = "MCCCCZ";
+	public final static String ALL_ELLIPSE_XPATH = ".//svg:ellipse";
 
 
 	@SuppressWarnings("unused")
@@ -264,6 +267,30 @@ public class SVGEllipse extends SVGShape {
 	@Override
 	public Real2 getXY() {
 		return this.getCXY();
+	}
+
+	/** convenience method to extract list of svgEllipses in element
+	 * 
+	 * @param svgElement
+	 * @return
+	 */
+	public static List<SVGEllipse> extractSelfAndDescendantEllipses(SVGElement svgElement) {
+		return SVGEllipse.extractEllipses(SVGUtil.getQuerySVGElements(svgElement, ALL_ELLIPSE_XPATH));
+	}
+
+	/** makes a new list composed of the ellipses in the list
+	 * 
+	 * @param elements
+	 * @return
+	 */
+	public static List<SVGEllipse> extractEllipses(List<SVGElement> elements) {
+		List<SVGEllipse> ellipseList = new ArrayList<SVGEllipse>();
+		for (SVGElement element : elements) {
+			if (element instanceof SVGEllipse) {
+				ellipseList.add((SVGEllipse) element);
+			}
+		}
+		return ellipseList;
 	}
 	
 	
