@@ -108,7 +108,7 @@ public class PlotBox {
 //	private List<SVGPath> pathList;
 	private List<SVGText> textList;
 //// derived
-//	private List<SVGLine> lineList;
+	private List<SVGLine> lineList;
 //	private List<SVGRect> rectList;
 //	private List<SVGCircle> circleList;
 	
@@ -252,14 +252,9 @@ public class PlotBox {
 		originalPathList = SVGPath.removePathsWithNegativeY(originalPathList);
 		originalPathList = SVGPath.removeShadowedPaths(originalPathList);
 		shapeExtractor.convertToShapes(originalPathList);
+		shapeExtractor.extractPrimitives(svgElement);
+		
 		shapeExtractor.debug();
-//		List<List<SVGShape>> shapeListList = new Path2ShapeConverter().convertPathsToShapesAndSplitAtMoves(originalPathList);
-//		for (List<SVGShape> shapeList : shapeListList) {
-//			System.out.println("=========");
-//			for (SVGShape shape : shapeList) {
-//				LOG.debug(shape.getClass()+": "+shape);
-//			}
-//		}
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		textList = SVGText.removeTextsWithNegativeY(textList);
 	}
