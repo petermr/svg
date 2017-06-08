@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
@@ -15,6 +18,7 @@ import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
+import org.xmlcml.euclid.util.MultisetUtil;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
@@ -30,7 +34,10 @@ import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.ShapeExtractor;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
-import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
 
 /** creates axes from ticks, scales, titles.
  * 
@@ -105,12 +112,7 @@ public class PlotBox {
 	private static Double BBOX_PADDING = 5.0; // to start with
 	private static int FORMAT_NDEC = 3; // format numbers; to start with
 	
-//	private List<SVGPath> pathList;
 	private List<SVGText> textList;
-//// derived
-	private List<SVGLine> lineList;
-//	private List<SVGRect> rectList;
-//	private List<SVGCircle> circleList;
 	
 	private List<SVGLine> horizontalLines;
 	private List<SVGLine> verticalLines;
@@ -128,6 +130,7 @@ public class PlotBox {
 	private String csvContent;
 	private ShapeExtractor shapeExtractor;
 	private List<SVGPath> originalPathList;
+	private Map<String, String> charBySig;
 
 	public PlotBox() {
 		setDefaults();
@@ -374,6 +377,7 @@ public class PlotBox {
 		g.appendChild(copyOriginalElements());
 		g.appendChild(shapeExtractor.createSVG());
 		g.appendChild(copyAnnotatedAxes());
+		g.appendChild(analyzePaths());
 		return g;
 	}
 	
@@ -511,6 +515,87 @@ public class PlotBox {
 
 	public void writeProcessedSVG(File file) {
 		SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
+	}
+	
+	public SVGElement analyzePaths() {
+		createCharBySig();
+		SVGG g = new SVGG();
+		List<SVGShape> allShapes = new ArrayList<SVGShape>();
+		Multiset<String> sigSet = HashMultiset.create();
+		Map<String, SVGPath> pathBySig = new HashMap<String, SVGPath>();
+		for (SVGPath path : shapeExtractor.getPathList()) {
+			path.setStrokeWidth(0.5);
+			String sig = path.getSignature();
+			sigSet.add(sig);
+			if (!pathBySig.containsKey(sig)) {
+				pathBySig.put(sig, path);
+			}
+			Real2Range box = path.getBoundingBox();
+			String c = charBySig.get(sig);
+			if (c != null && !c.equals("")) {
+				Real2 xy = box.getCorners()[0].plus(new Real2(-5, -5));
+				SVGText text = new SVGText(xy, c);
+				text.setFill("red");
+				text.setStrokeWidth(0.1);
+				text.setFontSize(6.0);
+				g.appendChild(text);
+			}
+			SVGRect rect = SVGRect.createFromReal2Range(box);
+			rect.setFill("yellow");
+			rect.setStrokeWidth(0.1);
+			rect.setOpacity(0.3);
+			g.appendChild(rect);
+		}
+		Iterable<Entry<String>> iterable = MultisetUtil.getEntriesSortedByCount(sigSet);
+		List<Entry<String>> list = MultisetUtil.createStringEntryList(iterable);
+		LOG.debug(list);
+		SVGG gg = new SVGG();
+		for (String sig : pathBySig.keySet()) {
+			SVGPath path = pathBySig.get(sig);
+			Real2 xy = path.getBoundingBox().getCorners()[0];
+			xy.plusEquals(new Real2(10., 10.));
+			gg.appendChild(path.copy());
+			SVGText text = new SVGText(xy, sig);
+			text.setFontSize(3.);
+			text.setOpacity(0.5);
+			gg.appendChild(text);
+		}
+		SVGSVG.wrapAndWriteAsSVG(gg, new File("target/chars/sig1.svg"));
+		return g;
+	}
+
+	private Map<String, String> createCharBySig() {
+		charBySig = new HashMap<String, String>();
+		charBySig.put("MLLCLLLL", "1");
+    charBySig.put("MCCLCCCLCLLLCLC", "2");
+    charBySig.put("MCCCCCCCCZ", "8");
+    charBySig.put("MLLCLLLLLC", "r");
+    charBySig.put("MLLLLCLC", "7");
+    charBySig.put("MLCCLLLLLCCLL", "h");
+    charBySig.put("MLCCCCLCCCC", "c");
+    charBySig.put("MCCCCCCLCCZ", "9");
+    charBySig.put("MCCLLLLLLCCCCLCC", "?");
+    charBySig.put("MCCCCLCCCLLCCCLCC", "?");
+    charBySig.put("MCCCCLCCCCZ", "?");
+    charBySig.put("MLLCC", "?");
+    charBySig.put("MCCCCCLCCLZ", "?");
+    charBySig.put("MCCLLLLLCCZ", "?");
+    charBySig.put("MLLLLLLCCLCCL", "?");
+    charBySig.put("MCCCCZ", "?");
+    charBySig.put("MLLCLLLLLLLLLLLCC", "?");
+    charBySig.put("MCLLLC", "?");
+    charBySig.put("MCLLLCZ", "?");
+    charBySig.put("MLLLLLLCLLCCL", "?");
+    charBySig.put("MZ", "?");
+    charBySig.put("MCLCCCLCCCLCCCLCC", "?");
+    charBySig.put("MLCCCCLLLLLCCLLLCCLL", "?");
+    charBySig.put("MLCLLLCL", "?");
+    charBySig.put("MCLLLLLCZ", "?");
+    charBySig.put("MLLCLCCLCCLCCCCCCCZ", "?");
+    charBySig.put("MCCCCL", "?");
+    charBySig.put("MLLLCCCCLLZ", "?");
+		return charBySig;
+		
 	}
 
 }

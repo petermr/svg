@@ -200,6 +200,8 @@ public class AnnotatedAxisTest {
 	}
 
 	@Test
+	@Ignore
+	
 	public void testFunnelKerrPlot() throws FileNotFoundException {
 		AnnotatedAxis[] axisArray = getAxisArrayAndTestFullBox("kerrplot.svg", "((353.189,566.653),(256.142,403.891))");
 //		Assert.assertNull(axisArray);
