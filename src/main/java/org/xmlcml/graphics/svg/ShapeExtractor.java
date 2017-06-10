@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
 
@@ -125,14 +126,14 @@ public class ShapeExtractor {
 
 	public void debug() {
 		LOG.debug(
-				"paths: "+pathList.size() 
-		+ "; circles: " + circleList.size()
-		+ "; ellipses: " + ellipseList.size()
+				"paths: " + pathList.size() 
+		+ "; circles: "   + circleList.size()
+		+ "; ellipses: "  + ellipseList.size()
+		+ "; lines: "     + lineList.size() 
+		+ "; polygons: "  + polygonList.size() 
 		+ "; polylines: " + polylineList.size() 
-		+ "; polygons: " + polygonList.size() 
-		+ "; polylines: " + polylineList.size() 
-		+ "; rects: " + rectList.size() 
-		+ "; shapes: " + shapeList.size() 
+		+ "; rects: "     + rectList.size() 
+		+ "; shapes: "    + shapeList.size() 
 		);
 	}
 
@@ -162,6 +163,28 @@ public class ShapeExtractor {
 		List<SVGPolyline> polylines = SVGPolyline.extractSelfAndDescendantPolylines(svgElement);
 		polylineList.addAll(polylines);
 		
+	}
+
+	public void removeElementsOutsideBox(Real2Range positiveXBox) {
+		SVGElement.removeElementsOutsideBox(circleList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(ellipseList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(lineList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(polylineList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(polygonList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(rectList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(triangleList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(shapeList, positiveXBox);
+	}
+
+	public void removeElementsInsideBox(Real2Range positiveXBox) {
+		SVGElement.removeElementsInsideBox(circleList, positiveXBox);
+		SVGElement.removeElementsInsideBox(ellipseList, positiveXBox);
+		SVGElement.removeElementsInsideBox(lineList, positiveXBox);
+		SVGElement.removeElementsInsideBox(polylineList, positiveXBox);
+		SVGElement.removeElementsInsideBox(polygonList, positiveXBox);
+		SVGElement.removeElementsInsideBox(rectList, positiveXBox);
+		SVGElement.removeElementsInsideBox(triangleList, positiveXBox);
+		SVGElement.removeElementsInsideBox(shapeList, positiveXBox);
 	}
 
 }

@@ -254,8 +254,15 @@ public class PlotBox {
 		originalPathList = SVGPath.extractPaths(svgElement);
 		originalPathList = SVGPath.removePathsWithNegativeY(originalPathList);
 		originalPathList = SVGPath.removeShadowedPaths(originalPathList);
+		shapeExtractor.debug();
+		LOG.debug("B> "+originalPathList.size());
+		Real2Range positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
+//		SVGElement.removeElementsInsideBox(originalPathList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(originalPathList, positiveXBox);
+		LOG.debug("A> "+originalPathList.size());
 		shapeExtractor.convertToShapes(originalPathList);
 		shapeExtractor.extractPrimitives(svgElement);
+		shapeExtractor.removeElementsOutsideBox(positiveXBox);
 		
 		shapeExtractor.debug();
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
@@ -298,12 +305,12 @@ public class PlotBox {
 		RealRange fullboxXRange = null;
 		RealRange fullboxYRange = null;
 		if (longHorizontalEdgeLines != null && longHorizontalEdgeLines.size() > 0) {
-			LOG.debug("longHorizontalEdgeLines"+longHorizontalEdgeLines.size());
+			LOG.debug("longHorizontalEdgeLines "+longHorizontalEdgeLines.size());
 			fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
 			fullboxXRange = fullboxXRange == null ? null : fullboxXRange.format(PlotBox.FORMAT_NDEC);
 		}
 		if (longVerticalEdgeLines != null && longVerticalEdgeLines.size() > 0) {
-			LOG.debug("longVerticalEdgeLines"+longVerticalEdgeLines.size());
+			LOG.debug("longVerticalEdgeLines "+longVerticalEdgeLines.size());
 			fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
 			fullboxYRange = fullboxYRange == null ? null : fullboxYRange.format(PlotBox.FORMAT_NDEC);
 		}
@@ -596,6 +603,10 @@ public class PlotBox {
     charBySig.put("MLLLCCCCLLZ", "?");
 		return charBySig;
 		
+	}
+
+	public String getCSV() {
+		return csvContent;
 	}
 
 }

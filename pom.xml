@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-       <svg.version>1.1.1</svg.version>
+       <svg.version>1.2.0-SNAPSHOT</svg.version>
        <!--  upstream -->
-       <euclid.version>2.1.1</euclid.version>
+       <euclid.version>2.2.0-SNAPSHOT</euclid.version>
     </properties>
 
     <groupId>org.contentmine</groupId>
     <artifactId>svg</artifactId>
-    <!--<version>${svg.version}</version>-->
-    <version>1.1.1</version>
+    <version>${svg.version}</version>
+<!--     <version>1.1.1</version> -->
     <packaging>jar</packaging>
     <name>svg</name>
     <description>A Java library for processing SVG</description>
