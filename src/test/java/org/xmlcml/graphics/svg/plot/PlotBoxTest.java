@@ -24,9 +24,9 @@ public class PlotBoxTest {
 	public void testBakker() throws IOException {
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, "bakker2014-page11b.svg");
+		plotBox.setCsvOutFile(new File("target/plot/bakker1.csv"));
+		plotBox.setSvgOutFile(new File("target/plot/bakker1.svg"));
 		plotBox.readAndCreatePlot(new FileInputStream(inputSVGFile));
-		plotBox.writeProcessedSVG(new File("target/plot/bakker1.svg"));
-		plotBox.writeCSV(new File("target/plot/bakker1.csv"));
 	}
 	
 	@Test

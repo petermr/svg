@@ -131,6 +131,8 @@ public class PlotBox {
 	private ShapeExtractor shapeExtractor;
 	private List<SVGPath> originalPathList;
 	private Map<String, String> charBySig;
+	private File svgOutFile;
+	private File csvOutFile;
 
 	public PlotBox() {
 		setDefaults();
@@ -171,6 +173,8 @@ public class PlotBox {
 		extractDataScreenPoints();
 		scaleDataPointsToValues();
 		createCSVContent();
+		writeProcessedSVG(svgOutFile);
+		writeCSV(csvOutFile);
 	}
 
 	private void scaleDataPointsToValues() {
@@ -203,10 +207,12 @@ public class PlotBox {
 	}
 
 	public void writeCSV(File file) {
-		try {
-			IOUtils.write(csvContent, new FileOutputStream(file));
-		} catch (IOException e) {
-			throw new RuntimeException("cannot write CSV: ", e);
+		if (file != null) {
+			try {
+				IOUtils.write(csvContent, new FileOutputStream(file));
+			} catch (IOException e) {
+				throw new RuntimeException("cannot write CSV: ", e);
+			}
 		}
 	}
 
@@ -521,7 +527,9 @@ public class PlotBox {
 	}
 
 	public void writeProcessedSVG(File file) {
-		SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
+		if (file != null) {
+			SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
+		}
 	}
 	
 	public SVGElement analyzePaths() {
@@ -607,6 +615,22 @@ public class PlotBox {
 
 	public String getCSV() {
 		return csvContent;
+	}
+
+	public File getSvgOutFile() {
+		return svgOutFile;
+	}
+
+	public void setSvgOutFile(File svgOutFile) {
+		this.svgOutFile = svgOutFile;
+	}
+
+	public File getCsvOutFile() {
+		return csvOutFile;
+	}
+
+	public void setCsvOutFile(File csvOutFile) {
+		this.csvOutFile = csvOutFile;
 	}
 
 }
