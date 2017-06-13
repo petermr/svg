@@ -267,7 +267,9 @@ public class PlotBox {
 		SVGElement.removeElementsOutsideBox(originalPathList, positiveXBox);
 		LOG.debug("A> "+originalPathList.size());
 		shapeExtractor.convertToShapes(originalPathList);
+		LOG.debug("C> after convert Shapes");
 		shapeExtractor.extractPrimitives(svgElement);
+		LOG.debug("D> after extractPrimitives");
 		shapeExtractor.removeElementsOutsideBox(positiveXBox);
 		
 		shapeExtractor.debug();

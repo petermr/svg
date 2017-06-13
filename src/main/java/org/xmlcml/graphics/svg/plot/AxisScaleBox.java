@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
@@ -13,8 +14,6 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.text.SVGPhrase;
 import org.xmlcml.graphics.svg.text.SVGWord;
-
-import com.google.common.collect.Multiset;
 
 /** a box to hold text on an Annotated axis.
  * 
@@ -63,6 +62,7 @@ public class AxisScaleBox extends AxialBox {
 
 
 	void extractText() {
+		LOG.debug("axial scales");
 		if (axis.isHorizontal()) {
 			// not a good idea as it slices through words
 			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
@@ -85,6 +85,7 @@ public class AxisScaleBox extends AxialBox {
 			}
 			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
 			LOG.debug("ROT90 phrase: "+rot90Phrase+"; "+rot90Texts.size());
+			Real2Array coords = rot90Phrase.getWordsWithHighestXValue();
 			LOG.trace("finished vert");
 		}
 	}

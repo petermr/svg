@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
+import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
+import org.xmlcml.euclid.util.MultisetUtil;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.xml.XMLUtil;
@@ -234,12 +236,62 @@ public class SVGPhrase extends SVGG {
 		return phrase;
 	}
 
+	/** create a new Phrase from words with the highest X-value.
+	 * 
+	 * @param nplaces
+	 * @return
+	 */
+	public SVGPhrase getWordsWithHighestXValue(int nplaces) {
+		Multiset<Double> xSet = this.createXValueSet(nplaces);
+		Double x = MultisetUtil.getHighestValue(xSet);
+		double eps = 1.0 / (Math.pow(10.0, (double)nplaces));
+		SVGPhrase phrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			if (Real.isEqual(word.getX(), x, eps)) {
+				phrase.addTrailingWord(word);
+			}
+		}
+		return phrase;
+	}
+	
+	/** get the xCoordinates of the words formatted to nplaces.
+	 * 
+	 * @param nplaces
+	 * @return set of coordinates
+	 */
+	public Multiset<Double> createXValueSet(int nplaces) {
+		RealArray xCoords = this.getXValuesOfWords();
+		xCoords.format(nplaces);
+		Multiset<Double> xSet = HashMultiset.create();
+		for (double x : xCoords) {
+			xSet.add(new Double(x));
+		}
+		return xSet;
+	}
+
+	public RealArray getXValuesOfWords() {
+		getOrCreateWordList();
+		RealArray xValues = new RealArray();
+		for (SVGWord word : wordList) {
+			double x = new Double(word.getX());
+			xValues.addElement(x);
+		}
+		return xValues;
+	}
+
+
+
 	public SVGPhrase emdashToMinus() {
 		ensureWordList();
 		for (SVGWord word : wordList) {
 			word.emdashToMinus();
 		}
 		return this;
+	}
+
+	public Real2Array getWordsWithHighestXValue() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
