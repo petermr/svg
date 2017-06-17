@@ -2,7 +2,7 @@ package org.xmlcml.graphics.svg;
 
 import nu.xom.*;
 
-
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.*;
 import org.xmlcml.euclid.Angle.Units;
@@ -35,6 +35,9 @@ public class SVGText extends SVGElement {
 	private static final String X = "x";
 
 	private static Logger LOG = Logger.getLogger(SVGText.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
 
 	// just in case there is a scaling problem
 	private static final double _SVG2AWT_FONT_SCALE = 1.0;
@@ -1145,6 +1148,28 @@ public class SVGText extends SVGElement {
 		}
 		return newTexts;
 	}
+
+	/** remove elements with empty content
+	 * remove elements with null content or empty string
+	 * 
+	 * @param removeWhiteSpace if true remove elements with whitespace
+	 * @param textList
+	 * @return
+	 */
+	public static List<SVGText> removeTextsWithEmptyContent(List<SVGText> textList, boolean removeWhiteSpace) {
+		List<SVGText> newTexts = new ArrayList<SVGText>();
+		for (SVGText text : textList) {
+			String value = text.getValue();
+			if (value != null && !"".equals(value) && !"null".equals(value)) {
+				if (removeWhiteSpace && Character.isWhitespace(value.charAt(0))) {
+					newTexts.add(text);
+				}
+			} else {
+			}
+		}
+		return newTexts;
+	}
+
 
 
 
