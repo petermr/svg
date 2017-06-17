@@ -59,9 +59,9 @@ public class ShapeExtractor {
 	public void convertToShapes(List<SVGPath> inputPathList) {
 		this.originalPathList = inputPathList;
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		LOG.debug("time0");
+		LOG.trace("time0");
 		List<List<SVGShape>> shapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(originalPathList);
-		LOG.debug("time1");
+		LOG.trace("time1");
 		for (List<SVGShape> shapeList : shapeListList) {
 			for (SVGShape shape : shapeList) {
 //				LOG.debug("S "+shape.getClass());
