@@ -280,7 +280,6 @@ public class SVGPhrase extends SVGG {
 	}
 
 
-
 	public SVGPhrase emdashToMinus() {
 		ensureWordList();
 		for (SVGWord word : wordList) {
@@ -289,9 +288,5 @@ public class SVGPhrase extends SVGG {
 		return this;
 	}
 
-	public Real2Array getWordsWithHighestXValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
