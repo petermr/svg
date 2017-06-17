@@ -168,28 +168,28 @@ public class Path2ShapeConverter {
 		setPathList(inputPathList);
 		List<List<SVGShape>> shapeListList = new ArrayList<List<SVGShape>>();
 		int id = 0;
-		LOG.debug("cps0");
+		LOG.trace("cps0");
 		if (makeRelativePathsAbsolute ) {
 			makeRelativePathsAbsolute(inputPathList);
 		}
-		LOG.debug("cps1");
+		LOG.trace("cps1");
 		if (removeRedundantLineCommands) {
 			inputPathList = removeRedundantLineCommands(inputPathList);
 		}
-		LOG.debug("cps2");
+		LOG.trace("cps2");
 		if (removeRedundantMoveCommands) {
 			inputPathList = removeRedundantMoveCommands(inputPathList);
 		}
-		LOG.debug(">inputPath>"+inputPathList);
+		LOG.trace(">inputPath>"+inputPathList);
 		List<List<SVGPath>> pathListList;
 		if (splitAtMoveCommands) {
-			LOG.debug("split at moves0");
+			LOG.trace("split at moves0");
 			pathListList = splitAtMoveCommands(inputPathList);
-			LOG.debug("split at moves1");
+			LOG.trace("split at moves1");
 		} else {
 			pathListList = new ArrayList<List<SVGPath>>();
 			for (SVGPath path : inputPathList) {
-				LOG.debug("split at moves?");
+				LOG.trace("split at moves?");
 				List<SVGPath> singlePath = new ArrayList<SVGPath>();
 				singlePath.add(path);
 				pathListList.add(singlePath);
