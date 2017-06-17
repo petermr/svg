@@ -43,8 +43,7 @@
         <dependency>
             <groupId>org.contentmine</groupId>
             <artifactId>euclid</artifactId>
-            <!--<version>${euclid.version}</version>-->
-            <version>2.1.1</version>
+            <version>${euclid.version}</version>
         </dependency>
         <dependency>
             <groupId>org.imgscalr</groupId>
