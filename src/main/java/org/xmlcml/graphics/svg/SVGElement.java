@@ -1550,31 +1550,31 @@ public class SVGElement extends GraphicsElement {
 	}
 
 	public static void removeElementsInsideBox(List<? extends SVGElement> svgList, Real2Range real2Range) {
-		LOG.debug("BB "+svgList.size());
+		LOG.trace("BB "+svgList.size());
 		for (int i = svgList.size() - 1; i >= 0; i--) {
 			SVGElement svgElement = svgList.get(i);
 			if (svgElement.isIncludedBy(real2Range)) {
-				LOG.debug("DETACH INSIDE"+svgElement.toXML());
+				LOG.trace("DETACH INSIDE"+svgElement.toXML());
 				svgList.remove(i);
 			} else {
-				LOG.debug("keep "+svgElement.toXML());
+				LOG.trace("keep "+svgElement.toXML());
 			}
 		}
-		LOG.debug("AA "+svgList.size());
+		LOG.trace("AA "+svgList.size());
 	}
 
 	public static void removeElementsOutsideBox(List<? extends SVGElement> svgList, Real2Range bbox) {
-		LOG.debug("BB "+svgList.size()+"; "+bbox);
+		LOG.trace("BB "+svgList.size()+"; "+bbox);
 		for (int i = svgList.size() - 1; i >= 0; i--) {
 			SVGElement svgElement = svgList.get(i);
 			if (!svgElement.isIncludedBy(bbox)) {
-				LOG.debug("DETACH OUTSIDE"+svgElement.toXML());
+				LOG.trace("DETACH OUTSIDE"+svgElement.toXML());
 				svgList.remove(i);
 			} else {
-				LOG.debug("keep "+svgElement.toXML());
+				LOG.trace("keep "+svgElement.toXML());
 			}
 		}
-		LOG.debug("AA "+svgList.size());
+		LOG.trace("AA "+svgList.size());
 	}
 
 }
