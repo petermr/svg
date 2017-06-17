@@ -111,7 +111,7 @@ public class PlotBox {
 	private static int FORMAT_NDEC = 3; // format numbers; to start with
 	
 	private List<SVGText> textList;
-	
+	// lines
 	private List<SVGLine> horizontalLines;
 	private List<SVGLine> verticalLines;
 	private List<SVGText> horizontalTexts;
@@ -120,19 +120,26 @@ public class PlotBox {
 	private AxialLineList longHorizontalEdgeLines;
 	private AxialLineList longVerticalEdgeLines;
 	private SVGRect fullLineBox;
+	
 	private SVGElement svgElement;
 	private BoxType boxType;
 	private int ndecimal = FORMAT_NDEC;
 	private Real2Array screenXYs;
 	private Real2Array scaledXYs;
-	private String csvContent;
+
 	private ShapeExtractor shapeExtractor;
-	private List<SVGPath> originalPathList;
 	private File svgOutFile;
+	private String csvContent;
 	private File csvOutFile;
 	private boolean removeWhitespace = false;
-	String pathBoxColor;
-	String resolvedOutlineCol = "red";
+	
+	// paths
+	private PathAnnotator pathAnnotator;
+	private List<SVGPath> originalPathList;
+	/** paths after trimming (out of box, duplicates, etc.) */
+	private List<SVGPath> trimmedPathList;
+	/** paths that can't be converted to text or shapes */
+	private List<SVGPath> unconvertedPathList;
 
 	public PlotBox() {
 		setDefaults();
@@ -146,8 +153,6 @@ public class PlotBox {
 			axisArray[axisType.serial] = axis;
 		}
 		ndecimal = FORMAT_NDEC;
-		pathBoxColor = "orange";
-
 	}
 
 	/** MAIN ENTRY METHOD for processing plots.
@@ -162,7 +167,6 @@ public class PlotBox {
 	 * @param svgElement
 	 */
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
-		shapeExtractor = new ShapeExtractor();
 		extractSVGComponents(svgElement);
 		createHorizontalAndVerticalLines();
 		createHorizontalAndVerticalTexts();
@@ -180,18 +184,19 @@ public class PlotBox {
 	}
 
 	private void extractSVGComponents(SVGElement svgElement) {
+		shapeExtractor = new ShapeExtractor();
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
 		SVGDefs.removeDefs(svgElement);
 		originalPathList = SVGPath.extractPaths(svgElement);
-		originalPathList = SVGPath.removePathsWithNegativeY(originalPathList);
-		originalPathList = SVGPath.removeShadowedPaths(originalPathList);
+		trimmedPathList = SVGPath.removePathsWithNegativeY(originalPathList);
+		trimmedPathList = SVGPath.removeShadowedPaths(trimmedPathList);
 		shapeExtractor.debug();
 		LOG.trace("B> "+originalPathList.size());
 		Real2Range positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
 //		SVGElement.removeElementsInsideBox(originalPathList, positiveXBox);
 		SVGElement.removeElementsOutsideBox(originalPathList, positiveXBox);
-		shapeExtractor.convertToShapes(originalPathList);
+		shapeExtractor.convertToShapes(trimmedPathList);
 		shapeExtractor.extractPrimitives(svgElement);
 		shapeExtractor.removeElementsOutsideBox(positiveXBox);
 		
@@ -367,10 +372,9 @@ public class PlotBox {
 		g.appendChild(copyOriginalElements());
 		g.appendChild(shapeExtractor.createSVG());
 		g.appendChild(copyAnnotatedAxes());
-		PathAnnotator pathAnnotator = new PathAnnotator();
+		pathAnnotator = new PathAnnotator();
 		pathAnnotator.analyzePaths(originalPathList);
-		SVGG gg = pathAnnotator.getSVGElement();
-		g.appendChild(gg);
+		g.appendChild(pathAnnotator.getSVGElement());
 		return g;
 	}
 	

@@ -31,7 +31,7 @@ public class ShapeExtractor {
 	private List<SVGPolyline> polylineList;
 	private List<SVGRect> rectList;
 	private List<SVGTriangle> triangleList;
-	private List<SVGShape> shapeList;
+	private List<SVGShape> unknownShapeList;
 
 	public ShapeExtractor() {
 		init();
@@ -39,7 +39,7 @@ public class ShapeExtractor {
 	
 	private void init() {
 		pathList = new ArrayList<SVGPath>();
-		shapeList = new ArrayList<SVGShape>();
+		unknownShapeList = new ArrayList<SVGShape>();
 		
 		circleList = new ArrayList<SVGCircle>();
 		ellipseList = new ArrayList<SVGEllipse>();
@@ -57,14 +57,10 @@ public class ShapeExtractor {
 	 * @param pathList
 	 */
 	public void convertToShapes(List<SVGPath> inputPathList) {
-		this.originalPathList = inputPathList;
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		LOG.trace("time0");
 		List<List<SVGShape>> shapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(originalPathList);
-		LOG.trace("time1");
 		for (List<SVGShape> shapeList : shapeListList) {
 			for (SVGShape shape : shapeList) {
-//				LOG.debug("S "+shape.getClass());
 				if (shape instanceof SVGCircle) {
 					circleList.add((SVGCircle) shape);
 				} else if (shape instanceof SVGEllipse) {
@@ -82,8 +78,8 @@ public class ShapeExtractor {
 				} else if (shape instanceof SVGPath) {
 					pathList.add((SVGPath) shape);
 				} else {
-					LOG.warn("Unexpected shape: "+shape.getClass());
-					shapeList.add(shape);
+					LOG.warn("Unexpected shape: "+shape.getClass()); 
+					unknownShapeList.add(shape);
 				}
 			}
 		}
@@ -122,7 +118,7 @@ public class ShapeExtractor {
 	}
 
 	public List<SVGShape> getShapeList() {
-		return shapeList;
+		return unknownShapeList;
 	}
 
 	public void debug() {
@@ -134,7 +130,7 @@ public class ShapeExtractor {
 		+ "; polygons: "  + polygonList.size() 
 		+ "; polylines: " + polylineList.size() 
 		+ "; rects: "     + rectList.size() 
-		+ "; shapes: "    + shapeList.size() 
+		+ "; shapes: "    + unknownShapeList.size() 
 		);
 	}
 
@@ -174,7 +170,7 @@ public class ShapeExtractor {
 		SVGElement.removeElementsOutsideBox(polygonList, positiveXBox);
 		SVGElement.removeElementsOutsideBox(rectList, positiveXBox);
 		SVGElement.removeElementsOutsideBox(triangleList, positiveXBox);
-		SVGElement.removeElementsOutsideBox(shapeList, positiveXBox);
+		SVGElement.removeElementsOutsideBox(unknownShapeList, positiveXBox);
 	}
 
 	public void removeElementsInsideBox(Real2Range positiveXBox) {
@@ -185,7 +181,7 @@ public class ShapeExtractor {
 		SVGElement.removeElementsInsideBox(polygonList, positiveXBox);
 		SVGElement.removeElementsInsideBox(rectList, positiveXBox);
 		SVGElement.removeElementsInsideBox(triangleList, positiveXBox);
-		SVGElement.removeElementsInsideBox(shapeList, positiveXBox);
+		SVGElement.removeElementsInsideBox(unknownShapeList, positiveXBox);
 	}
 
 }

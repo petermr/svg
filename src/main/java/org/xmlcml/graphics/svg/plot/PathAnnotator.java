@@ -42,9 +42,13 @@ public class PathAnnotator {
 
 	
 	public PathAnnotator() {
-		
+		setDefaults();
 	}
 	
+	private void setDefaults() {
+		pathBoxColor = "orange";
+	}
+
 	public SVGElement analyzePaths(List<SVGPath> pathList) {
 		this.pathList = pathList;
 		SVGG g = new SVGG();
