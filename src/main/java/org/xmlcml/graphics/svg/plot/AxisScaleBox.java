@@ -85,7 +85,12 @@ public class AxisScaleBox extends AxialBox {
 			}
 			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
 			LOG.debug("ROT90 phrase: "+rot90Phrase+"; "+rot90Texts.size());
-			Real2Array coords = rot90Phrase.getWordsWithHighestXValue();
+			if (rot90Phrase != null) {
+				SVGPhrase rot90HighestPhrase = rot90Phrase.getWordsWithHighestXValue(0);
+				LOG.info("**************"+rot90HighestPhrase+"***************");
+			} else {
+				LOG.info("NO rot90 text");
+			}
 			LOG.trace("finished vert");
 		}
 	}
@@ -176,38 +181,43 @@ public class AxisScaleBox extends AxialBox {
 		if (axis.isHorizontal()) {
 			extractHorizontalAxisScalesAndCoords();
 		} else {
-			processVerticalAxis();
+			processVerticalAxisScaleValues();
 		}
 		return this.scalesPhrase;
 	}
 
-	private void processVerticalAxis() {
+	private void processVerticalAxisScaleValues() {
 		String rot90Value = null;
 		if (rot90Texts != null && rot90Texts.size() > 0) {
 			rot90Value = String.valueOf(rot90Texts.get(0).getText());
-		}
-		if (!"null".equals(String.valueOf(rot90Value)) && !rot90Value.trim().equals("")) {
-			LOG.debug("skip processing rot90 text");
-//			processVerticalAxisRotatedChars();
-		}
-		if (true) {
-			processWordLadderScales();
+			LOG.debug("first rot90 scale value: "+rot90Value);
+			if (!"null".equals(String.valueOf(rot90Value)) && !rot90Value.trim().equals("")) {
+				LOG.debug("processing rot90 text");
+				processVerticalAxisRot90Chars();
+				processVerticalAxisWordLadderScales();
+			}
+		} else {
+			processVerticalAxisWordLadderScales();
 		}
 	}
 
-	private void processWordLadderScales() {
-		if (horizontalTexts == null || horizontalTexts.size() == 0) return;
-		LOG.debug("VERTICAL AXIS; Hor (ladder) texts "+horizontalTexts.size());
-		List<SVGWord> wordList = createWordListFromHorizontalTextsWithJoinsIfNecessary();
-		LOG.debug("VERT words0: "+wordList);
-		wordList = removeWordsNotInVerticalRange(axis.getRange(), wordList);
-		LOG.debug("VERT words1: "+wordList);
+	private void processVerticalAxisWordLadderScales() {
+		// if no rot90 we use wordladder
+		if (rot90Phrase == null || rot90Phrase.getOrCreateWordList().size() == 0) {
+			LOG.debug("VERTICAL AXIS; Hor (ladder) texts "+horizontalTexts.size());
+			List<SVGWord> wordList = createWordListFromHorizontalTextsWithJoinsIfNecessary();
+			LOG.debug("VERT words0: "+wordList);
+			wordList = removeWordsNotInVerticalRange(axis.getRange(), wordList);
+			LOG.debug("VERT words1: "+wordList);
+			createVerticalNumberUserAndScreenCoords(wordList);
+			LOG.debug("vertical tickNumberUserCoords from HOR wordladder:"+tickNumberValues);
+		}
+	}
+
+	private void processVerticalAxisRot90Chars() {
+		List<SVGWord> wordList = rot90Phrase.getOrCreateWordList();
 		createVerticalNumberUserAndScreenCoords(wordList);
-		LOG.debug("vertical tickNumberUserCoords:"+tickNumberValues);
-	}
-
-	private void processVerticalAxisRotatedChars() {
-		LOG.debug("VERTICAL rotated characters, Not Yet Written: "+rot90Texts.size());
+		LOG.debug("vertical tickNumberUserCoords from rot90:"+tickNumberValues);
 	}
 
 	private List<SVGWord> removeWordsNotInVerticalRange(RealRange range, List<SVGWord> wordList) {

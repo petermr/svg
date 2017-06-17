@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,7 +19,6 @@ import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
-import org.xmlcml.euclid.util.MultisetUtil;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
@@ -35,9 +35,7 @@ import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.ShapeExtractor;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
 
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Multiset.Entry;
 
 /** creates axes from ticks, scales, titles.
  * 
@@ -130,9 +128,11 @@ public class PlotBox {
 	private String csvContent;
 	private ShapeExtractor shapeExtractor;
 	private List<SVGPath> originalPathList;
-	private Map<String, String> charBySig;
 	private File svgOutFile;
 	private File csvOutFile;
+	private boolean removeWhitespace = false;
+	String pathBoxColor;
+	String resolvedOutlineCol = "red";
 
 	public PlotBox() {
 		setDefaults();
@@ -146,6 +146,8 @@ public class PlotBox {
 			axisArray[axisType.serial] = axis;
 		}
 		ndecimal = FORMAT_NDEC;
+		pathBoxColor = "orange";
+
 	}
 
 	/** MAIN ENTRY METHOD for processing plots.
@@ -177,82 +179,6 @@ public class PlotBox {
 		writeCSV(csvOutFile);
 	}
 
-	private void scaleDataPointsToValues() {
-		scaledXYs = null;
-		AnnotatedAxis xAxis = axisArray[AxisType.BOTTOM_AXIS];
-		AnnotatedAxis yAxis = axisArray[AxisType.LEFT_AXIS];
-		if (xAxis.getScreenToUserScale() == null ||
-				xAxis.getScreenToUserConstant() == null ||
-				yAxis.getScreenToUserScale() == null ||
-				yAxis.getScreenToUserConstant() == null) {
-			LOG.error("Cannot get conversion constants: abort");
-			return;
-		}
-
-		if (screenXYs != null && screenXYs.size() > 0) {
-			scaledXYs = new Real2Array();
-			LOG.debug("screenXY: "+screenXYs);
-			for (int i = 0; i < screenXYs.size(); i++) {
-				Real2 screenXY = screenXYs.get(i);
-				double x = screenXY.getX();
-				double scaledX = xAxis.getScreenToUserScale() * x + xAxis.getScreenToUserConstant();
-				double y = screenXY.getY();
-				double scaledY = yAxis.getScreenToUserScale() * y + yAxis.getScreenToUserConstant();
-				Real2 scaledXY = new Real2(scaledX, scaledY);
-				scaledXYs.add(scaledXY);
-			}
-			scaledXYs.format(ndecimal + 1);
-			LOG.trace("scaledXY: "+scaledXYs);
-		}
-	}
-
-	public void writeCSV(File file) {
-		if (file != null) {
-			try {
-				IOUtils.write(csvContent, new FileOutputStream(file));
-			} catch (IOException e) {
-				throw new RuntimeException("cannot write CSV: ", e);
-			}
-		}
-	}
-
-	private String createCSVContent() {
-		// use CSVBuilder later
-		StringBuilder sb = new StringBuilder();
-		if (scaledXYs != null) {
-			for (Real2 scaledXY : scaledXYs) {
-				sb.append(scaledXY.getX()+","+scaledXY.getY()+"\n");
-			}
-		}
-		csvContent = sb.toString();
-		return csvContent;
-	}
-
-	private void extractDataScreenPoints() {
-		screenXYs = new Real2Array();
-		for (SVGCircle circle : shapeExtractor.getCircleList()) {
-			screenXYs.add(circle.getCXY());
-		}
-		if (screenXYs.size() == 0) {
-			LOG.warn("NO CIRCLES IN PLOT");
-		}
-		if (screenXYs.size() == 0) {
-			// this is really messy
-			LOG.debug("trying short pi/4 lines");
-			for (SVGLine line : shapeExtractor.getLineList()) {
-				Real2 vector = line.getEuclidLine().getVector();
-				double angle = vector.getAngle();
-				double length = vector.getLength();
-				if (length < 3.0) {
-					LOG.debug(angle + " "+ length + " " +line);
-					if (Real.isEqual(angle, 2.35, 0.03)) {
-						screenXYs.add(line.getMidPoint());
-					}
-				}
-			}
-		}
-		screenXYs.format(getNdecimal());
-	}
 	private void extractSVGComponents(SVGElement svgElement) {
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = svgElement;
@@ -261,21 +187,20 @@ public class PlotBox {
 		originalPathList = SVGPath.removePathsWithNegativeY(originalPathList);
 		originalPathList = SVGPath.removeShadowedPaths(originalPathList);
 		shapeExtractor.debug();
-		LOG.debug("B> "+originalPathList.size());
+		LOG.trace("B> "+originalPathList.size());
 		Real2Range positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
 //		SVGElement.removeElementsInsideBox(originalPathList, positiveXBox);
 		SVGElement.removeElementsOutsideBox(originalPathList, positiveXBox);
-		LOG.debug("A> "+originalPathList.size());
 		shapeExtractor.convertToShapes(originalPathList);
-		LOG.debug("C> after convert Shapes");
 		shapeExtractor.extractPrimitives(svgElement);
-		LOG.debug("D> after extractPrimitives");
 		shapeExtractor.removeElementsOutsideBox(positiveXBox);
 		
 		shapeExtractor.debug();
 		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		textList = SVGText.removeTextsWithNegativeY(textList);
+		textList = SVGText.removeTextsWithEmptyContent(textList, removeWhitespace );
 	}
+
 
 
 	private void createHorizontalAndVerticalLines() {
@@ -358,33 +283,83 @@ public class PlotBox {
 		}
 	}
 
-//	private void createCircles(SVGElement svgElement) {
-//		circleList =  SVGCircle.extractSelfAndDescendantCircles(svgElement);
-//		List<SVGCircle> pathCircleList =  SVGPath.createCirclesFromPaths(pathList);
-//		circleList.addAll(pathCircleList);
-//		SVGShape.removeShadowedShapes(circleList);
-//	}
-//
-//	private void createLines(SVGElement svgElement) {
-//		lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
-//		List<SVGLine> pathLineList = SVGPath.createLinesFromPaths(pathList);
-//		lineList.addAll(pathLineList);
-//		lineList = SVGLine.removeLinesWithNegativeY(lineList);
-//		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size());
-//		SVGShape.removeShadowedShapes(lineList);
-//		LOG.debug("paths: "+pathList.size() + "; lines: " + lineList.size());
-//	}
-	
-//	private void createRects(SVGElement svgElement) {
-//		rectList = SVGRect.extractSelfAndDescendantRects(svgElement);
-//		List<SVGRect> pathRectList = SVGPath.createRectsFromPaths(pathList);
-//		rectList.addAll(pathRectList);
-//		rectList = SVGRect.removeRectsWithNegativeY(rectList);
-//		LOG.debug("paths: "+pathList.size() + "; rects: " + rectList.size());
-//		SVGShape.removeShadowedShapes(rectList);
-//		LOG.debug("paths: "+pathList.size() + "; rects: " + rectList.size());
-//	}
-//	
+	private void scaleDataPointsToValues() {
+		scaledXYs = null;
+		AnnotatedAxis xAxis = axisArray[AxisType.BOTTOM_AXIS];
+		AnnotatedAxis yAxis = axisArray[AxisType.LEFT_AXIS];
+		if (xAxis.getScreenToUserScale() == null ||
+				xAxis.getScreenToUserConstant() == null ||
+				yAxis.getScreenToUserScale() == null ||
+				yAxis.getScreenToUserConstant() == null) {
+			LOG.error("Cannot get conversion constants: abort");
+			return;
+		}
+
+		if (screenXYs != null && screenXYs.size() > 0) {
+			scaledXYs = new Real2Array();
+			LOG.debug("screenXY: "+screenXYs);
+			for (int i = 0; i < screenXYs.size(); i++) {
+				Real2 screenXY = screenXYs.get(i);
+				double x = screenXY.getX();
+				double scaledX = xAxis.getScreenToUserScale() * x + xAxis.getScreenToUserConstant();
+				double y = screenXY.getY();
+				double scaledY = yAxis.getScreenToUserScale() * y + yAxis.getScreenToUserConstant();
+				Real2 scaledXY = new Real2(scaledX, scaledY);
+				scaledXYs.add(scaledXY);
+			}
+			scaledXYs.format(ndecimal + 1);
+			LOG.trace("scaledXY: "+scaledXYs);
+		}
+	}
+
+	public void writeCSV(File file) {
+		if (file != null) {
+			try {
+				IOUtils.write(csvContent, new FileOutputStream(file));
+			} catch (IOException e) {
+				throw new RuntimeException("cannot write CSV: ", e);
+			}
+		}
+	}
+
+	private String createCSVContent() {
+		// use CSVBuilder later
+		StringBuilder sb = new StringBuilder();
+		if (scaledXYs != null) {
+			for (Real2 scaledXY : scaledXYs) {
+				sb.append(scaledXY.getX()+","+scaledXY.getY()+"\n");
+			}
+		}
+		csvContent = sb.toString();
+		return csvContent;
+	}
+
+	private void extractDataScreenPoints() {
+		screenXYs = new Real2Array();
+		for (SVGCircle circle : shapeExtractor.getCircleList()) {
+			screenXYs.add(circle.getCXY());
+		}
+		if (screenXYs.size() == 0) {
+			LOG.warn("NO CIRCLES IN PLOT");
+		}
+		if (screenXYs.size() == 0) {
+			// this is really messy
+			LOG.debug("trying short pi/4 lines");
+			for (SVGLine line : shapeExtractor.getLineList()) {
+				Real2 vector = line.getEuclidLine().getVector();
+				double angle = vector.getAngle();
+				double length = vector.getLength();
+				if (length < 3.0) {
+					LOG.debug(angle + " "+ length + " " +line);
+					if (Real.isEqual(angle, 2.35, 0.03)) {
+						screenXYs.add(line.getMidPoint());
+					}
+				}
+			}
+		}
+		screenXYs.format(getNdecimal());
+	}
+
 	// graphics
 	
 	public SVGElement createSVGElement() {
@@ -392,7 +367,10 @@ public class PlotBox {
 		g.appendChild(copyOriginalElements());
 		g.appendChild(shapeExtractor.createSVG());
 		g.appendChild(copyAnnotatedAxes());
-		g.appendChild(analyzePaths());
+		PathAnnotator pathAnnotator = new PathAnnotator();
+		pathAnnotator.analyzePaths(originalPathList);
+		SVGG gg = pathAnnotator.getSVGElement();
+		g.appendChild(gg);
 		return g;
 	}
 	
@@ -417,13 +395,9 @@ public class PlotBox {
 	// getters and setters
 	
 
-//	public List<SVGPath> getPathList() {
-//		return pathList;
-//	}
-//
-//	public void setPathList(List<SVGPath> pathList) {
-//		this.pathList = pathList;
-//	}
+	public List<SVGPath> getOriginalPathList() {
+		return originalPathList;
+	}
 
 	public List<SVGText> getTextList() {
 		return textList;
@@ -534,87 +508,6 @@ public class PlotBox {
 		}
 	}
 	
-	public SVGElement analyzePaths() {
-		createCharBySig();
-		SVGG g = new SVGG();
-		List<SVGShape> allShapes = new ArrayList<SVGShape>();
-		Multiset<String> sigSet = HashMultiset.create();
-		Map<String, SVGPath> pathBySig = new HashMap<String, SVGPath>();
-		for (SVGPath path : shapeExtractor.getPathList()) {
-			path.setStrokeWidth(0.5);
-			String sig = path.getSignature();
-			sigSet.add(sig);
-			if (!pathBySig.containsKey(sig)) {
-				pathBySig.put(sig, path);
-			}
-			Real2Range box = path.getBoundingBox();
-			String c = charBySig.get(sig);
-			if (c != null && !c.equals("")) {
-				Real2 xy = box.getCorners()[0].plus(new Real2(-5, -5));
-				SVGText text = new SVGText(xy, c);
-				text.setFill("red");
-				text.setStrokeWidth(0.1);
-				text.setFontSize(6.0);
-				g.appendChild(text);
-			}
-			SVGRect rect = SVGRect.createFromReal2Range(box);
-			rect.setFill("yellow");
-			rect.setStrokeWidth(0.1);
-			rect.setOpacity(0.3);
-			g.appendChild(rect);
-		}
-		Iterable<Entry<String>> iterable = MultisetUtil.getEntriesSortedByCount(sigSet);
-		List<Entry<String>> list = MultisetUtil.createStringEntryList(iterable);
-		LOG.debug(list);
-		SVGG gg = new SVGG();
-		for (String sig : pathBySig.keySet()) {
-			SVGPath path = pathBySig.get(sig);
-			Real2 xy = path.getBoundingBox().getCorners()[0];
-			xy.plusEquals(new Real2(10., 10.));
-			gg.appendChild(path.copy());
-			SVGText text = new SVGText(xy, sig);
-			text.setFontSize(3.);
-			text.setOpacity(0.5);
-			gg.appendChild(text);
-		}
-		SVGSVG.wrapAndWriteAsSVG(gg, new File("target/chars/sig1.svg"));
-		return g;
-	}
-
-	private Map<String, String> createCharBySig() {
-		charBySig = new HashMap<String, String>();
-		charBySig.put("MLLCLLLL", "1");
-    charBySig.put("MCCLCCCLCLLLCLC", "2");
-    charBySig.put("MCCCCCCCCZ", "8");
-    charBySig.put("MLLCLLLLLC", "r");
-    charBySig.put("MLLLLCLC", "7");
-    charBySig.put("MLCCLLLLLCCLL", "h");
-    charBySig.put("MLCCCCLCCCC", "c");
-    charBySig.put("MCCCCCCLCCZ", "9");
-    charBySig.put("MCCLLLLLLCCCCLCC", "?");
-    charBySig.put("MCCCCLCCCLLCCCLCC", "?");
-    charBySig.put("MCCCCLCCCCZ", "?");
-    charBySig.put("MLLCC", "?");
-    charBySig.put("MCCCCCLCCLZ", "?");
-    charBySig.put("MCCLLLLLCCZ", "?");
-    charBySig.put("MLLLLLLCCLCCL", "?");
-    charBySig.put("MCCCCZ", "?");
-    charBySig.put("MLLCLLLLLLLLLLLCC", "?");
-    charBySig.put("MCLLLC", "?");
-    charBySig.put("MCLLLCZ", "?");
-    charBySig.put("MLLLLLLCLLCCL", "?");
-    charBySig.put("MZ", "?");
-    charBySig.put("MCLCCCLCCCLCCCLCC", "?");
-    charBySig.put("MLCCCCLLLLLCCLLLCCLL", "?");
-    charBySig.put("MLCLLLCL", "?");
-    charBySig.put("MCLLLLLCZ", "?");
-    charBySig.put("MLLCLCCLCCLCCCCCCCZ", "?");
-    charBySig.put("MCCCCL", "?");
-    charBySig.put("MLLLCCCCLLZ", "?");
-		return charBySig;
-		
-	}
-
 	public String getCSV() {
 		return csvContent;
 	}
