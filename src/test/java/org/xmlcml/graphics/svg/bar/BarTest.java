@@ -21,8 +21,8 @@ public class BarTest {
 		String fileRoot = "../bar/art%3A10.1186%2Fs13148-016-0230-5/svg/fig3";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
-		plotBox.readAndCreatePlot(new FileInputStream(inputSVGFile));
-		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
+		plotBox.readGraphicsComponents(inputSVGFile);
+		plotBox.writeProcessedSVG(new File("target/plot/bar/"+fileRoot+".svg"));
 	}
 
 }
