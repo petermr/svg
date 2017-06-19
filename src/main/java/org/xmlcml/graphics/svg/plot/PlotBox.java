@@ -1,13 +1,13 @@
 package org.xmlcml.graphics.svg.plot;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -29,13 +29,12 @@ import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.ShapeExtractor;
+import org.xmlcml.graphics.svg.extract.PathExtractor;
+import org.xmlcml.graphics.svg.extract.ShapeExtractor;
+import org.xmlcml.graphics.svg.extract.TextExtractor;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
-
-import com.google.common.collect.Multiset;
 
 /** creates axes from ticks, scales, titles.
  * 
@@ -110,7 +109,7 @@ public class PlotBox {
 	private static Double BBOX_PADDING = 5.0; // to start with
 	private static int FORMAT_NDEC = 3; // format numbers; to start with
 	
-	private List<SVGText> textList;
+//	public List<SVGText> textList;
 	// lines
 	private List<SVGLine> horizontalLines;
 	private List<SVGLine> verticalLines;
@@ -131,15 +130,13 @@ public class PlotBox {
 	private File svgOutFile;
 	private String csvContent;
 	private File csvOutFile;
-	private boolean removeWhitespace = false;
-	
-	// paths
-	private PathAnnotator pathAnnotator;
-	private List<SVGPath> originalPathList;
-	/** paths after trimming (out of box, duplicates, etc.) */
-	private List<SVGPath> trimmedPathList;
-	/** paths that can't be converted to text or shapes */
-	private List<SVGPath> unconvertedPathList;
+	public boolean removeWhitespace = false;
+		
+	public SVGLogger svgLogger;
+	private PathExtractor pathExtractor;
+	private Real2Range positiveXBox;
+	private TextExtractor textExtractor;
+	private String fileRoot;
 
 	public PlotBox() {
 		setDefaults();
@@ -158,20 +155,30 @@ public class PlotBox {
 	/** MAIN ENTRY METHOD for processing plots.
 	 * 
 	 * @param svgElement
+	 * @throws FileNotFoundException 
 	 */
-	public void readAndCreatePlot(InputStream inputStream) {
-		readAndCreateCSVPlot(SVGUtil.parseToSVGElement(inputStream));
+	public void readAndCreateCSVPlot(File file) throws FileNotFoundException {
+		InputStream inputStream = new FileInputStream(file);
+		this.fileRoot = FilenameUtils.getName(file.toString());
+		readAndCreateCSVPlot(inputStream);
 	}
 	/** MAIN ENTRY METHOD for processing plots.
 	 * 
-	 * @param svgElement
+	 * @param inputStream
 	 */
+	private void readAndCreateCSVPlot(InputStream inputStream) {
+		if (inputStream == null) {
+			throw new RuntimeException("Null input stream");
+		}
+		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
+		if (svgElement == null) {
+			throw new RuntimeException("Null svgElement");
+		}
+		readAndCreateCSVPlot(svgElement);
+	}
+
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
-		extractSVGComponents(svgElement);
-		createHorizontalAndVerticalLines();
-		createHorizontalAndVerticalTexts();
-		makeLongHorizontalAndVerticalEdges();
-		makeFullLineBoxAndRanges();
+		extractGraphicsElements(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
 		extractScaleTextsAndMakeScales();
@@ -183,30 +190,115 @@ public class PlotBox {
 		writeCSV(csvOutFile);
 	}
 
-	private void extractSVGComponents(SVGElement svgElement) {
-		shapeExtractor = new ShapeExtractor();
-		LOG.debug("********* made SVG components *********");
-		this.svgElement = svgElement;
-		SVGDefs.removeDefs(svgElement);
-		originalPathList = SVGPath.extractPaths(svgElement);
-		trimmedPathList = SVGPath.removePathsWithNegativeY(originalPathList);
-		trimmedPathList = SVGPath.removeShadowedPaths(trimmedPathList);
-		shapeExtractor.debug();
-		LOG.trace("B> "+originalPathList.size());
-		Real2Range positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
-//		SVGElement.removeElementsInsideBox(originalPathList, positiveXBox);
-		SVGElement.removeElementsOutsideBox(originalPathList, positiveXBox);
-		shapeExtractor.convertToShapes(trimmedPathList);
-		shapeExtractor.extractPrimitives(svgElement);
-		shapeExtractor.removeElementsOutsideBox(positiveXBox);
-		
-		shapeExtractor.debug();
-		textList = SVGText.extractSelfAndDescendantTexts(svgElement);
-		textList = SVGText.removeTextsWithNegativeY(textList);
-		textList = SVGText.removeTextsWithEmptyContent(textList, removeWhitespace );
+	/** ENTRY METHOD for processing figures.
+	 * 
+	 * @param svgElement
+	 */
+	public void readGraphicsComponents(File inputFile) {
+		if (inputFile == null) {
+			throw new RuntimeException("Null input file");
+		}
+		if (!inputFile.exists() || inputFile.isDirectory()) {
+			throw new RuntimeException("nonexistent file or isDirectory "+inputFile);
+		}
+		fileRoot = inputFile.getName();
+		try {
+			readGraphicsComponents(new FileInputStream(inputFile));
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot read inputFile", e);
+		}
+	}
+	
+	/** ENTRY METHOD for processing figures.
+	 * 
+	 * @param svgElement
+	 */
+	public void readGraphicsComponents(InputStream inputStream) {
+		extractGraphicsElements(inputStream);
+	}
+	/** extract graphics components from Stream.
+	 * uses extractGraphicsElements(SVGElement)
+	 * 
+	 * @param inputStream
+	 */
+	private void extractGraphicsElements(InputStream inputStream) {
+		if (inputStream == null) {
+			throw new RuntimeException("Null input stream");
+		}
+		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
+		if (svgElement == null) {
+			throw new RuntimeException("Null svgElement");
+		}
+		extractGraphicsElements(svgElement);
 	}
 
+	private void extractGraphicsElements(SVGElement svgElement) {
+		extractSVGComponents(svgElement);
+		createHorizontalAndVerticalLines();
+		createHorizontalAndVerticalTexts();
+		makeLongHorizontalAndVerticalEdges();
+		makeFullLineBoxAndRanges();
+	}
 
+	private void extractSVGComponents(SVGElement svgElem) {
+		svgLogger = new SVGLogger();
+		LOG.debug("********* made SVG components *********");
+		this.svgElement = (SVGElement) svgElem.copy();
+		SVGG g;
+		SVGG gg = new SVGG();
+		
+		 // is this a good idea? These are clipping boxes. 
+		 SVGDefs.removeDefs(svgElement);
+		
+		positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
+		removeEmptyTextElements();
+		removeNegativeXorYElements();
+		
+		pathExtractor = new PathExtractor(this);
+		pathExtractor.extractPaths(svgElement);
+		g = pathExtractor.debug("target/paths/"+fileRoot+".debug.svg");
+//		gg.appendChild(g.copy());
+		
+		shapeExtractor = new ShapeExtractor(this);
+		List<SVGPath> currentPathList = pathExtractor.getCurrentPathList();
+		shapeExtractor.extractShapes(currentPathList, svgElement);
+		g = shapeExtractor.debug("target/shapes/"+fileRoot+".debug.svg");
+		gg.appendChild(g.copy());
+		
+		textExtractor = new TextExtractor(this);
+		textExtractor.extractTexts(svgElement);
+		g = textExtractor.debug("target/texts/"+fileRoot+".debug.svg");
+		gg.appendChild(g.copy());
+		SVGSVG.wrapAndWriteAsSVG(gg, new File("target/plot/"+fileRoot+".debug.svg"));
+	}
+
+	/** some plots have publisher cruft outside the limits, especially negative Y.
+	 * remove these elements from svgElement
+	 * 
+	 */
+	private void removeNegativeXorYElements() {
+		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(svgElement);
+		for (int i = texts.size() - 1; i >= 0; i--) {
+			SVGText text = texts.get(i);
+			Real2 xy = text.getXY();
+			if (xy.getX() < 0.0 || xy.getY() < 0.0) {
+				texts.remove(i);
+				text.detach();
+			}
+		}
+	}
+
+	private void removeEmptyTextElements() {
+		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(svgElement);
+		for (int i = texts.size() - 1; i >= 0; i--) {
+			SVGText text = texts.get(i);
+			String s = text.getValue();
+			if (s == null || "".equals(s.trim())) {
+				texts.remove(i);
+				text.detach();
+			}
+		}
+	}
 
 	private void createHorizontalAndVerticalLines() {
 		LOG.debug("********* make Horizontal/Vertical lines *********");
@@ -216,8 +308,8 @@ public class PlotBox {
 
 	private void createHorizontalAndVerticalTexts() {
 		LOG.debug("********* make Horizontal/Vertical texts *********");
-		horizontalTexts = SVGText.findHorizontalOrVerticalTexts(textList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
-		verticalTexts = SVGText.findHorizontalOrVerticalTexts(textList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+		horizontalTexts = SVGText.findHorizontalOrRot90Texts(textExtractor.getTextList(), LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+		verticalTexts = SVGText.findHorizontalOrRot90Texts(textExtractor.getTextList(), LineDirection.VERTICAL, AnnotatedAxis.EPS);
 		
 		StringBuilder sb = new StringBuilder();
 		for (SVGText verticalText : verticalTexts) {
@@ -370,18 +462,16 @@ public class PlotBox {
 	public SVGElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
-		g.appendChild(shapeExtractor.createSVG());
+		g.appendChild(shapeExtractor.createSVGAnnotations());
 		g.appendChild(copyAnnotatedAxes());
-		pathAnnotator = new PathAnnotator();
-		pathAnnotator.analyzePaths(originalPathList);
-		g.appendChild(pathAnnotator.getSVGElement());
+		g.appendChild(pathExtractor.createSVGAnnotation().copy());
 		return g;
 	}
 	
 	private SVGG copyOriginalElements() {
 		SVGG g = new SVGG();
-		ShapeExtractor.addList(g, originalPathList);
-		ShapeExtractor.addList(g, textList);
+		ShapeExtractor.addList(g, new ArrayList<SVGPath>(pathExtractor.getOriginalPathList()));
+		ShapeExtractor.addList(g, new ArrayList<SVGText>(textExtractor.getTextList()));
 		g.setStroke("pink");
 		return g;
 	}
@@ -399,17 +489,13 @@ public class PlotBox {
 	// getters and setters
 	
 
-	public List<SVGPath> getOriginalPathList() {
-		return originalPathList;
-	}
-
-	public List<SVGText> getTextList() {
-		return textList;
-	}
-
-	public void setTextList(List<SVGText> textList) {
-		this.textList = textList;
-	}
+//	public List<SVGText> getTextList() {
+//		return textList;
+//	}
+//
+//	public void setTextList(List<SVGText> textList) {
+//		this.textList = textList;
+//	}
 
 //	public List<SVGLine> getLineList() {
 //		return lineList;
@@ -508,7 +594,8 @@ public class PlotBox {
 
 	public void writeProcessedSVG(File file) {
 		if (file != null) {
-			SVGSVG.wrapAndWriteAsSVG(this.createSVGElement(), file);
+			SVGElement processedSVGElement = this.createSVGElement();
+			SVGSVG.wrapAndWriteAsSVG(processedSVGElement, file);
 		}
 	}
 	
@@ -530,6 +617,18 @@ public class PlotBox {
 
 	public void setCsvOutFile(File csvOutFile) {
 		this.csvOutFile = csvOutFile;
+	}
+
+	public SVGLogger getSvgLogger() {
+		return svgLogger;
+	}
+
+	public Real2Range getPositiveXBox() {
+		return positiveXBox;
+	}
+
+	public boolean isRemoveWhitespace() {
+		return removeWhitespace;
 	}
 
 }

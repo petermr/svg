@@ -221,10 +221,14 @@ public class Path2ShapeConverter {
 	}
 
 	private void makeRelativePathsAbsolute(List<SVGPath> pathList) {
-		for (SVGPath path : pathList) {
-			String s = path.getDString();
-			LOG.trace("path absolute: "+s.substring(0, Math.min(100, s.length()))+"; "+s.length());
-			path.makeRelativePathsAbsolute();
+		if (pathList == null) {
+			LOG.warn(" ****** Empty path list");
+		} else {
+			for (SVGPath path : pathList) {
+				String s = path.getDString();
+				LOG.trace("path absolute: "+s.substring(0, Math.min(100, s.length()))+"; "+s.length());
+				path.makeRelativePathsAbsolute();
+			}
 		}
 	}
 
@@ -507,6 +511,11 @@ public class Path2ShapeConverter {
 	}
 
 	private SVGShape createRectOrAxialLine(SVGPath path, double eps) {
+//		String sig = path.getSignature();
+//		LOG.debug(sig);
+//		if ("MLLLZ".equals(sig)) {
+//			LOG.debug("sig: "+sig);
+//		}
 		SVGShape shape;
 		SVGRect rect = path.createRectangle(eps);
 		SVGLine line = null;
