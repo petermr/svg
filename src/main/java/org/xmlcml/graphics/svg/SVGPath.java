@@ -889,6 +889,12 @@ public class SVGPath extends SVGShape {
 	}
 
 
+	public void getOrCreateSignature() {
+		if (getAttribute("signature") == null) {
+			addAttribute(new Attribute("signature", getSignature()));
+		}
+	}
+
 	/** some diagrams contain multiple copies of a primitive with different attributes. Remove all but one.
 	 * Example
 	 * 
@@ -933,6 +939,12 @@ public class SVGPath extends SVGShape {
 			}
 		}
 		return newPaths;
+	}
+
+	public static void addSignatures(List<SVGPath> pathList) {
+		for (SVGPath path : pathList) {
+			path.getOrCreateSignature();
+		}
 	}
 
 

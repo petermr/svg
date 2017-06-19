@@ -71,6 +71,9 @@ public class SVGText extends SVGElement {
 	private static final double MIN_FONT_SIZE = 0.01;
 	private static final Double DEFAULT_CHARACTER_WIDTH = 500.0;
 
+	public Angle ROT90 = new Angle(Math.PI/2.0, Units.RADIANS);
+	public double ANGLE_EPS = 0.01;
+
 	// these are all when text is used for concatenation, etc.
 	private double estimatedHorizontallength = Double.NaN; 
 	private double currentFontSize = Double.NaN;
@@ -1104,7 +1107,7 @@ public class SVGText extends SVGElement {
 		return textList;
 	}
 
-	public static List<SVGText> findHorizontalOrVerticalTexts(List<SVGText> texts, LineDirection direction, double eps) {
+	public static List<SVGText> findHorizontalOrRot90Texts(List<SVGText> texts, LineDirection direction, double eps) {
 		List<SVGText> textList = new ArrayList<SVGText>();
 		Angle angle = null;
 		if (direction.isHorizontal()) {
@@ -1170,7 +1173,10 @@ public class SVGText extends SVGElement {
 		return newTexts;
 	}
 
-
+	public boolean isRot90() {
+		boolean rot90 = ROT90.isEqualTo(this.getAngleOfRotation(), ANGLE_EPS);
+		return rot90;
+	}
 
 
 }
