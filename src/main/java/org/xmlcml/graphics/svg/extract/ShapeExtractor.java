@@ -1,20 +1,33 @@
-package org.xmlcml.graphics.svg;
+package org.xmlcml.graphics.svg.extract;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.graphics.svg.SVGCircle;
+import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.SVGEllipse;
+import org.xmlcml.graphics.svg.SVGG;
+import org.xmlcml.graphics.svg.SVGLine;
+import org.xmlcml.graphics.svg.SVGPath;
+import org.xmlcml.graphics.svg.SVGPolygon;
+import org.xmlcml.graphics.svg.SVGPolyline;
+import org.xmlcml.graphics.svg.SVGRect;
+import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
+import org.xmlcml.graphics.svg.plot.PlotBox;
 
 /** extracts and tidies shapes read from SVG.
  * 
  * @author pm286
  *
  */
-public class ShapeExtractor {
+public class ShapeExtractor extends AbstractExtractor {
 	private static final Logger LOG = Logger.getLogger(ShapeExtractor.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
@@ -32,8 +45,9 @@ public class ShapeExtractor {
 	private List<SVGRect> rectList;
 	private List<SVGTriangle> triangleList;
 	private List<SVGShape> unknownShapeList;
-
-	public ShapeExtractor() {
+	
+	public ShapeExtractor(PlotBox plotBox) {
+		super(plotBox);
 		init();
 	}
 	
@@ -54,11 +68,11 @@ public class ShapeExtractor {
 	 * if it can convert to a shape, adds to the appropriate list, else adds as path/s
 	 * to the pathList
 	 * 
-	 * @param pathList
+	 * @param paths
 	 */
-	public void convertToShapes(List<SVGPath> inputPathList) {
+	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		List<List<SVGShape>> shapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(originalPathList);
+		List<List<SVGShape>> shapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
 		for (List<SVGShape> shapeList : shapeListList) {
 			for (SVGShape shape : shapeList) {
 				if (shape instanceof SVGCircle) {
@@ -76,13 +90,15 @@ public class ShapeExtractor {
 				} else if (shape instanceof SVGTriangle) {
 					triangleList.add((SVGTriangle) shape);
 				} else if (shape instanceof SVGPath) {
-					pathList.add((SVGPath) shape);
+					this.pathList.add((SVGPath) shape);
+					LOG.info("unprocessed shape: "+shape);
 				} else {
 					LOG.warn("Unexpected shape: "+shape.getClass()); 
 					unknownShapeList.add(shape);
 				}
 			}
 		}
+		return;
 	}
 
 	public List<SVGPath> getPathList() {
@@ -123,7 +139,7 @@ public class ShapeExtractor {
 
 	public void debug() {
 		LOG.debug(
-				"paths: " + pathList.size() 
+		"paths: " + pathList.size() 
 		+ "; circles: "   + circleList.size()
 		+ "; ellipses: "  + ellipseList.size()
 		+ "; lines: "     + lineList.size() 
@@ -134,7 +150,7 @@ public class ShapeExtractor {
 		);
 	}
 
-	public SVGG createSVG() {
+	public SVGG createSVGAnnotations() {
 		SVGG g = new SVGG();
 		addList(g, polylineList);
 		addList(g, circleList);
@@ -148,7 +164,7 @@ public class ShapeExtractor {
 		}
 	}
 
-	public void extractPrimitives(SVGElement svgElement) {
+	public void extractRawPrimitives(SVGElement svgElement) {
 		List<SVGCircle> circles = SVGCircle.extractSelfAndDescendantCircles(svgElement);
 		circleList.addAll(circles);
 		List<SVGEllipse> ellipses = SVGEllipse.extractSelfAndDescendantEllipses(svgElement);
@@ -159,6 +175,8 @@ public class ShapeExtractor {
 		polygonList.addAll(polygons);
 		List<SVGPolyline> polylines = SVGPolyline.extractSelfAndDescendantPolylines(svgElement);
 		polylineList.addAll(polylines);
+		List<SVGRect> rects = SVGRect.extractSelfAndDescendantRects(svgElement);
+		rectList.addAll(rects);
 		
 	}
 
@@ -183,5 +201,64 @@ public class ShapeExtractor {
 		SVGElement.removeElementsInsideBox(triangleList, positiveXBox);
 		SVGElement.removeElementsInsideBox(unknownShapeList, positiveXBox);
 	}
+
+	public void extractShapes(List<SVGPath> pathList, SVGElement svgElement) {
+		convertToShapes(pathList);
+		svgLogger.write("after convertToShapes", pathList);
+		extractRawPrimitives(svgElement);
+		removeElementsOutsideBox(plotBox.getPositiveXBox());
+		
+		debug();
+	}
+
+	public SVGG debug(String outFilename) {
+		SVGG g = new SVGG();
+//		debug(g, originalPathList, "black", "yellow", 0.3);
+//		private List<SVGPath> pathList;
+		// derived
+		debug(g, rectList, "black", "#ffff77", 0.2);
+		debug(g, polygonList, "black", "orange", 0.3);
+		debug(g, triangleList, "black", "#ffeeff", 0.3);
+		debug(g, ellipseList, "black", "red", 0.3);
+		debug(g, lineList, "cyan", "red", 0.3);
+		debug(g, polylineList, "magenta", "green", 0.3);
+		debug(g, circleList, "blue", "yellow", 0.3); // highest priority
+		debug(g, pathList, "purple", "pink", 0.3);
+		debug(g, unknownShapeList, "cyan", "orange", 0.3);
+		File outFile = new File(outFilename);
+		SVGSVG.wrapAndWriteAsSVG(g, outFile);
+		LOG.debug("wrote shapes: "+outFile.getAbsolutePath());
+		return g;
+	}
+
+	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity) {
+		for (SVGElement e : elementList) {
+			SVGShape shape = (SVGShape) e.copy();
+			Double strokeWidth = shape.getStrokeWidth();
+			if (strokeWidth == null) strokeWidth = 0.2;
+			if (shape instanceof SVGLine) {
+				SVGLine line1 = (SVGLine) shape.copy();
+				strokeWidth = line1.getStrokeWidth();
+				styleAndDraw(g, stroke, "none", opacity, 2*strokeWidth, line1);
+				styleAndDraw(g, fill, "none", opacity, strokeWidth, shape);
+			} else if (shape instanceof SVGRect) {
+				strokeWidth = Math.max(0.2, strokeWidth);
+				styleAndDraw(g, stroke, fill, opacity, strokeWidth, shape);
+			} else {
+				styleAndDraw(g, stroke, fill, opacity, strokeWidth, shape);
+			}
+		}
+	}
+
+	private void styleAndDraw(SVGG g, String stroke, String fill, double opacity, double strokeWidth, SVGShape shape) {
+		shape.setStroke(stroke);
+		shape.setStrokeWidth(strokeWidth);
+		shape.setFill(fill);
+		shape.setOpacity(opacity);
+		shape.addTitle(shape.getClass().getSimpleName());
+		g.appendChild(shape);
+		
+	}
+
 
 }

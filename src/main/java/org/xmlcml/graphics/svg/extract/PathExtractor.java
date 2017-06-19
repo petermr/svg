@@ -1,6 +1,8 @@
-package org.xmlcml.graphics.svg.plot;
+package org.xmlcml.graphics.svg.extract;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.plot.PlotBox;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -26,9 +29,9 @@ import com.google.common.collect.Multiset.Entry;
  * @author pm286
  *
  */
-public class PathAnnotator {
+public class PathExtractor extends AbstractExtractor{
 
-	private static final Logger LOG = Logger.getLogger(PathAnnotator.class);
+	private static final Logger LOG = Logger.getLogger(PathExtractor.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -40,9 +43,40 @@ public class PathAnnotator {
 	private String pathBoxColor;
 	private String resolvedOutlineCol = "red";
 
-	
-	public PathAnnotator() {
+	private Real2Range positiveXBox;
+	private List<SVGPath> originalPathList;
+	/** paths after trimming (out of box, duplicates, etc.) */
+	private List<SVGPath> nonNegativePathList;
+	/** paths that can't be converted to text or shapes */
+	private List<SVGPath> unconvertedPathList;
+	private List<SVGPath> trimmedShadowedPathList;
+	private List<SVGPath> currentPathList;
+	private List<SVGPath> positiveBoxPathList;
+
+	public void setPositiveXBox(Real2Range positiveXBox) {
+		this.positiveXBox = positiveXBox;
+		
+	}
+
+	public void extractPaths(SVGElement svgElement) {
+		this.originalPathList = SVGPath.extractPaths(svgElement);
+		SVGPath.addSignatures(originalPathList);
+		svgLogger.write("originalPathList", originalPathList);
+		positiveBoxPathList = new ArrayList<SVGPath>(originalPathList);
+		SVGElement.removeElementsOutsideBox(positiveBoxPathList, positiveXBox);
+		svgLogger.write("positiveBoxPathList", positiveBoxPathList);
+		nonNegativePathList = SVGPath.removePathsWithNegativeY(positiveBoxPathList);
+		svgLogger.write("nonNegativePathList", nonNegativePathList);
+		trimmedShadowedPathList = SVGPath.removeShadowedPaths(nonNegativePathList);
+//		currentPathList = trimmedShadowedPathList;
+		currentPathList = originalPathList;
+		svgLogger.write("trimmedShadowedPathList", trimmedShadowedPathList);
+	}
+
+	public PathExtractor(PlotBox plotBox) {
 		setDefaults();
+		this.plotBox = plotBox;
+		this.svgLogger = plotBox.getSvgLogger();
 	}
 	
 	private void setDefaults() {
@@ -66,7 +100,7 @@ public class PathAnnotator {
 		g.appendChild(gg);
 		Iterable<Entry<String>> iterable = MultisetUtil.getEntriesSortedByCount(sigSet);
 		List<Entry<String>> list = MultisetUtil.createStringEntryList(iterable);
-		PlotBox.LOG.debug("> "+list);
+		LOG.debug("> "+list);
 		SVGG ggg = annotatePathsWithSignatures();
 //		File pathsSvgFile = plotBox.svgOutFile != null ? new File(plotBox.svgOutFile+"paths.svg") :
 //			new File("target/paths/paths.svg");
@@ -116,15 +150,17 @@ public class PathAnnotator {
 			rect.setFill(pathBoxColor);
 			rect.setStrokeWidth(0.2);
 			rect.setOpacity(0.3);
-			PlotBox.LOG.debug("****************** ADD RECT ****************");
+			LOG.debug("****************** ADD RECT ****************");
 			g.appendChild(rect);
 		}
 		return g;
 	}
 
-	public SVGG getSVGElement() {
-		// TODO Auto-generated method stub
-		return null;
+	public SVGG createSVGAnnotation() {
+		SVGG g = new SVGG();
+		
+		g.setClassName("pathAnnotation NYI");
+		return g;
 	}
 	
 	private Map<String, String> createCharBySig() {
@@ -159,6 +195,39 @@ public class PathAnnotator {
     charBySig.put("MLLLCCCCLLZ", "?");
 		return charBySig;
 		
+	}
+
+	public List<SVGPath> getCurrentPathList() {
+		return currentPathList;
+	}
+
+	public Collection<? extends SVGPath> getOriginalPathList() {
+		return originalPathList;
+	}
+
+	public SVGG debug(String outFilename) {
+		SVGG g = new SVGG();
+		debug(g, originalPathList, "black", "yellow", 0.3);
+		debug(g, positiveBoxPathList, "black", "red", 0.3);
+		debug(g, nonNegativePathList, "black", "green", 0.3);
+		debug(g, currentPathList, "black", "blue", 0.3);
+		debug(g, trimmedShadowedPathList, "black", "cyan", 0.3);
+		File outFile = new File(outFilename);
+		SVGSVG.wrapAndWriteAsSVG(g, outFile);
+		LOG.debug("wrote paths: "+outFile.getAbsolutePath());
+		return g;
+	}
+
+	private void debug(SVGG g, List<SVGPath> pathList, String stroke, String fill, double opacity) {
+		for (SVGPath p : pathList) {
+			SVGPath path = (SVGPath) p.copy();
+			path.setStroke(stroke);
+			path.setStrokeWidth(0.2);
+			path.setFill(fill);
+			path.setOpacity(opacity);
+			path.addTitle(p.getSignature());
+			g.appendChild(path);
+		}
 	}
 
 
