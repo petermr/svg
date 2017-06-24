@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.manifest;
+package org.xmlcml.graphics.svg.store;
 
 /** a collection of graphics objects.
  * often a page or a box within the page.
