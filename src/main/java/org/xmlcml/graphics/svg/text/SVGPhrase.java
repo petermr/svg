@@ -110,18 +110,22 @@ public class SVGPhrase extends SVGG {
 	}
 
 	public static SVGPhrase createPhraseFromCharacters(List<SVGText> textList) {
+		return SVGPhrase.createPhraseFromCharacters(textList, false);
+	}
+
+	public static SVGPhrase createPhraseFromCharacters(List<SVGText> textList, boolean isRot90) {
 		SVGPhrase phrase = null;
-		LOG.debug("phrase: "+textList);
+		LOG.debug("phrase: "+isRot90+": "+textList);
 		if (textList != null && textList.size() > 0) {
 			phrase = new SVGPhrase();
-			SVGWord word = new SVGWord(textList.get(0));
+			SVGWord word = new SVGWord(textList.get(0), isRot90);
 			phrase.addTrailingWord(word);
 			for (int i = 1; i < textList.size(); i++) {
 				SVGText text = textList.get(i); 
 				if (word.canAppend(text)) {
 					word.append(text);
 				} else {
-					word = new SVGWord(text);
+					word = new SVGWord(text, isRot90);
 					phrase.addTrailingWord(word);
 				}
 			}
@@ -280,10 +284,10 @@ public class SVGPhrase extends SVGG {
 	}
 
 
-	public SVGPhrase emdashToMinus() {
+	public SVGPhrase normalizeMinus() {
 		ensureWordList();
 		for (SVGWord word : wordList) {
-			word.emdashToMinus();
+			word.normalizeMinus();
 		}
 		return this;
 	}
