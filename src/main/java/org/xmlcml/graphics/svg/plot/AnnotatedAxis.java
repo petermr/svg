@@ -38,7 +38,7 @@ public class AnnotatedAxis {
 		LOG.setLevel(Level.DEBUG);
 	}
 	
-	static double EPS = 0.01;
+	public static double EPS = 0.01;
 	LineDirection lineDirection;
 	RealRange range;
 	SVGLine singleLine;
@@ -135,8 +135,8 @@ public class AnnotatedAxis {
 
 	SVGLine getOrCreateSingleLine() {
 		if (singleLine == null) {
-			if (plotBox.getFullLineBox() != null) {
-				Real2Range bbox = plotBox.getFullLineBox().getBoundingBox();
+			if (plotBox.getSVGStore().getFullLineBox() != null) {
+				Real2Range bbox = plotBox.getSVGStore().getFullLineBox().getBoundingBox();
 				Real2[] corners = bbox.getCorners();
 				if (AxisType.TOP.equals(axisType)) {
 					singleLine = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
@@ -295,7 +295,7 @@ public class AnnotatedAxis {
 	}
 
 	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		AxisTickBox.LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getFullLineBox());
+		AxisTickBox.LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
 		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);
