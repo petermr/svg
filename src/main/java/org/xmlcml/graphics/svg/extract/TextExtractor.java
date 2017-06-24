@@ -40,7 +40,8 @@ public class TextExtractor extends AbstractExtractor {
 		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
 		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, plotBox.isRemoveWhitespace());
-		this.currentTextList = nonNegativeNonEmptyTextList;
+//		this.currentTextList = nonNegativeNonEmptyTextList;
+		this.currentTextList = originalTextList;
 	}
 
 	public List<SVGText> getTextList() {
@@ -53,6 +54,8 @@ public class TextExtractor extends AbstractExtractor {
 		debug(g, originalTextList,"yellow",  "black", 0.3);
 		debug(g, nonNegativeYTextList, "red", "black", 0.3);
 		debug(g, nonNegativeNonEmptyTextList, "green", "black", 0.3);
+		drawBox(g, "green", 2.0);
+
 		File outFile = new File(outFilename);
 		SVGSVG.wrapAndWriteAsSVG(g, outFile);
 		LOG.debug("wrote shapes: "+outFile.getAbsolutePath());
@@ -98,4 +101,10 @@ public class TextExtractor extends AbstractExtractor {
 			g.appendChild(text);
 		}
 	}
+	
+	public Real2Range getBoundingBox() {
+		boundingBox = SVGElement.createBoundingBox(originalTextList);
+		return boundingBox;
+	}
+
 }

@@ -52,7 +52,6 @@ public class PathExtractor extends AbstractExtractor{
 	private List<SVGPath> trimmedShadowedPathList;
 	private List<SVGPath> currentPathList;
 	private List<SVGPath> positiveBoxPathList;
-
 	public void setPositiveXBox(Real2Range positiveXBox) {
 		this.positiveXBox = positiveXBox;
 		
@@ -228,6 +227,11 @@ public class PathExtractor extends AbstractExtractor{
 			path.addTitle(p.getSignature());
 			g.appendChild(path);
 		}
+	}
+
+	public Real2Range getBoundingBox() {
+		boundingBox = SVGElement.createBoundingBox(originalPathList);
+		return boundingBox;
 	}
 
 

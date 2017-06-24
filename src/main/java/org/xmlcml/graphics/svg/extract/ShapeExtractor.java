@@ -222,7 +222,7 @@ public class ShapeExtractor extends AbstractExtractor {
 		debug(g, ellipseList, "black", "red", 0.3);
 		debug(g, lineList, "cyan", "red", 0.3);
 		debug(g, polylineList, "magenta", "green", 0.3);
-		debug(g, circleList, "blue", "yellow", 0.3); // highest priority
+		debug(g, circleList, "black", "blue", 0.3); // highest priority
 		debug(g, pathList, "purple", "pink", 0.3);
 		debug(g, unknownShapeList, "cyan", "orange", 0.3);
 		File outFile = new File(outFilename);
@@ -259,6 +259,12 @@ public class ShapeExtractor extends AbstractExtractor {
 		g.appendChild(shape);
 		
 	}
+
+	public Real2Range getBoundingBox() {
+		boundingBox = SVGElement.createBoundingBox(originalPathList);
+		return boundingBox;
+	}
+
 
 
 }
