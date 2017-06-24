@@ -67,33 +67,6 @@ public class PlotBoxTest {
 	}
 	
 	@Test
-	/** several bars
-	 * 
-	 * @throws IOException
-	 */
-	public void testBarPlot() throws IOException {
-		String fileRoot = "barchart1.10";
-		PlotBox plotBox = new PlotBox();
-		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
-		plotBox.readAndCreateCSVPlot(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
-	}
-	
-	@Test
-	/** two simple bars
-	 * 
-	 * @throws IOException
-	 */
-	public void testBarPlot1() throws IOException {
-		String fileRoot = "figure4.2";
-		PlotBox plotBox = new PlotBox();
-		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
-		plotBox.readAndCreateCSVPlot(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
-	}
-	
-	
-	@Test
 	public void testFunnelPlot1() throws IOException {
 		String fileRoot = "6400831a1";
 		PlotBox plotBox = new PlotBox();
@@ -133,7 +106,6 @@ public class PlotBoxTest {
 				"10.21053_ceo.2016.9.1.1_2",
 				"10.21053_ceo.2016.9.1.1_3",
 				"10.21053_ceo.2016.9.1.1_4",
-				"10.2147_AMEP.S116699_1",
 				"10.2147_BCTT.S94617_1",
 				"10.3349_ymj.2016.57.5.1260_1",
 				"10.3349_ymj.2016.57.5.1260_2",
@@ -147,12 +119,56 @@ public class PlotBoxTest {
 			PlotBox plotBox = new PlotBox();
 			File inputSVGFile = new File(TILBURG_DIR, root+".svg");
 			try {
+				plotBox.setCsvOutFile(new File("target/plot/"+root+".csv"));
+				plotBox.setSvgOutFile(new File("target/plot/"+root+"0.svg"));
 				plotBox.readAndCreateCSVPlot(inputSVGFile);
-				plotBox.writeProcessedSVG(new File("target/plot/tilburg/"+root+".svg"));
+//				plotBox.writeProcessedSVG(new File("target/plot/tilburg/"+root+".svg"));
 			} catch (Exception e) {
 				LOG.error("Exception in "+root, e);
 			}
 
+		}
+	}
+	
+	@Test
+	public void testTilburgVector0() throws IOException {
+		File TILBURG_DIR = new File(Fixtures.PLOT_DIR, "tilburgVectors");
+		String root =
+//				"10.1186_s12885-016-2685-3_1"
+//			"10.1186_s12889-016-3083-0_1"
+//				"10.1186_s13027-016-0058-9_1"
+//				"10.1186_s40064-016-3064-x_1" // 
+//				"10.1186_s40064-016-3064-x_2"
+//				"10.1186_s40064-016-3064-x_3"
+//				"10.1515_med-2016-0052_1"
+//				"10.1515_med-2016-0052_2"
+//				"10.1515_med-2016-0052_3"
+//				"10.1515_med-2016-0099_1"
+//				"10.1515_med-2016-0099_2"
+//				"10.1515_med-2016-0099_3"
+//				"10.1515_med-2016-0099_4"
+//				"10.1590_S1518-8787.2016050006236_1"
+//				"10.21053_ceo.2016.9.1.1_1"
+//				"10.21053_ceo.2016.9.1.1_2"
+//				"10.21053_ceo.2016.9.1.1_3"
+//				"10.21053_ceo.2016.9.1.1_4"
+//				"10.2147_BCTT.S94617_1"
+				"10.3349_ymj.2016.57.5.1260_1"
+//				"10.3349_ymj.2016.57.5.1260_2"
+//				"10.3390_ijerph13050458_1"
+//				"10.5114_aoms.2016.61916_1"
+//				"10.5114_aoms.2016.61916_2"
+//				"10.5812_ircmj.40061_1"
+		;
+		PlotBox plotBox = new PlotBox();
+		File inputSVGFile = new File(TILBURG_DIR, root+".svg");
+		try {
+			plotBox.setCsvOutFile(new File("target/plot/"+root+".csv"));
+			plotBox.setSvgOutFile(new File("target/plot/"+root+"0.svg"));
+			plotBox.readAndCreateCSVPlot(inputSVGFile);
+			plotBox.writeProcessedSVG(new File("target/plot/tilburg/"+root+".svg"));
+		} catch (Exception e) {
+			LOG.error("Exception in "+root, e);
 		}
 	}
 	
