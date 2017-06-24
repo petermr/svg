@@ -208,27 +208,46 @@ public class AnnotatedAxis {
 		}
 	}
 
-private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArray tickValueCoords, RealArray tickCoords, int nplaces) {
-	if (tickValueCoords.size() - tickCoords.size() == 2) { // probably missing end points
-		LOG.info("missing 2 ticks; taking axes as ends ticks"); 
-		tickCoords.addElement(range.getMax());
-		tickCoords.insertElementAt(0, range.getMin());
-	} else if (tickValueCoords.size() - tickCoords.size() == 1) { // have to work out which end point
-		throw new RuntimeException("cannot match ticks with values; single missing tick");
-	} else if (tickValueCoords.size() == tickCoords.size() ) {
-		LOG.trace("ok");
-	} else {
-		LOG.error(axisType+" cannot match ticks with valueCoords: \n"+tickValueCoords+"; ticks "+tickCoords);
-		throw new RuntimeException("cannot match ticks with values; "+axisType+" tickValues: "+tickValueCoords.size()+"; ticks: " + tickCoords.size());
+	private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArray tickValueCoords, RealArray tickCoords, int nplaces) {
+		if (tickValueCoords.size() - tickCoords.size() == 2) { // probably missing end points
+			LOG.info("missing 2 ticks; taking axes as ends ticks"); 
+			tickCoords.addElement(range.getMax());
+			tickCoords.insertElementAt(0, range.getMin());
+		} else if (tickValueCoords.size() - tickCoords.size() == 1) { // have to work out which end point
+			throw new RuntimeException("cannot match ticks with values; single missing tick");
+		} else if (tickValueCoords.size() == tickCoords.size() ) {
+			LOG.trace("ok");
+		} else {
+			LOG.error(axisType+" cannot match ticks with valueCoords: \n"+tickValueCoords+"; ticks "+tickCoords);
+			throw new RuntimeException("cannot match ticks with values; "+axisType+" tickValues: "+tickValueCoords.size()+"; ticks: " + tickCoords.size());
+		}
+		RealArray tick2ValueDiffs = tickCoords.subtract(tickValueCoords);
+		tick2ValueDiffs.format(0);
+		Multiset<Double> tick2ValueSet = tick2ValueDiffs.createDoubleDifferenceMultiset(nplaces);
+		LOG.debug("tick2ValueCoordsDiffs "+tick2ValueSet);
+	//	this.tickValues = tickValues;
+		screenToUserScale = getOrCreateScreenToUserScale(tickValues, tickCoords);
+		screenToUserConstant = getOrCreateScreenToUserConstant(tickValues, tickCoords);
+		LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
 	}
-	RealArray tick2ValueDiffs = tickCoords.subtract(tickValueCoords);
-	tick2ValueDiffs.format(0);
-	Multiset<Double> tick2ValueSet = tick2ValueDiffs.createDoubleDifferenceMultiset(nplaces);
-	LOG.debug("tick2ValueCoordsDiffs "+tick2ValueSet);
-	screenToUserScale = tickCoords.getRange().getScaleTo(tickValues.getRange());
-	screenToUserConstant = tickCoords.getRange().getConstantTo(tickValues.getRange());
-	LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
-}
+
+	private Double getOrCreateScreenToUserConstant(RealArray tickValues, RealArray tickCoords) {
+		if (tickCoords != null && tickCoords.getRange() != null && tickValues != null && tickValues.getRange() != null) {	
+			screenToUserConstant = tickCoords.getRange().getConstantTo(tickValues.getRange());
+		} else {
+			LOG.warn("No tickBox info: "+this.axisType);
+		}
+		return screenToUserConstant;
+	}
+
+	private Double getOrCreateScreenToUserScale(RealArray tickValues, RealArray tickCoords) {
+		if (tickCoords != null && tickCoords.getRange() != null && tickValues != null && tickValues.getRange() != null) {	
+			screenToUserScale = tickCoords.getRange().getScaleTo(tickValues.getRange());
+		} else {
+			LOG.warn("No tickBox info: "+this.axisType);
+		}
+		return screenToUserScale;
+	}
 
 	void extractTitleTextsAndMakeTitles() {
 		axialTitleTextBox = new AxisScaleBox(this);
@@ -299,6 +318,20 @@ private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArra
 		}
 		return axisTickBox;
 	}
+
+	public void ensureScales() {
+		if (axialScaleTextBox != null) {
+			RealArray tickValues = axialScaleTextBox.getTickValueScreenCoords();
+			RealArray tickCoords = axialScaleTextBox.getTickValueScreenCoords();
+			if (screenToUserScale == null || screenToUserConstant == null) {
+				getOrCreateScreenToUserScale(tickValues, tickCoords);
+				getOrCreateScreenToUserConstant(tickValues, tickCoords);
+			}
+		} else {
+			throw new RuntimeException("No axial tickbox: "+axisType);
+		}
+	}
+
 
 	
 }
