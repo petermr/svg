@@ -32,8 +32,8 @@ public class PlotBoxTest {
 	@Test
 	public void testSingle() throws IOException {
 //		String fileRoot = "bakker";
-//		String fileRoot = "calvin";
-		String fileRoot = "kerr";
+		String fileRoot = "calvin";
+//		String fileRoot = "kerr";
 //		String fileRoot = "dong";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+"plot.svg");

@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 
-public class ManifestTest {
-	private static final Logger LOG = Logger.getLogger(ManifestTest.class);
+public class SVGStoreTest {
+	private static final Logger LOG = Logger.getLogger(SVGStoreTest.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}

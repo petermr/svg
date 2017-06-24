@@ -42,8 +42,8 @@ public class AnnotatedAxisTest {
 		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "bakker2014-page11b.svg")));
 		PlotBox plotBox = new PlotBox();
 		plotBox.readAndCreateCSVPlot(svgElement);
-		SVGSVG.wrapAndWriteAsSVG(plotBox.createSVGElement(), new File("target/plot/bakker.svg"));
-		SVGRect fullLineBbox = plotBox.getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGStore().createSVGElement(), new File("target/plot/bakker.svg"));
+		SVGRect fullLineBbox = plotBox.getSVGStore().getFullLineBox();
 		fullLineBbox.format(3);
 		Assert.assertEquals("full box",  "((140.415,426.016),(483.056,650.628))", fullLineBbox.toString());
 		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
@@ -373,8 +373,8 @@ public class AnnotatedAxisTest {
 		} catch (RuntimeException e) {
 			LOG.debug(e);
 		}
-		SVGSVG.wrapAndWriteAsSVG(plotBox.createSVGElement(), new File(new File("target/plot/"), svgName));
-		SVGRect fullLineBbox = plotBox.getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGStore().createSVGElement(), new File(new File("target/plot/"), svgName));
+		SVGRect fullLineBbox = plotBox.getSVGStore().getFullLineBox();
 		AnnotatedAxis[] axisArray = null;
 		if (fullLineBbox != null) {
 			fullLineBbox.format(3);
