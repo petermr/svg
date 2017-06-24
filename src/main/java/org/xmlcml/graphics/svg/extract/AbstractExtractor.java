@@ -6,7 +6,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.plot.PlotBox;
-import org.xmlcml.graphics.svg.plot.SVGLogger;
+import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** superclass for extractorAnnotators.
  * 
@@ -20,17 +20,15 @@ public abstract class AbstractExtractor {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	protected PlotBox plotBox;
-	protected SVGLogger svgLogger;
 	protected Real2Range boundingBox;
+	protected SVGStore svgStore;
 
 	protected AbstractExtractor() {
 		
 	}
 
-	protected AbstractExtractor(PlotBox plotBox) {
-		this.plotBox = plotBox;
-		this.svgLogger = plotBox.getSvgLogger();
+	public AbstractExtractor(SVGStore svgStore) {
+		this.svgStore = svgStore;
 	}
 
 	protected void drawBox(SVGG g, String col, double width) {

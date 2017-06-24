@@ -11,7 +11,7 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** extracts texts within graphic area.
  * 
@@ -32,14 +32,14 @@ public class TextExtractor extends AbstractExtractor {
 	private List<SVGText> nonNegativeNonEmptyTextList;
 	private List<SVGText> currentTextList;
 	
-	public TextExtractor(PlotBox plotBox) {
-		super(plotBox);
+	public TextExtractor(SVGStore svgStore) {
+		super(svgStore);
 	}
 
 	public void extractTexts(SVGElement svgElement) {
 		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
-		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, plotBox.isRemoveWhitespace());
+		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, svgStore.isRemoveWhitespace());
 //		this.currentTextList = nonNegativeNonEmptyTextList;
 		this.currentTextList = originalTextList;
 	}

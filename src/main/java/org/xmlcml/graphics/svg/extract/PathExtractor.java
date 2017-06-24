@@ -18,7 +18,7 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.store.SVGStore;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -52,6 +52,7 @@ public class PathExtractor extends AbstractExtractor{
 	private List<SVGPath> trimmedShadowedPathList;
 	private List<SVGPath> currentPathList;
 	private List<SVGPath> positiveBoxPathList;
+	
 	public void setPositiveXBox(Real2Range positiveXBox) {
 		this.positiveXBox = positiveXBox;
 		
@@ -60,22 +61,21 @@ public class PathExtractor extends AbstractExtractor{
 	public void extractPaths(SVGElement svgElement) {
 		this.originalPathList = SVGPath.extractPaths(svgElement);
 		SVGPath.addSignatures(originalPathList);
-		svgLogger.write("originalPathList", originalPathList);
+//		svgLogger.write("originalPathList", originalPathList);
 		positiveBoxPathList = new ArrayList<SVGPath>(originalPathList);
 		SVGElement.removeElementsOutsideBox(positiveBoxPathList, positiveXBox);
-		svgLogger.write("positiveBoxPathList", positiveBoxPathList);
+//		svgLogger.write("positiveBoxPathList", positiveBoxPathList);
 		nonNegativePathList = SVGPath.removePathsWithNegativeY(positiveBoxPathList);
-		svgLogger.write("nonNegativePathList", nonNegativePathList);
+//		svgLogger.write("nonNegativePathList", nonNegativePathList);
 		trimmedShadowedPathList = SVGPath.removeShadowedPaths(nonNegativePathList);
 //		currentPathList = trimmedShadowedPathList;
 		currentPathList = originalPathList;
-		svgLogger.write("trimmedShadowedPathList", trimmedShadowedPathList);
+//		svgLogger.write("trimmedShadowedPathList", trimmedShadowedPathList);
 	}
 
-	public PathExtractor(PlotBox plotBox) {
+	public PathExtractor(SVGStore svgStore) {
+		super(svgStore);
 		setDefaults();
-		this.plotBox = plotBox;
-		this.svgLogger = plotBox.getSvgLogger();
 	}
 	
 	private void setDefaults() {

@@ -20,7 +20,7 @@ import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
-import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** extracts and tidies shapes read from SVG.
  * 
@@ -46,8 +46,8 @@ public class ShapeExtractor extends AbstractExtractor {
 	private List<SVGTriangle> triangleList;
 	private List<SVGShape> unknownShapeList;
 	
-	public ShapeExtractor(PlotBox plotBox) {
-		super(plotBox);
+	public ShapeExtractor(SVGStore svgStore) {
+		super(svgStore);
 		init();
 	}
 	
@@ -204,9 +204,9 @@ public class ShapeExtractor extends AbstractExtractor {
 
 	public void extractShapes(List<SVGPath> pathList, SVGElement svgElement) {
 		convertToShapes(pathList);
-		svgLogger.write("after convertToShapes", pathList);
+//		svgLogger.write("after convertToShapes", pathList);
 		extractRawPrimitives(svgElement);
-		removeElementsOutsideBox(plotBox.getPositiveXBox());
+		removeElementsOutsideBox(svgStore.getPositiveXBox());
 		
 		debug();
 	}
