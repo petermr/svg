@@ -22,7 +22,35 @@ public class BarTest {
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
 		plotBox.readGraphicsComponents(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/plot/bar/"+fileRoot+".svg"));
+		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
 	}
+
+	@Test
+	/** several bars
+	 * 
+	 * @throws IOException
+	 */
+	public void testBarPlot() throws IOException {
+		String fileRoot = "barchart1.10";
+		PlotBox plotBox = new PlotBox();
+		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
+		plotBox.readAndCreateCSVPlot(inputSVGFile);
+		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
+	}
+	
+	@Test
+	/** two simple bars
+	 * 
+	 * @throws IOException
+	 */
+	public void testBarPlot1() throws IOException {
+		String fileRoot = "figure4.2";
+		PlotBox plotBox = new PlotBox();
+		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
+		plotBox.readAndCreateCSVPlot(inputSVGFile);
+		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
+	}
+	
+	
 
 }
