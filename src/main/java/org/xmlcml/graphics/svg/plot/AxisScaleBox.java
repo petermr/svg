@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
+import org.xmlcml.euclid.Util;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
@@ -72,7 +72,7 @@ public class AxisScaleBox extends AxialBox {
 			}
 			if(horizontalPhrase != null) {
 				horizontalPhrase = horizontalPhrase.getWordsWithLowestYValue(0);
-				horizontalPhrase = horizontalPhrase.emdashToMinus();
+				horizontalPhrase = horizontalPhrase.normalizeMinus();
 				LOG.debug("HOR phrase Y: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
 			
@@ -81,9 +81,10 @@ public class AxisScaleBox extends AxialBox {
 			LOG.debug("Word Ladder?: "+horizontalPhrase+"; "+horizontalTexts.size());
 			if (horizontalPhrase != null) {
 				horizontalPhrase = removeVerticalWordsCompletelyOutsideRange(horizontalPhrase, axis.getRange());
+				horizontalPhrase = horizontalPhrase.normalizeMinus();
 				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
-			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts);
+			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts, true);
 			LOG.debug("ROT90 phrase: "+rot90Phrase+"; "+rot90Texts.size());
 			if (rot90Phrase != null) {
 				SVGPhrase rot90HighestPhrase = rot90Phrase.getWordsWithHighestXValue(0);
@@ -170,6 +171,7 @@ public class AxisScaleBox extends AxialBox {
 			bbox = bbox.plus(word0.getBoundingBox());
 			tickNumberScreenCoords.addElement(word0.getXY().getY());
 			String ss = word0.getStringValue();
+			ss = SVGWord.replaceNonStandardChars(ss, Util.S_MINUS, SVGWord.NON_STANDARD_MINUS);
 			LOG.debug("ss "+ss);
 			values[i] = (ss == null) ? Double.NaN : new Double(ss);
 		}
