@@ -37,6 +37,7 @@ import org.xmlcml.graphics.svg.extract.PathExtractor;
 import org.xmlcml.graphics.svg.extract.ShapeExtractor;
 import org.xmlcml.graphics.svg.extract.TextExtractor;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
+import org.xmlcml.graphics.svg.manifest.Manifest;
 
 /** creates axes from ticks, scales, titles.
  * 
