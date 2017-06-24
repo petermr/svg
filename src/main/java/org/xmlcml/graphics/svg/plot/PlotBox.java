@@ -27,9 +27,11 @@ import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPath;
+import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.SVGTitle;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.extract.PathExtractor;
 import org.xmlcml.graphics.svg.extract.ShapeExtractor;
@@ -233,14 +235,20 @@ public class PlotBox {
 	}
 
 	private void extractGraphicsElements(SVGElement svgElement) {
-		extractSVGComponents(svgElement);
-		createHorizontalAndVerticalLines();
-		createHorizontalAndVerticalTexts();
-		makeLongHorizontalAndVerticalEdges();
-		makeFullLineBoxAndRanges();
+		Manifest figureManifest = new Manifest();
+		createManifest(figureManifest, svgElement);
+		makeFullLineBoxAndRanges(figureManifest);
 	}
 
-	private void extractSVGComponents(SVGElement svgElem) {
+	public Manifest createManifest(Manifest manifest, SVGElement svgElement) {
+		extractSVGComponents(manifest, svgElement);
+		createHorizontalAndVerticalLines(manifest);
+		createHorizontalAndVerticalTexts(manifest);
+		makeLongHorizontalAndVerticalEdges(manifest);
+		return manifest;
+	}
+
+	private void extractSVGComponents(Manifest manifest, SVGElement svgElem) {
 		svgLogger = new SVGLogger();
 		LOG.debug("********* made SVG components *********");
 		this.svgElement = (SVGElement) svgElem.copy();
@@ -251,24 +259,32 @@ public class PlotBox {
 		 SVGDefs.removeDefs(svgElement);
 		
 		positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
-		removeEmptyTextElements();
-		removeNegativeXorYElements();
+		removeEmptyTextElements(manifest);
+		removeNegativeXorYElements(manifest);
 		
 		pathExtractor = new PathExtractor(this);
 		pathExtractor.extractPaths(svgElement);
+//		Real2Range pathBox = pathExtractor.getBoundingBox();
 		g = pathExtractor.debug("target/paths/"+fileRoot+".debug.svg");
+		g.appendChild(new SVGTitle("path"));
 //		gg.appendChild(g.copy());
 		
+
+		textExtractor = new TextExtractor(this);
+		textExtractor.extractTexts(svgElement);
+		g = textExtractor.debug("target/texts/"+fileRoot+".debug.svg");
+		g.appendChild(new SVGTitle("text"));
+		gg.appendChild(g.copy());
+		
+//		Real2Range totalBox = textBox.plus(pathBox);
+
 		shapeExtractor = new ShapeExtractor(this);
 		List<SVGPath> currentPathList = pathExtractor.getCurrentPathList();
 		shapeExtractor.extractShapes(currentPathList, svgElement);
 		g = shapeExtractor.debug("target/shapes/"+fileRoot+".debug.svg");
+		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
 		
-		textExtractor = new TextExtractor(this);
-		textExtractor.extractTexts(svgElement);
-		g = textExtractor.debug("target/texts/"+fileRoot+".debug.svg");
-		gg.appendChild(g.copy());
 		SVGSVG.wrapAndWriteAsSVG(gg, new File("target/plot/"+fileRoot+".debug.svg"));
 	}
 
@@ -276,7 +292,7 @@ public class PlotBox {
 	 * remove these elements from svgElement
 	 * 
 	 */
-	private void removeNegativeXorYElements() {
+	private void removeNegativeXorYElements(Manifest manifest) {
 		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(svgElement);
 		for (int i = texts.size() - 1; i >= 0; i--) {
 			SVGText text = texts.get(i);
@@ -288,7 +304,7 @@ public class PlotBox {
 		}
 	}
 
-	private void removeEmptyTextElements() {
+	private void removeEmptyTextElements(Manifest manifest) {
 		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(svgElement);
 		for (int i = texts.size() - 1; i >= 0; i--) {
 			SVGText text = texts.get(i);
@@ -300,13 +316,22 @@ public class PlotBox {
 		}
 	}
 
-	private void createHorizontalAndVerticalLines() {
+	private void createHorizontalAndVerticalLines(Manifest manifest) {
 		LOG.debug("********* make Horizontal/Vertical lines *********");
 		horizontalLines = SVGLine.findHorizontalOrVerticalLines(shapeExtractor.getLineList(), LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
 		verticalLines = SVGLine.findHorizontalOrVerticalLines(shapeExtractor.getLineList(), LineDirection.VERTICAL, AnnotatedAxis.EPS);
+		List<SVGPolyline> polylineList = shapeExtractor.getPolylineList();
+		List<SVGPolyline> axialLShapes = SVGPolyline.findLShapes(polylineList);
+		for (int i = axialLShapes.size() - 1; i >= 0; i--) {
+			SVGPolyline axialLShape = axialLShapes.get(i);
+			verticalLines.add(axialLShape.getLineList().get(0));
+			horizontalLines.add(axialLShape.getLineList().get(1));
+//			axialLShapes.remove(i);
+			polylineList.remove(axialLShape);
+		}
 	}
 
-	private void createHorizontalAndVerticalTexts() {
+	private void createHorizontalAndVerticalTexts(Manifest manifest) {
 		LOG.debug("********* make Horizontal/Vertical texts *********");
 		horizontalTexts = SVGText.findHorizontalOrRot90Texts(textExtractor.getTextList(), LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
 		verticalTexts = SVGText.findHorizontalOrRot90Texts(textExtractor.getTextList(), LineDirection.VERTICAL, AnnotatedAxis.EPS);
@@ -318,7 +343,7 @@ public class PlotBox {
 		LOG.debug("TEXT horiz: " + horizontalTexts.size()+"; vert: " + verticalTexts.size()+"; " /*+ "/"+sb*/);
 	}
 
-	private void makeLongHorizontalAndVerticalEdges() {
+	private void makeLongHorizontalAndVerticalEdges(Manifest manifest) {
 		LOG.debug("********* make Horizontal/Vertical edges *********");
 		List<SVGLine> lineList = shapeExtractor.getLineList();
 		if (lineList != null && lineList.size() > 0) {
@@ -329,19 +354,19 @@ public class PlotBox {
 		}
 	}
 
-	private void makeFullLineBoxAndRanges() {
+	private void makeFullLineBoxAndRanges(Manifest manifest) {
 		LOG.debug("********* make FullineBox and Ranges *********");
 		fullLineBox = null;
 		RealRange fullboxXRange = null;
 		RealRange fullboxYRange = null;
 		if (longHorizontalEdgeLines != null && longHorizontalEdgeLines.size() > 0) {
 			LOG.debug("longHorizontalEdgeLines "+longHorizontalEdgeLines.size());
-			fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
+			fullboxXRange = createRange(manifest, longHorizontalEdgeLines, Direction.HORIZONTAL);
 			fullboxXRange = fullboxXRange == null ? null : fullboxXRange.format(PlotBox.FORMAT_NDEC);
 		}
 		if (longVerticalEdgeLines != null && longVerticalEdgeLines.size() > 0) {
 			LOG.debug("longVerticalEdgeLines "+longVerticalEdgeLines.size());
-			fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
+			fullboxYRange = createRange(manifest, longVerticalEdgeLines, Direction.VERTICAL);
 			fullboxYRange = fullboxYRange == null ? null : fullboxYRange.format(PlotBox.FORMAT_NDEC);
 		}
 		if (fullboxXRange != null && fullboxYRange != null) {
@@ -384,10 +409,14 @@ public class PlotBox {
 		scaledXYs = null;
 		AnnotatedAxis xAxis = axisArray[AxisType.BOTTOM_AXIS];
 		AnnotatedAxis yAxis = axisArray[AxisType.LEFT_AXIS];
+		xAxis.ensureScales();
+		yAxis.ensureScales();
 		if (xAxis.getScreenToUserScale() == null ||
 				xAxis.getScreenToUserConstant() == null ||
 				yAxis.getScreenToUserScale() == null ||
 				yAxis.getScreenToUserConstant() == null) {
+			LOG.debug("XAXIS "+xAxis);
+			LOG.debug("YAXIS "+yAxis);
 			LOG.error("Cannot get conversion constants: abort");
 			return;
 		}
@@ -564,7 +593,7 @@ public class PlotBox {
 	
 	// static methods
 	
-	private static RealRange createRange(SVGLineList lines, Direction direction) {
+	private static RealRange createRange(Manifest manifest, SVGLineList lines, Direction direction) {
 		RealRange hRange = null;
 		if (lines.size() > 0) {
 			SVGLine line0 = lines.get(0);
