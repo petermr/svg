@@ -84,11 +84,15 @@ public class AxisScaleBox extends AxialBox {
 				horizontalPhrase = horizontalPhrase.normalizeMinus();
 				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
+			
 			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts, true);
-			LOG.debug("ROT90 phrase: "+rot90Phrase+"; "+rot90Texts.size());
+			LOG.debug("ROT90 phrase1: "+rot90Phrase+"; "+rot90Texts.size());
 			if (rot90Phrase != null) {
 				SVGPhrase rot90HighestPhrase = rot90Phrase.getWordsWithHighestXValue(0);
+				rot90HighestPhrase.reverseTextsInWords();
 				LOG.info("**************"+rot90HighestPhrase+"***************");
+//				List<SVGText> rot90Texts1 = rot90HighestPhrase.getTextList();
+				rot90Phrase = rot90HighestPhrase;
 			} else {
 				LOG.info("NO rot90 text");
 			}

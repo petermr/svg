@@ -209,6 +209,9 @@ public class AnnotatedAxis {
 	}
 
 	private void matchTicksToValuesAndCalculateScales(RealArray tickValues, RealArray tickValueCoords, RealArray tickCoords, int nplaces) {
+		if (tickValueCoords.size() <= 1) {
+			return;
+		}
 		if (tickValueCoords.size() - tickCoords.size() == 2) { // probably missing end points
 			LOG.info("missing 2 ticks; taking axes as ends ticks"); 
 			tickCoords.addElement(range.getMax());
@@ -295,12 +298,12 @@ public class AnnotatedAxis {
 	}
 
 	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		AxisTickBox.LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
+		LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
 		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);
 		} else {
-			AxisTickBox.LOG.debug("Null axisTickBox");
+			LOG.debug("Null axisTickBox");
 		}
 		return axisTickBox;
 	}

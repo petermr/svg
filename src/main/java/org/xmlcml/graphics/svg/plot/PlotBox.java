@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -16,24 +15,14 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
-import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.euclid.RealRange;
-import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
-import org.xmlcml.graphics.svg.SVGLineList;
-import org.xmlcml.graphics.svg.SVGPath;
-import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.extract.PathExtractor;
-import org.xmlcml.graphics.svg.extract.ShapeExtractor;
-import org.xmlcml.graphics.svg.extract.TextExtractor;
-import org.xmlcml.graphics.svg.linestuff.AxialLineList;
 import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** creates axes from ticks, scales, titles.
@@ -105,8 +94,6 @@ public class PlotBox {
 
 	static final String MINOR_CHAR = "i";
 	static final String MAJOR_CHAR = "I";
-	private static Double CORNER_EPS = 0.5; // to start with
-	private static Double BBOX_PADDING = 5.0; // to start with
 	public static int FORMAT_NDEC = 3; // format numbers; to start with
 	
 
@@ -189,6 +176,7 @@ public class PlotBox {
 
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
 		svgStore = new SVGStore(this);
+		svgStore.setFileRoot(fileRoot);
 		svgStore.extractGraphicsElements(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
@@ -403,34 +391,6 @@ public class PlotBox {
 	
 	// static methods
 	
-	public static RealRange createRange(SVGStore svgStore, SVGLineList lines, Direction direction) {
-		RealRange hRange = null;
-		if (lines.size() > 0) {
-			SVGLine line0 = lines.get(0);
-			hRange = line0.getReal2Range().getRealRange(direction);
-			SVGLine line1 = lines.get(1);
-			if (line1 != null && !line1.getReal2Range().getRealRange(direction).isEqualTo(hRange, CORNER_EPS)) {
-				hRange = null;
-	//				throw new RuntimeException("Cannot make box from HLines: "+line0+"; "+line1);
-			}
-		}
-		return hRange;
-	}
-	
-	public static AxialLineList getSortedLinesCloseToEdge(List<SVGLine> lines, LineDirection direction, RealRange range) {
-		RealRange.Direction rangeDirection = direction.isHorizontal() ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
-		AxialLineList axialLineList = new AxialLineList(direction);
-		for (SVGLine line : lines) {
-			RealRange lineRange = line.getRealRange(rangeDirection);
-			if (lineRange.isEqualTo(range, BBOX_PADDING)) {
-				axialLineList.add(line);
-				line.normalizeDirection(AnnotatedAxis.EPS);
-			}
-		}
-		axialLineList.sort();
-		return axialLineList;
-	}
-
 	public void writeProcessedSVG(File file) {
 		if (file != null) {
 			SVGElement processedSVGElement = svgStore.createSVGElement();
