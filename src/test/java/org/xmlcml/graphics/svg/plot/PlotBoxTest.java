@@ -15,6 +15,7 @@ import org.xmlcml.graphics.svg.Fixtures;
  *
  */
 public class PlotBoxTest {
+	private static final String TARGET_PLOT = "target/plot/";
 	private static final Logger LOG = Logger.getLogger(PlotBoxTest.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
@@ -39,8 +40,8 @@ public class PlotBoxTest {
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+"plot.svg");
 		LOG.debug("reading: "+inputSVGFile);
 		plotBox.readAndCreateCSVPlot(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
-		plotBox.writeCSV(new File("target/plot/"+fileRoot+".csv"));
+		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
+		plotBox.writeCSV(new File(TARGET_PLOT+fileRoot+".csv"));
 	}
 	
 	@Test
@@ -61,18 +62,19 @@ public class PlotBoxTest {
 			} catch (RuntimeException e) {
 				e.printStackTrace();
 			}
-			plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
-			plotBox.writeCSV(new File("target/plot/"+fileRoot+".csv"));
+			plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
+			plotBox.writeCSV(new File(TARGET_PLOT+fileRoot+".csv"));
 		}
 	}
 	
 	@Test
-	public void testFunnelPlot1() throws IOException {
+	public void test6400831a1() throws IOException {
 		String fileRoot = "6400831a1";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
+		plotBox.setCsvOutFile(new File(TARGET_PLOT+fileRoot+".csv"));
 		plotBox.readAndCreateCSVPlot(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
+		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
 	}
 	
 	@Test
@@ -80,8 +82,9 @@ public class PlotBoxTest {
 		String fileRoot = "13148-016-0230-5fig2";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
+		plotBox.setCsvOutFile(new File(TARGET_PLOT+fileRoot+".csv"));
 		plotBox.readAndCreateCSVPlot(inputSVGFile);
-		plotBox.writeProcessedSVG(new File("target/plot/"+fileRoot+".svg"));
+		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
 	}
 	
 	@Test
@@ -119,8 +122,8 @@ public class PlotBoxTest {
 			PlotBox plotBox = new PlotBox();
 			File inputSVGFile = new File(TILBURG_DIR, root+".svg");
 			try {
-				plotBox.setCsvOutFile(new File("target/plot/"+root+".csv"));
-				plotBox.setSvgOutFile(new File("target/plot/"+root+"0.svg"));
+				plotBox.setCsvOutFile(new File(TARGET_PLOT+root+".csv"));
+				plotBox.setSvgOutFile(new File(TARGET_PLOT+root+"_0.svg"));
 				plotBox.readAndCreateCSVPlot(inputSVGFile);
 //				plotBox.writeProcessedSVG(new File("target/plot/tilburg/"+root+".svg"));
 			} catch (Exception e) {
@@ -137,10 +140,10 @@ public class PlotBoxTest {
 //				"10.1186_s12885-016-2685-3_1"
 //			"10.1186_s12889-016-3083-0_1"
 //				"10.1186_s13027-016-0058-9_1"
-//				"10.1186_s40064-016-3064-x_1" // 
+//				"10.1186_s40064-016-3064-x_1" 
 //				"10.1186_s40064-016-3064-x_2"
 //				"10.1186_s40064-016-3064-x_3"
-//				"10.1515_med-2016-0052_1"
+				"10.1515_med-2016-0052_1"
 //				"10.1515_med-2016-0052_2"
 //				"10.1515_med-2016-0052_3"
 //				"10.1515_med-2016-0099_1"
@@ -153,7 +156,7 @@ public class PlotBoxTest {
 //				"10.21053_ceo.2016.9.1.1_3"
 //				"10.21053_ceo.2016.9.1.1_4"
 //				"10.2147_BCTT.S94617_1"
-				"10.3349_ymj.2016.57.5.1260_1"
+//				"10.3349_ymj.2016.57.5.1260_1"
 //				"10.3349_ymj.2016.57.5.1260_2"
 //				"10.3390_ijerph13050458_1"
 //				"10.5114_aoms.2016.61916_1"
@@ -163,8 +166,8 @@ public class PlotBoxTest {
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(TILBURG_DIR, root+".svg");
 		try {
-			plotBox.setCsvOutFile(new File("target/plot/"+root+".csv"));
-			plotBox.setSvgOutFile(new File("target/plot/"+root+"0.svg"));
+			plotBox.setCsvOutFile(new File(TARGET_PLOT+root+".csv"));
+			plotBox.setSvgOutFile(new File(TARGET_PLOT+root+"0.svg"));
 			plotBox.readAndCreateCSVPlot(inputSVGFile);
 			plotBox.writeProcessedSVG(new File("target/plot/tilburg/"+root+".svg"));
 		} catch (Exception e) {
