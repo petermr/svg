@@ -1,12 +1,12 @@
 package org.xmlcml.graphics.svg.text;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
-import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
@@ -36,6 +36,9 @@ public class SVGPhrase extends SVGG {
 	}
 	
 	public static final String CLASS = "phrase";
+
+	private static final boolean ROT0 = false;
+	private static final boolean ROT90 = true;
 	
 	private List<SVGWord> wordList;
 	private double interWordGap = 17.0; // empirical gap between Tesseract words in a phrase
@@ -117,17 +120,54 @@ public class SVGPhrase extends SVGG {
 		SVGPhrase phrase = null;
 		LOG.debug("phrase: "+isRot90+": "+textList);
 		if (textList != null && textList.size() > 0) {
-			phrase = new SVGPhrase();
-			SVGWord word = new SVGWord(textList.get(0), isRot90);
-			phrase.addTrailingWord(word);
-			for (int i = 1; i < textList.size(); i++) {
-				SVGText text = textList.get(i); 
-				if (word.canAppend(text)) {
-					word.append(text);
-				} else {
-					word = new SVGWord(text, isRot90);
-					phrase.addTrailingWord(word);
-				}
+			if (!isRot90) {
+				phrase = extractHorizontalPhrase(textList);
+			} else {
+				phrase = extractRot90Phrase(textList);
+			}
+		}
+		return phrase;
+	}
+
+	private static SVGPhrase extractHorizontalPhrase(List<SVGText> textList) {
+		SVGPhrase phrase;
+		phrase = new SVGPhrase();
+		SVGWord word = new SVGWord(textList.get(0));
+		phrase.addTrailingWord(word);
+		for (int i = 1; i < textList.size(); i++) {
+			SVGText text = textList.get(i); 
+			if (word.canAppend(text)) {
+				word.append(text);
+			} else {
+				word = new SVGWord(text);
+				phrase.addTrailingWord(word);
+			}
+		}
+		return phrase;
+	}
+
+	/** complex because:
+	 *   moving variable is y
+	 *   it runs downwards
+	 *   but phrases run upwards
+	 *   
+	 * @param textList
+	 * @return
+	 */
+	private static SVGPhrase extractRot90Phrase(List<SVGText> texts) {
+		SVGPhrase phrase;
+		phrase = new SVGPhrase();
+		List<SVGText> reverseTexts = new ArrayList<SVGText>(texts);
+		Collections.reverse(reverseTexts);
+		SVGWord word = new SVGWord(reverseTexts.get(0), ROT90);
+		phrase.addTrailingWord(word);
+		for (int i = 1; i < reverseTexts.size(); i++) {
+			SVGText text = reverseTexts.get(i); 
+			if (word.canAppend(text)) {
+				word.append(text);
+			} else {
+				word = new SVGWord(text, ROT90);
+				phrase.addTrailingWord(word);
 			}
 		}
 		return phrase;
@@ -290,6 +330,25 @@ public class SVGPhrase extends SVGG {
 			word.normalizeMinus();
 		}
 		return this;
+	}
+
+	public List<SVGText> getTextList() {
+		List<SVGText> textList = new ArrayList<SVGText>();
+		List<SVGWord> wordList = this.getOrCreateWordList();
+		for (SVGWord word : wordList) {
+			textList.add(word.getSVGText());
+		}
+		return textList;
+		
+	}
+
+	public void reverseTextsInWords() {
+		List<SVGWord> newWordList = new ArrayList<SVGWord>();
+		for (SVGWord word : wordList) {
+			word.reverseTexts();
+			newWordList.add(word);
+		}
+		wordList = newWordList;
 	}
 
 

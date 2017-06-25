@@ -132,7 +132,6 @@ public class SVGWord extends SVGG {
 	public void append(SVGText newText) {
 		SVGText svgText = this.getSVGText();
 		if (svgText != null) {
-//			Real2Range bbox = text.getBoundingBox().plusEquals(newText.getBoundingBox());
 			String textValue = svgText.getText();
 			svgText.getChild(0).detach();
 			String newValue = newText.getText();
@@ -194,6 +193,12 @@ public class SVGWord extends SVGG {
 			s = s.replaceAll(nonStandardChar, standardChar);
 		}
 		return s;
+	}
+
+	public void reverseTexts() {
+		SVGText svgText = this.getSVGText();
+		String text = new StringBuilder(svgText.getText()).reverse().toString();
+		svgText.setText(text);
 	}
 
 }
