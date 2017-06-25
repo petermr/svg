@@ -1,10 +1,13 @@
 package org.xmlcml.graphics.svg.extract;
 
+import java.io.File;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
+import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.plot.PlotBox;
 import org.xmlcml.graphics.svg.store.SVGStore;
 
@@ -43,4 +46,10 @@ public abstract class AbstractExtractor {
 	}
 	
 	protected abstract Real2Range getBoundingBox();
+
+	protected void writeDebug(String type, String outFilename, SVGG g) {
+		File outFile = new File(outFilename);
+		SVGSVG.wrapAndWriteAsSVG(g, outFile);
+		LOG.debug("wrote "+type+": "+outFile.getAbsolutePath());
+	}
 }

@@ -101,9 +101,6 @@ public class PathExtractor extends AbstractExtractor{
 		List<Entry<String>> list = MultisetUtil.createStringEntryList(iterable);
 		LOG.debug("> "+list);
 		SVGG ggg = annotatePathsWithSignatures();
-//		File pathsSvgFile = plotBox.svgOutFile != null ? new File(plotBox.svgOutFile+"paths.svg") :
-//			new File("target/paths/paths.svg");
-//		PlotBox.LOG.debug("Writing SVG Paths: "+pathsSvgFile);
 		g.appendChild(ggg);
 //		SVGSVG.wrapAndWriteAsSVG(g, pathsSvgFile);
 	}
@@ -211,9 +208,8 @@ public class PathExtractor extends AbstractExtractor{
 		debug(g, nonNegativePathList, "black", "green", 0.3);
 		debug(g, currentPathList, "black", "blue", 0.3);
 		debug(g, trimmedShadowedPathList, "black", "cyan", 0.3);
-		File outFile = new File(outFilename);
-		SVGSVG.wrapAndWriteAsSVG(g, outFile);
-		LOG.debug("wrote paths: "+outFile.getAbsolutePath());
+		
+		writeDebug("paths",outFilename, g);
 		return g;
 	}
 

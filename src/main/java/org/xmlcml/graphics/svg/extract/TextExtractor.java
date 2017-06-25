@@ -1,6 +1,5 @@
 package org.xmlcml.graphics.svg.extract;
 
-import java.io.File;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -9,7 +8,6 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
-import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.store.SVGStore;
 
@@ -22,7 +20,7 @@ public class TextExtractor extends AbstractExtractor {
 	private static final char BLACK_VERTICAL_RECTANGLE = (char)0x25AE;
 	private static final char WHITE_VERTICAL_RECTANGLE = (char)0x25AF;
 	private static final char WHITE_SQUARE = (char)0x25A1;
-	private static final Logger LOG = Logger.getLogger(TextExtractor.class);
+	static final Logger LOG = Logger.getLogger(TextExtractor.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -56,9 +54,7 @@ public class TextExtractor extends AbstractExtractor {
 		debug(g, nonNegativeNonEmptyTextList, "green", "black", 0.3);
 		drawBox(g, "green", 2.0);
 
-		File outFile = new File(outFilename);
-		SVGSVG.wrapAndWriteAsSVG(g, outFile);
-		LOG.debug("wrote shapes: "+outFile.getAbsolutePath());
+		writeDebug("texts",outFilename, g);
 		return g;
 	}
 

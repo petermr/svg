@@ -225,26 +225,79 @@ public class ShapeExtractor extends AbstractExtractor {
 		debug(g, circleList, "black", "blue", 0.3); // highest priority
 		debug(g, pathList, "purple", "pink", 0.3);
 		debug(g, unknownShapeList, "cyan", "orange", 0.3);
-		File outFile = new File(outFilename);
-		SVGSVG.wrapAndWriteAsSVG(g, outFile);
-		LOG.debug("wrote shapes: "+outFile.getAbsolutePath());
+		
+		writeDebug("shapes",outFilename, g);
 		return g;
 	}
+
+//	debug(g, rectList, "black", "#ffff77", 0.2);
+//	debug(g, polygonList, "black", "orange", 0.3);
+//	debug(g, triangleList, "black", "#ffeeff", 0.3);
+//	debug(g, ellipseList, "black", "red", 0.3);
+//	debug(g, lineList, "cyan", "red", 0.3);
+//	debug(g, polylineList, "magenta", "green", 0.3);
+//	debug(g, circleList, "black", "blue", 0.3); // highest priority
+//	debug(g, pathList, "purple", "pink", 0.3);
+
+//	private void debugRects(SVGG g, List<SVGRect> rectList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugPolygons(SVGG g, List<SVGLine> polygonsList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugTriangles(SVGG g, List<SVGLine> triangleList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugEllipses(SVGG g, List<SVGLine> ellipseList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugLines(SVGG g, List<SVGLine> lineList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugPolylines(SVGG g, List<SVGLine> polylineList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugCircles(SVGG g, List<SVGLine> circleList, String stroke, String fill, double opacity) {
+//		
+//	}
+//
+//	private void debugPaths(SVGG g, List<SVGLine> debugList, String stroke, String fill, double opacity) {
+//		
+//	}
+
+//	debug(g, rectList, "black", "#ffff77", 0.2);
+//	debug(g, polygonList, "black", "orange", 0.3);
+//	debug(g, triangleList, "black", "#ffeeff", 0.3);
+//	debug(g, ellipseList, "black", "red", 0.3);
+//	debug(g, lineList, "cyan", "red", 0.3);
+//	debug(g, polylineList, "magenta", "green", 0.3);
+//	debug(g, circleList, "black", "blue", 0.3); // highest priority
+//	debug(g, pathList, "purple", "pink", 0.3);
 
 	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity) {
 		for (SVGElement e : elementList) {
 			SVGShape shape = (SVGShape) e.copy();
+			SVGShape shape1 = (SVGShape) shape.copy();
 			Double strokeWidth = shape.getStrokeWidth();
 			if (strokeWidth == null) strokeWidth = 0.2;
-			if (shape instanceof SVGLine) {
-				SVGLine line1 = (SVGLine) shape.copy();
-				strokeWidth = line1.getStrokeWidth();
-				styleAndDraw(g, stroke, "none", opacity, 2*strokeWidth, line1);
+			double border = Math.max(strokeWidth, 1.5);
+			if (shape instanceof SVGLine || shape instanceof SVGPolyline || shape instanceof SVGPath) {
+				styleAndDraw(g, stroke, "none", opacity, strokeWidth+border, shape1);
 				styleAndDraw(g, fill, "none", opacity, strokeWidth, shape);
-			} else if (shape instanceof SVGRect) {
-				strokeWidth = Math.max(0.2, strokeWidth);
+			} else if (shape instanceof SVGCircle || shape instanceof SVGPolygon || shape instanceof SVGEllipse) {
+				styleAndDraw(g, stroke, "none", opacity, strokeWidth+border, shape1);
+				styleAndDraw(g, fill, "none", opacity, strokeWidth, shape);
+			} else if (shape instanceof SVGRect || shape instanceof SVGTriangle) {
+				styleAndDraw(g, stroke, "none", opacity, strokeWidth+border, shape1);
 				styleAndDraw(g, stroke, fill, opacity, strokeWidth, shape);
 			} else {
+				styleAndDraw(g, stroke, "none", opacity, strokeWidth+border, shape1);
 				styleAndDraw(g, stroke, fill, opacity, strokeWidth, shape);
 			}
 		}
