@@ -1,10 +1,13 @@
 package org.xmlcml.graphics.svg.store;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
@@ -38,6 +41,8 @@ public class SVGStore {
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
+	
+	public static int ZERO_PLACES = 0;
 
 	// FIXME change to getters
 	private List<SVGLine> horizontalLines;
@@ -48,7 +53,6 @@ public class SVGStore {
 	private PathExtractor pathExtractor;
 	private ShapeExtractor shapeExtractor;
 	private TextExtractor textExtractor;
-	
 	
 	private Real2Range positiveXBox;
 
@@ -74,24 +78,31 @@ public class SVGStore {
 	private Real2Range totalBox;
 
 
+	/** this may change as we decide what types of object interact with store
+	 * 
+	 * @param plotBox
+	 */
 	public SVGStore(PlotBox plotBox) {
 		this.plotBox = plotBox;
 	}
-
 	
-	/** ENTRY METHOD for processing figures.
-	 * 
-	 * @param svgElement
-	 */
+	public SVGStore() {
+	}
+
+	public void readGraphicsComponents(File file) throws FileNotFoundException {
+		this.fileRoot = FilenameUtils.getBaseName(file.getName());
+		readGraphicsComponents(new FileInputStream(file));
+	}
+	
 	public void readGraphicsComponents(InputStream inputStream) {
 		if (inputStream == null) {
 			throw new RuntimeException("Null input stream");
 		}
 		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
-		extractGraphicsElements(svgElement);
+		readGraphicsElements(svgElement);
 	}
 
-	public void extractGraphicsElements(SVGElement svgElement) {
+	public void readGraphicsElements(SVGElement svgElement) {
 		if (svgElement != null) {
 			this.extractSVGComponents(svgElement);
 			this.createHorizontalAndVerticalLines();
@@ -254,6 +265,17 @@ public class SVGStore {
 		if (fullboxXRange != null && fullboxYRange != null) {
 			this.fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
 			this.fullLineBox.format(PlotBox.FORMAT_NDEC);
+		}
+		if (fullLineBox == null && pathBox != null) {
+			LOG.debug("path> "+pathBox);
+			for (SVGRect rect : shapeExtractor.getRectList()) {
+				Real2Range rectRange = rect.getBoundingBox();
+				LOG.debug("rect> "+rectRange);
+				if (pathBox.isEqualTo(rectRange, axialLinePadding)) {
+					fullLineBox = rect;
+					break;
+				}
+			}
 		}
 		LOG.debug("fullbox "+this.fullLineBox);
 	}
