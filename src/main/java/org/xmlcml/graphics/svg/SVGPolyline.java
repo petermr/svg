@@ -403,6 +403,8 @@ public class SVGPolyline extends SVGPoly {
 		Real2Array r2a = this.getReal2Array();
 		r2a.reverse();
 		this.setReal2Array(r2a);
+		lineList = null;
+		getLineList();
 		return this;
 	}
 	
@@ -653,8 +655,13 @@ public class SVGPolyline extends SVGPoly {
 	public static List<SVGPolyline> findLShapes(List<SVGPolyline> polylines) {
 		List<SVGPolyline> polylineList = new ArrayList<SVGPolyline>();
 		for (SVGPolyline polyline : polylines) {
-			if (polyline.isLShape() || polyline.reverse().isLShape()) {
+			if (polyline.isLShape()) {
 				polylineList.add(polyline);
+			} else {
+				polyline.reverse();
+				if (polyline.isLShape()) {
+					polylineList.add(polyline);
+				}
 			}
 		}
 		return polylineList;
