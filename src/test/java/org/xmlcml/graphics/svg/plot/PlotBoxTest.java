@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 
+import junit.framework.Assert;
+
 /** tests PlotBox class (interprets scatterplots at present).
  * 
  * @author pm286
@@ -32,8 +34,8 @@ public class PlotBoxTest {
 	
 	@Test
 	public void testSingle() throws IOException {
-//		String fileRoot = "bakker";
-		String fileRoot = "calvin";
+		String fileRoot = "bakker";
+//		String fileRoot = "calvin";
 //		String fileRoot = "kerr";
 //		String fileRoot = "dong";
 		PlotBox plotBox = new PlotBox();
@@ -47,12 +49,12 @@ public class PlotBoxTest {
 	@Test
 	public void testConvertAllSVG2CSV() throws IOException {
 		String[] fileRoots = {
-				"bakkerplot",
-				"calvinplot",
-				"dongplot",
-				"kerrplot",
-				"nairplot",
-				"sbarraplot"
+				"bakkerplot", // OK
+				"calvinplot", // OK
+				"dongplot",   // OK
+				"kerrplot",   // No fullbox
+				"nairplot",   // OK
+				"sbarraplot"  // OK
 				};
 		for (String fileRoot : fileRoots) {
 			PlotBox plotBox = new PlotBox();
@@ -78,12 +80,21 @@ public class PlotBoxTest {
 	}
 	
 	@Test
+	/** outline glyphs not yet processed.
+	 * 
+	 * @throws IOException
+	 */
 	public void testScatter13148() throws IOException {
 		String fileRoot = "13148-016-0230-5fig2";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
 		plotBox.setCsvOutFile(new File(TARGET_PLOT+fileRoot+".csv"));
-		plotBox.readAndCreateCSVPlot(inputSVGFile);
+		try {
+			plotBox.readAndCreateCSVPlot(inputSVGFile);
+			Assert.fail("should throw exception as cannot yet do glyphs");
+		} catch (RuntimeException e) {
+			Assert.assertEquals("cannot parse glyphs", "No axial tickbox: BOTTOM", e.getMessage());
+		}
 		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
 	}
 	
@@ -156,8 +167,8 @@ public class PlotBoxTest {
 //				"10.21053_ceo.2016.9.1.1_1"          // Missing a tick // still bad 
 //				"10.21053_ceo.2016.9.1.1_2"          // Y NaN
 //				"10.21053_ceo.2016.9.1.1_3"          // OK
-//				"10.21053_ceo.2016.9.1.1_4"          // X NaN
-				"10.2147_BCTT.S94617_1"              // X NaN // something weird about the decimal points. Maybe vectors? 
+//				"10.21053_ceo.2016.9.1.1_4"          // OK
+				"10.2147_BCTT.S94617_1"              // OK
 //				"10.3349_ymj.2016.57.5.1260_1"       // OK
 //				"10.3349_ymj.2016.57.5.1260_2"       // OK
 //				"10.3390_ijerph13050458_1"           // OK
