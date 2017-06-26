@@ -201,4 +201,18 @@ public class SVGWord extends SVGG {
 		svgText.setText(text);
 	}
 
+	/** converts Word into Double to see if it is numeric.
+	 * 
+	 * @return true if can form new Double();
+	 */
+	public boolean isNumeric() {
+		String text = this.getSVGText().getText();
+		try {
+			new Double(text);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 }

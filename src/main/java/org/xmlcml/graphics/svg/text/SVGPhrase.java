@@ -351,5 +351,15 @@ public class SVGPhrase extends SVGG {
 		wordList = newWordList;
 	}
 
+	public SVGPhrase getNumericWords() {
+		SVGPhrase phrase = new SVGPhrase();
+		for (SVGWord word : wordList) {
+			if (word.isNumeric()) {
+				phrase.addTrailingWord(word);
+			}
+		}
+		return phrase;
+	}
+
 
 }
