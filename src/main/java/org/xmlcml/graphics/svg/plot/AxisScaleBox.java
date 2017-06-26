@@ -12,6 +12,7 @@ import org.xmlcml.euclid.Util;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.store.SVGStore;
 import org.xmlcml.graphics.svg.text.SVGPhrase;
 import org.xmlcml.graphics.svg.text.SVGWord;
 
@@ -71,8 +72,9 @@ public class AxisScaleBox extends AxialBox {
 				horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
 			}
 			if(horizontalPhrase != null) {
-				horizontalPhrase = horizontalPhrase.getWordsWithLowestYValue(0);
 				horizontalPhrase = horizontalPhrase.normalizeMinus();
+				horizontalPhrase = horizontalPhrase.getNumericWords();
+//				horizontalPhrase = horizontalPhrase.getWordsWithLowestYValue(SVGStore.ZERO_PLACES);
 				LOG.debug("HOR phrase Y: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
 			
@@ -177,7 +179,13 @@ public class AxisScaleBox extends AxialBox {
 			String ss = word0.getStringValue();
 			ss = SVGWord.replaceNonStandardChars(ss, Util.S_MINUS, SVGWord.NON_STANDARD_MINUS);
 			LOG.debug("ss "+ss);
-			values[i] = (ss == null) ? Double.NaN : new Double(ss);
+			Double d = null;
+			try {
+				d = new Double(ss);
+			} catch (java.lang.NumberFormatException nfe) {
+				LOG.debug("NFE in ("+ss+"; "+nfe.getMessage());
+			}
+			values[i] = (d == null || ss == null) ? Double.NaN : new Double(ss);
 		}
 		tickNumberValues = new RealArray(values);
 	}

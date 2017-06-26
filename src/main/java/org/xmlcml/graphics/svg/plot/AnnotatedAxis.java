@@ -194,13 +194,19 @@ public class AnnotatedAxis {
 		Monotonicity tickValueCoordsMonotonicity = tickValueCoords == null ? null : tickValueCoords.getMonotonicity();
 		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
 		Monotonicity tickMonotonicity = (tickCoords == null) ? null : tickCoords.getMonotonicity();
-		LOG.debug("TICK coords\n"+tickCoords+": "+tickMonotonicity+"\n"+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"+tickValues);
+		LOG.debug("TICK coords\n"
+				+ " tick coords "+tickCoords+": "+tickMonotonicity+"\n"
+				+ " tick value coords "+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"
+				+ " tickValues: "+tickValues);
 		if (tickValues != null && !tickValues.hasNaN() && tickCoords != null) {
 			int nplaces = 1;
 			Multiset<Double> deltaValueSet = tickValues.createDoubleDifferenceMultiset(nplaces);
 			Multiset<Integer> deltaValueCoordSet = tickValueCoords.createIntegerDifferenceMultiset();
 			Multiset<Integer> deltaTickCoordSet = tickCoords.createIntegerDifferenceMultiset();
-			LOG.debug("DELTA coords\n"+deltaTickCoordSet+"\n"+deltaValueCoordSet+"\n"+deltaValueSet);
+			LOG.debug("DELTA coords\n"
+					+ " delta tick Coords "+deltaTickCoordSet+"\n"
+					+ " delta value Coords "+deltaValueCoordSet+"\n"
+					+ " delta values: "+deltaValueSet);
 			
 			if (true) { // fill conditions for equality
 				matchTicksToValuesAndCalculateScales(tickValues, tickValueCoords, tickCoords, nplaces);
@@ -217,7 +223,14 @@ public class AnnotatedAxis {
 			tickCoords.addElement(range.getMax());
 			tickCoords.insertElementAt(0, range.getMin());
 		} else if (tickValueCoords.size() - tickCoords.size() == 1) { // have to work out which end point
-			throw new RuntimeException("cannot match ticks with values; single missing tick");
+			LOG.warn("cannot match ticks with values; single missing tick; try to add at ends");
+			double delta00 = Math.abs(tickCoords.get(0) - tickValueCoords.get(0));
+			double delta01 = Math.abs(tickCoords.get(0) - tickValueCoords.get(1));
+			if (delta00 < delta01) {
+				tickCoords.addElement(range.getMax());
+			} else {
+				tickCoords.insertElementAt(0, range.getMin());
+			}
 		} else if (tickValueCoords.size() == tickCoords.size() ) {
 			LOG.trace("ok");
 		} else {
