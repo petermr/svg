@@ -30,15 +30,17 @@ public class AxialLineList extends SVGLineList {
 	
 	public void sort() {
 		Comparator<SVGLine> comparator = 
-			LineDirection.HORIZONTAL.equals(direction) ? new HorizontalLineComparator() : new VerticalLineComparator();
-		Collections.sort(lineList, comparator);
+			direction.isHorizontal() ? new HorizontalLineComparator() : new VerticalLineComparator();
+		if (lineList != null) {
+			Collections.sort(lineList, comparator);
+		}
 	}
 	
 	public boolean add(SVGLine line) {
 		ensureLines();
-		if (LineDirection.HORIZONTAL.equals(direction) && line.isHorizontal(eps)) {
+		if (direction.isHorizontal() && line.isHorizontal(eps)) {
 			return lineList.add(line);
-		} else if (LineDirection.VERTICAL.equals(direction) && line.isVertical(eps)) {
+		} else if (direction.isVertical() && line.isVertical(eps)) {
 			return lineList.add(line);
 		} else {
 			return false;

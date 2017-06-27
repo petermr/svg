@@ -1090,18 +1090,28 @@ public class SVGElement extends GraphicsElement {
 		if (r2r != null) {
 			RealRange xr = r2r.getXRange();
 			RealRange yr = r2r.getYRange();
-			if (xr == null || yr == null) {
-				LOG.trace("null bbox");
-				return null;
+			if (xr != null && yr != null) {
+				double dx = (xr.getRange() < Real.EPS) ? 1.0 : 0.0; 
+				double dy = (yr.getRange() < Real.EPS) ? 1.0 : 0.0; 
+				rect = createGraphicalBox(xr, yr, dx, dy);
+				rect.setStrokeWidth(strokeWidth);
+				rect.setStroke(stroke);
+				rect.setFill(fill);
+				rect.setOpacity(opacity);
 			}
-			double dx = (xr.getRange() < Real.EPS) ? 1.0 : 0.0; 
-			double dy = (yr.getRange() < Real.EPS) ? 1.0 : 0.0; 
-			rect = new SVGRect(new Real2(xr.getMin()-dx, yr.getMin()-dy), new Real2(xr.getMax()+dx, yr.getMax()+dy));
-			rect.setStrokeWidth(strokeWidth);
-			rect.setStroke(stroke);
-			rect.setFill(fill);
-			rect.setOpacity(opacity);
 		}
+		return rect;
+	}
+	
+	public static SVGRect createGraphicalBox(Real2Range r2r, double dx, double dy) {
+		RealRange xr = r2r.getXRange();
+		RealRange yr = r2r.getYRange();
+		return createGraphicalBox(xr,  yr, dx, dy);
+	}
+
+	private static SVGRect createGraphicalBox(RealRange xr, RealRange yr, double dx, double dy) {
+		SVGRect rect;
+		rect = new SVGRect(new Real2(xr.getMin()-dx, yr.getMin()-dy), new Real2(xr.getMax()+dx, yr.getMax()+dy));
 		return rect;
 	}
 
@@ -1527,4 +1537,74 @@ public class SVGElement extends GraphicsElement {
 		return value;
 	}
 
+	/** remove stroke, stroke-width, fill from element.
+	 *  
+	 * @param element
+	 */
+	public static void removeStyleAttributes(SVGElement element) {
+		removeAttributeByName(element, STROKE);
+		removeAttributeByName(element, STROKE_WIDTH);
+		removeAttributeByName(element, FILL);
+	}
+
+	/** remove a no-namespace attribute if it exists else no-op.
+	 * 
+	 * @param element
+	 * @param name
+	 */
+	public static void removeAttributeByName(SVGElement element, String name) {
+		Attribute attribute = element.getAttribute(name);
+		if (attribute != null) {
+			attribute.detach();
+		}
+	}
+
+	/** remove elements from list if inside the box.
+	 * uses svgElement.isIncludedBy(real2Range)
+	 * @param svgList
+	 * @param real2Range box
+	 */
+	public static void removeElementsInsideBox(List<? extends SVGElement> svgList, Real2Range real2Range) {
+		for (int i = svgList.size() - 1; i >= 0; i--) {
+			SVGElement svgElement = svgList.get(i);
+			if (svgElement.isIncludedBy(real2Range)) {
+				svgList.remove(i);
+			} else {
+//				LOG.trace("keep "+svgElement.toXML());
+			}
+		}
+	}
+
+	/** remove elements from list if inside the box.
+	 * uses !svgElement.isIncludedBy(real2Range)
+	 * 
+	 * @param svgList
+	 * @param real2Range box
+	 */
+	public static void removeElementsOutsideBox(List<? extends SVGElement> svgList, Real2Range bbox) {
+		for (int i = svgList.size() - 1; i >= 0; i--) {
+			SVGElement svgElement = svgList.get(i);
+			if (!svgElement.isIncludedBy(bbox)) {
+				svgList.remove(i);
+			} else {
+//				LOG.trace("keep "+svgElement.toXML());
+			}
+		}
+	}
+	
+	public void setStyle(String style) {
+		Attribute styleAttribute = this.getAttribute(STYLE); 
+		if (styleAttribute != null) {
+			styleAttribute.detach();
+		}
+		if (style != null) {
+			Attribute att = new Attribute(STYLE, style);
+			this.addAttribute(att);
+		}
+	}
+
+	public void addTitle(String t) {
+		SVGTitle title = new SVGTitle(t);
+		this.appendChild(title);
+	}
 }

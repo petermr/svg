@@ -76,7 +76,7 @@ public class SVGPolylineTest {
 	;
 
 	private double epsilon = 0.01;
-
+	
 	@Test
 	@Ignore // FIXME ANDY
 	public void testCreateLineList() {

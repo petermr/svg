@@ -32,6 +32,7 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
+import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
@@ -51,8 +52,25 @@ public class SVGLine extends SVGShape {
 	private static Logger LOG = Logger.getLogger(SVGLine.class);
 	
 	public enum LineDirection {
-		HORIZONTAL,
-		VERTICAL
+		HORIZONTAL(RealRange.Direction.HORIZONTAL),
+		VERTICAL(RealRange.Direction.VERTICAL);
+		private RealRange.Direction direction;
+		private LineDirection(RealRange.Direction direction) {
+			this.direction = direction;
+		}
+		public RealRange.Direction getRealRangeDirection() {
+			return this.direction;
+		}
+		public LineDirection getPerpendicularLineDirection() {
+			return this.isHorizontal() ? LineDirection.VERTICAL : LineDirection.HORIZONTAL;
+		}
+		
+		public boolean isHorizontal() {
+			return LineDirection.HORIZONTAL.equals(this);
+		}
+		public boolean isVertical() {
+			return LineDirection.VERTICAL.equals(this);
+		}
 	}
 	public final static String ALL_LINE_XPATH = ".//svg:line";
 	
@@ -407,8 +425,8 @@ public class SVGLine extends SVGShape {
 	public static List<SVGLine> findHorizontalOrVerticalLines(List<SVGLine> lines, LineDirection direction, double eps) {
 		List<SVGLine> lineList = new ArrayList<SVGLine>();
 		for (SVGLine line : lines) {
-			if ((LineDirection.HORIZONTAL.equals(direction) && line.isHorizontal(eps)) ||
-			    (LineDirection.VERTICAL.equals(direction) && line.isVertical(eps))) {
+			if ((direction.isHorizontal() && line.isHorizontal(eps)) ||
+			    (direction.isVertical() && line.isVertical(eps))) {
 				lineList.add(line);
 			}
 		}
@@ -418,7 +436,7 @@ public class SVGLine extends SVGShape {
 	public static List<SVGLine> findVerticalLines(List<SVGLine> lines, double eps) {
 		List<SVGLine> lineList = new ArrayList<SVGLine>();
 		for (SVGLine line : lines) {
-			if (line.isHorizontal(eps)) {
+			if (line.isVertical(eps)) {
 				lineList.add(line);
 			}
 		}
@@ -668,8 +686,8 @@ public class SVGLine extends SVGShape {
 		List<SVGLine> newLineList = new ArrayList<SVGLine>();
 		for (int i = lineList.size() - 1; i >= 0; i--) {
 			SVGLine line = lineList.get(i);
-			if ((LineDirection.HORIZONTAL.equals(direction) && line.isHorizontal(eps)) ||
-				LineDirection.VERTICAL.equals(direction) && line.isVertical(eps)) {
+			if ((direction.isHorizontal() && line.isHorizontal(eps)) ||
+					direction.isVertical() && line.isVertical(eps)) {
 				lineList.remove(i);
 				newLineList.add(line);
 			}
@@ -850,5 +868,22 @@ public class SVGLine extends SVGShape {
 		}
 		return false;
 	}
+
+	/** lines outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param lineList
+	 * @return
+	 */
+	public static List<SVGLine> removeLinesWithNegativeY(List<SVGLine> lineList) {
+		List<SVGLine> newLines = new ArrayList<SVGLine>();
+		for (SVGLine line : lineList) {
+			Real2Range bbox = line.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newLines.add(line);
+			}
+		}
+		return newLines;
+	}
+
 
 }

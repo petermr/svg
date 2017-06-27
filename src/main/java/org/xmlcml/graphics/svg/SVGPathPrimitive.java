@@ -29,9 +29,6 @@ public abstract class SVGPathPrimitive {
 
 	public static final String MOVE_S     = "M";
 
-//	public static final String ABS = "ABS";
-//	public static final String REL = "REL";
-	
 	protected Real2Array coordArray;
 	protected Real2 zerothCoord; // from preceding primitive
 
@@ -53,7 +50,7 @@ public abstract class SVGPathPrimitive {
 		for (SVGPathPrimitive primitive : primitiveList) {
 			primitive.format(places);
 		}
-		d = createD(primitiveList);
+		d = primitiveList.createD();
 		return d;
 	}
 	
@@ -62,26 +59,10 @@ public abstract class SVGPathPrimitive {
 		for (SVGPathPrimitive primitive : primitiveList) {
 			primitive.format(places);
 		}
-		d = createD(primitiveList);
+		d = primitiveList.createD();
 		return d;
 	}
 	
-	public static String createD(PathPrimitiveList primitiveList) {
-		StringBuilder sb = new StringBuilder();
-		for (SVGPathPrimitive primitive : primitiveList) {
-			sb.append(primitive.toString());
-		}
-		return sb.toString();
-	}
-	
-	public static String createSignature(PathPrimitiveList primitiveList) {
-		StringBuilder sig = new StringBuilder();
-		for (SVGPathPrimitive primitive : primitiveList) {
-			sig.append(primitive.getTag());
-		}
-		return sig.toString();
-	}
-
 	public void transformBy(Transform2 t2) {
 		
 		if (coordArray != null) {
@@ -167,10 +148,7 @@ public abstract class SVGPathPrimitive {
 		this.zerothCoord = lastPoint;
 	}
 
-	public static void setFirstPoints(PathPrimitiveList primitiveList) {
-		throw new RuntimeException("NYI");
-//		for (SVGPathPrimitive primitive : primitiveList) {
-//			primitive.s
-//		}
-	}
+//	public static void setFirstPoints(PathPrimitiveList primitiveList) {
+//		throw new RuntimeException("NYI");
+//	}
 }

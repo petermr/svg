@@ -1,7 +1,9 @@
 package org.xmlcml.graphics.svg;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -186,6 +188,34 @@ public abstract class SVGShape extends SVGElement {
 			}
 		}
 		return intArray;
+	}
+	
+	/** remove duplicate shapes 
+	 * @see SVGPath#removeShadowedPaths(List<SVGPath>)
+	 * 
+	 * crude algorithm - simply compares XML representations and may therefore fail.
+	 * removes style attributes before comparison
+	 * 
+	 * Should later use canonical XML methods 
+	 * 
+	 * @param shapeList list of shapes, duplicates are removed
+	 */
+
+	public static void removeShadowedShapes(List<? extends SVGShape> shapeList) {
+		Set<String> xmlSet = new HashSet<String>();
+		for (int i = shapeList.size() - 1; i >= 0; i--) {
+			SVGShape shape = shapeList.get(i);
+			SVGShape copy = (SVGShape) shape.copy();
+			SVGElement.removeStyleAttributes(copy);
+			SVGElement.removeAttributeByName(copy, "id");
+			String xml = copy.toXML();
+			LOG.trace(xml);
+			if (!xmlSet.contains(xml)) {
+				xmlSet.add(xml);
+			} else {
+				shapeList.remove(i);
+			}
+		}
 	}
 
 	

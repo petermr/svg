@@ -399,10 +399,13 @@ public class SVGPolyline extends SVGPoly {
 	/** 
 	 * Alters direction of line. MODIFIES THIS.
 	 */
-	public void reverse() {
+	public SVGPolyline reverse() {
 		Real2Array r2a = this.getReal2Array();
 		r2a.reverse();
 		this.setReal2Array(r2a);
+		lineList = null;
+		getLineList();
+		return this;
 	}
 	
 	@Override
@@ -592,6 +595,76 @@ public class SVGPolyline extends SVGPoly {
 			line.setXY(this.getLast(), 1);
 		}
 		return line;
+	}
+
+	public static List<SVGPolyline> getLShapes(List<SVGPolyline> polylines) {
+		List<SVGPolyline> polylineList = new ArrayList<SVGPolyline>();
+		for (SVGPolyline polyline : polylines) {
+			if (polyline.isRightAngle()) {
+				polylineList.add(polyline);
+			}
+		}
+		return polylineList;
+	}
+
+	/** is the polyline composed of two components (3 points) aligned with the x- and y axes?
+	 * It need not be the normal "L" orientation
+	 * @return
+	 */
+	private boolean isRightAngle() {
+		boolean isRightAngle = false;
+		if (this.getPointList().size() == 3) {
+			SVGLine line0 = this.getLineList().get(0);
+			SVGLine line1 = this.getLineList().get(1);
+			if (line0.isHorizontal(epsilon) && line1.isVertical(epsilon)) {
+				isRightAngle = true;
+			} else if (line1.isHorizontal(epsilon) && line0.isVertical(epsilon)) {
+				isRightAngle = true;
+			}
+		}
+		return isRightAngle;
+	}
+
+	/** is the polyline composed of two components (3 points) aligned with the x- and y axes in the normal "L" orientation?
+	 * The polyline must go in order Ymin, Xmin => Ymax, Xmin => Ymax, Xmax (because Y down page).
+	 * Note that an "L" in the other direction can be "reverse()d"
+	 * 
+	 * @return
+	 */
+	private boolean isLShape() {
+		boolean isLShape = isRightAngle();
+		if (isLShape) {
+			isLShape = false;
+			SVGLine line0 = this.getLineList().get(0);
+			SVGLine line1 = this.getLineList().get(1);
+			if (line0.isVertical(epsilon) && line0.getXY(0).getY() < line0.getXY(1).getY()  &&
+				line1.isHorizontal(epsilon) && line1.getXY(0).getX() < line1.getXY(1).getY()) {
+				isLShape = true;
+			}
+		}
+		return isLShape;
+	}
+
+	/** iterates over all isRightAngle 2-polylines to find those that have "LShape".
+	 * Will CHANGE the direction of any LShapes so they have consistent direction 
+	 * (i.e. natural drawing order down-> right)
+	 * 
+	 * @param polylines
+	 * @return
+	 */
+	public static List<SVGPolyline> findLShapes(List<SVGPolyline> polylines) {
+		List<SVGPolyline> polylineList = new ArrayList<SVGPolyline>();
+		for (SVGPolyline polyline : polylines) {
+			if (polyline.isLShape()) {
+				polylineList.add(polyline);
+			} else {
+				polyline.reverse();
+				if (polyline.isLShape()) {
+					polylineList.add(polyline);
+				}
+			}
+		}
+		return polylineList;
 	}
 
 }

@@ -131,7 +131,7 @@ public class SVGPolygon extends SVGPoly {
 		return polygonList;
 	}
 
-	public static List<SVGPolygon> extractSelfAndDescendantPolygons(SVGG g) {
+	public static List<SVGPolygon> extractSelfAndDescendantPolygons(SVGElement g) {
 		return SVGPolygon.extractPolygons(SVGUtil.getQuerySVGElements(g, ALL_POLYGON_XPATH));
 	}
 	
@@ -225,5 +225,6 @@ public class SVGPolygon extends SVGPoly {
 		}
 		return hasMirror;
 	}
+
 
 }

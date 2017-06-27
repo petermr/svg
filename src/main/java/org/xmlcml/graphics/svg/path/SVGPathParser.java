@@ -16,14 +16,15 @@ public class SVGPathParser {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private static Real2 firstPoint;
-	private static Real2 currentPoint;
+	/** THESE STATICS ARE CODE SMELLS */
+	private /*static*/ Real2 firstPoint;
+	private /*static*/ Real2 currentPoint;
+	
 	private PathPrimitiveList primitiveList;
 	private List<String> tokenList;
 	private String d;
 	private SVGPathPrimitive lastPrimitive;
 	
-
 	public PathPrimitiveList parseDString(String d) {
 		LOG.trace(">d>"+d);
 		this.d = d;
@@ -405,7 +406,7 @@ treated as relative even though the initial moveto is interpreted as an absolute
 
 	private void checkExistingFirstXY(char t) {
 		if (firstPoint == null) {
-			throw new RuntimeException("M/m or absolute must be first in path; found "+t+" in "+d);
+			LOG.error("M/m or absolute must be first in path; found "+t+" in "+d);
 		}
 	}
 

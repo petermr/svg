@@ -2,10 +2,14 @@ package org.xmlcml.graphics.svg;
 
 import nu.xom.*;
 
-
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.*;
+import org.xmlcml.euclid.Angle.Units;
+import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.fonts.FontWidths;
+import org.xmlcml.graphics.svg.text.SVGPhrase;
+import org.xmlcml.graphics.svg.text.SVGWord;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;
 
@@ -31,6 +35,9 @@ public class SVGText extends SVGElement {
 	private static final String X = "x";
 
 	private static Logger LOG = Logger.getLogger(SVGText.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
 
 	// just in case there is a scaling problem
 	private static final double _SVG2AWT_FONT_SCALE = 1.0;
@@ -63,6 +70,9 @@ public class SVGText extends SVGElement {
 	public final static Double DEFAULT_SPACE_FACTOR = 0.05;
 	private static final double MIN_FONT_SIZE = 0.01;
 	private static final Double DEFAULT_CHARACTER_WIDTH = 500.0;
+
+	public Angle ROT90 = new Angle(Math.PI/2.0, Units.RADIANS);
+	public double ANGLE_EPS = 0.01;
 
 	// these are all when text is used for concatenation, etc.
 	private double estimatedHorizontallength = Double.NaN; 
@@ -274,7 +284,7 @@ public class SVGText extends SVGElement {
 		Nodes nodes = query("./text()");
 		return (nodes.size() == 1 ? nodes.get(0).getValue() : null);
 	}
-
+	
 	/**
 	 * Clears text and replaces if not null
 	 * 
@@ -1088,13 +1098,85 @@ public class SVGText extends SVGElement {
 		SVGSVG.wrapAndWriteAsSVG(g, file);
 	}
 
-	public static List<SVGText> getRotatedElements(List<SVGText> characterList, Angle angle, double eps) {
-		List<SVGElement> elements = SVGElement.getRotatedElementList(characterList, angle, eps);
+	public static List<SVGText> getRotatedTexts(List<SVGText> texts, Angle angle, double eps) {
+		List<SVGElement> elements = SVGElement.getRotatedElementList(texts, angle, eps);
 		List<SVGText> textList = new ArrayList<SVGText>();
 		for (SVGElement element : elements) {
 			textList.add((SVGText) element);
 		}
 		return textList;
 	}
+
+	public static List<SVGText> findHorizontalOrRot90Texts(List<SVGText> texts, LineDirection direction, double eps) {
+		List<SVGText> textList = new ArrayList<SVGText>();
+		Angle angle = null;
+		if (direction.isHorizontal()) {
+			angle = new Angle(0.0);
+		} else if (direction.isVertical()) {
+			angle = new Angle(Math.PI/2.0, Units.RADIANS);
+		}
+		if (angle != null) {
+			textList = getRotatedTexts(texts, angle, eps);
+		}
+		return textList;
+	}
+
+	/** removes characters whose horizontal range does not intersect this.boundingBox.
+	 * 
+	 * @param range
+	 * @return
+	 */
+	public static List<SVGText> removeStringsCompletelyOutsideRange(List<SVGText> texts, RealRange range) {
+		List<SVGText> textList = new ArrayList<SVGText>();
+		for (SVGText text : texts) {
+			if (text.getBoundingBox().getXRange().intersectsWith(range)) {
+				textList.add(text);
+			}
+		}
+		return textList;
+	}
+
+	/** Texts outside y=0 are not part of the plot but confuse calculation of
+	 * bounding box 
+	 * @param TextList
+	 * @return
+	 */
+	public static List<SVGText> removeTextsWithNegativeY(List<SVGText> textList) {
+		List<SVGText> newTexts = new ArrayList<SVGText>();
+		for (SVGText text : textList) {
+			Real2Range bbox = text.getBoundingBox();
+			if (bbox.getYMax() >= 0.0) {
+				newTexts.add(text);
+			}
+		}
+		return newTexts;
+	}
+
+	/** remove elements with empty content
+	 * remove elements with null content or empty string
+	 * 
+	 * @param removeWhiteSpace if true remove elements with whitespace
+	 * @param textList
+	 * @return
+	 */
+	public static List<SVGText> removeTextsWithEmptyContent(List<SVGText> textList, boolean removeWhiteSpace) {
+		List<SVGText> newTexts = new ArrayList<SVGText>();
+		for (SVGText text : textList) {
+			String value = text.getValue();
+			if (value != null && !"".equals(value) && !"null".equals(value)) {
+				if (removeWhiteSpace && Character.isWhitespace(value.charAt(0))) {
+					newTexts.add(text);
+				}
+			} else {
+			}
+		}
+		return newTexts;
+	}
+
+	public boolean isRot90() {
+		boolean rot90 = ROT90.isEqualTo(this.getAngleOfRotation(), ANGLE_EPS);
+		return rot90;
+	}
+
 
 }

@@ -68,6 +68,7 @@ public class Axis {
 	private static final Double Y_SIDE = 10.; // spread of horizontal labels beyond backbone
 	private static final Double Y_VERT = 45.;
 	private static final double TEXT_EPS = 1.0;
+	private static final int FORMAT_NDEC = 3;
 
 	private double eps = 0.001;
 	private ComplexLine complexLine;
@@ -852,13 +853,17 @@ public class Axis {
 
 	private String tickDetail(String title, double spacing, List<Joint> jointList) {
 		int nTicks = jointList.size();
-		return " "+nTicks+" "+title+" ticks (pixels): "+jointList.get(0).getPoint().format(3)+" ... "+(nTicks-1)+" gaps "+
-				Real.normalize(spacing, 3)+"(pixels) ... "+jointList.get(nTicks-1).getPoint().format(3);
+		return " "+nTicks+" "+title+" ticks (pixels): "+jointList.get(0).getPoint().format(decimalPlaces())+" ... "+(nTicks-1)+" gaps "+
+				Real.normalize(spacing, 3)+"(pixels) ... "+jointList.get(nTicks-1).getPoint().format(decimalPlaces());
 	}
 
 	public RealRange getAxisRangeInPixels() {
 		Real2Range r2r = complexLine.getBackbone().getReal2Range();
 		axisRangeInPixels = (LineOrientation.HORIZONTAL.equals(lineOrientation)) ? r2r.getXRange() : r2r.getYRange();
 		return axisRangeInPixels;
+	}
+	
+	protected int decimalPlaces() {
+		return FORMAT_NDEC;
 	}
 }

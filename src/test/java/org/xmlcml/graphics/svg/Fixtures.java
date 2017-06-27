@@ -58,7 +58,9 @@ public class Fixtures {
 	public static final File SVG_G_8_2_SVG = new File(Fixtures.SVG_DIR, "image.g.8.2.svg");
 	public static final File SVG_PAGE6_SVG = new File(Fixtures.SVG_DIR, "page6.svg");
 
+	public static final File FIGURE_DIR = new File(SVG_DIR, "figure");
 	public static final File PLOT_DIR = new File(SVG_DIR, "plot");
+	public static final File BAR_DIR = new File(SVG_DIR, "bar");
 	public static final File LINEPLOTS_10_2_SVG = new File(PLOT_DIR, "lineplots.g.10.2.svg");
 	public static final File SCATTERPLOT_FIVE_7_2_SVG = new File(PLOT_DIR, "scatterplot5.g.7.2.svg");
 	public static final File SCATTERPLOT_7_2_SVG = new File(PLOT_DIR, "scatterplot.g.7.2.svg");

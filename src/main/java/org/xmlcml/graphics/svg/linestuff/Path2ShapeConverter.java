@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Angle.Units;
@@ -51,6 +52,7 @@ public class Path2ShapeConverter {
 	public static final String Z_COORDINATE = "z";
 
 	private final static Logger LOG = Logger.getLogger(Path2ShapeConverter.class);
+	static {LOG.setLevel(Level.DEBUG);}
 	
 	private static final String MLCCLCC = "MLCCLCC";
 	private static final String MLCCLCCZ = "MLCCLCCZ";
@@ -166,22 +168,28 @@ public class Path2ShapeConverter {
 		setPathList(inputPathList);
 		List<List<SVGShape>> shapeListList = new ArrayList<List<SVGShape>>();
 		int id = 0;
+		LOG.trace("cps0");
 		if (makeRelativePathsAbsolute ) {
 			makeRelativePathsAbsolute(inputPathList);
 		}
+		LOG.trace("cps1");
 		if (removeRedundantLineCommands) {
 			inputPathList = removeRedundantLineCommands(inputPathList);
 		}
+		LOG.trace("cps2");
 		if (removeRedundantMoveCommands) {
 			inputPathList = removeRedundantMoveCommands(inputPathList);
 		}
 		LOG.trace(">inputPath>"+inputPathList);
 		List<List<SVGPath>> pathListList;
 		if (splitAtMoveCommands) {
+			LOG.trace("split at moves0");
 			pathListList = splitAtMoveCommands(inputPathList);
+			LOG.trace("split at moves1");
 		} else {
 			pathListList = new ArrayList<List<SVGPath>>();
 			for (SVGPath path : inputPathList) {
+				LOG.trace("split at moves?");
 				List<SVGPath> singlePath = new ArrayList<SVGPath>();
 				singlePath.add(path);
 				pathListList.add(singlePath);
@@ -192,11 +200,13 @@ public class Path2ShapeConverter {
 			List<SVGShape> shapeList = new ArrayList<SVGShape>();
 			for (SVGPath path : pathList) {
 				SVGShape shape = convertPathToShape(path);
-				if (shape != null) {
-					shape.setId(shape.getClass().getSimpleName().toLowerCase().substring(SVG.length())+"."+id);
-					shapeList.add(shape);
-					id++;
+				// unconverted path, add as raw
+				if (shape == null) {
+					shape = path;
 				}
+				shape.setId(shape.getClass().getSimpleName().toLowerCase().substring(SVG.length())+"."+id);
+				shapeList.add(shape);
+				id++;
 			}
 			if (splitPolylines) {
 				shapeList = splitPolylines(shapeList);
@@ -211,8 +221,14 @@ public class Path2ShapeConverter {
 	}
 
 	private void makeRelativePathsAbsolute(List<SVGPath> pathList) {
-		for (SVGPath path : pathList) {
-			path.makeRelativePathsAbsolute();
+		if (pathList == null) {
+			LOG.warn(" ****** Empty path list");
+		} else {
+			for (SVGPath path : pathList) {
+				String s = path.getDString();
+				LOG.trace("path absolute: "+s.substring(0, Math.min(100, s.length()))+"; "+s.length());
+				path.makeRelativePathsAbsolute();
+			}
 		}
 	}
 
@@ -495,6 +511,11 @@ public class Path2ShapeConverter {
 	}
 
 	private SVGShape createRectOrAxialLine(SVGPath path, double eps) {
+//		String sig = path.getSignature();
+//		LOG.debug(sig);
+//		if ("MLLLZ".equals(sig)) {
+//			LOG.debug("sig: "+sig);
+//		}
 		SVGShape shape;
 		SVGRect rect = path.createRectangle(eps);
 		SVGLine line = null;
@@ -741,7 +762,7 @@ public class Path2ShapeConverter {
 		while (true) {
 			int i = sb.indexOf(SVGPathPrimitive.MOVE_S, current + 1);
 			if (i == -1) {
-				strings.add(d.substring(current));
+				strings.add(d.substring(Math.max(0, current)));
 				break;
 			} else if (current > -1) {
 				strings.add(d.substring(current, i));

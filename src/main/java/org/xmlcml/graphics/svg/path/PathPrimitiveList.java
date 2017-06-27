@@ -371,4 +371,20 @@ public class PathPrimitiveList implements Iterable<SVGPathPrimitive> {
 		}
 	}
 
+	public String createSignature() {
+		StringBuilder sig = new StringBuilder();
+		for (SVGPathPrimitive primitive : this) {
+			sig.append(primitive.getTag());
+		}
+		return sig.toString();
+	}
+
+	public String createD() {
+		StringBuilder sb = new StringBuilder();
+		for (SVGPathPrimitive primitive : this) {
+			sb.append(primitive.toString());
+		}
+		return sb.toString();
+	}
+
 }
