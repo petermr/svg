@@ -3,8 +3,6 @@ package org.xmlcml.graphics.svg.plot;
 import java.util.ArrayList;
 import java.util.List;
 
-import nu.xom.Attribute;
-
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.IntArray;
 import org.xmlcml.euclid.Real;
@@ -32,6 +30,8 @@ import org.xmlcml.graphics.svg.words.TypedNumber;
 import org.xmlcml.stml.STMLArray;
 import org.xmlcml.stml.STMLScalar;
 import org.xmlcml.xml.XMLConstants;
+
+import nu.xom.Attribute;
 
 /** an axis on a graph.
  * 

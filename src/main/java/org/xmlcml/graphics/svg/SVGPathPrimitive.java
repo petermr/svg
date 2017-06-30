@@ -1,12 +1,14 @@
 package org.xmlcml.graphics.svg;
 
-import org.apache.log4j.Logger;
-import org.xmlcml.euclid.*;
-import org.xmlcml.graphics.svg.path.*;
-
 import java.awt.geom.GeneralPath;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Angle;
+import org.xmlcml.euclid.Real2;
+import org.xmlcml.euclid.Real2Array;
+import org.xmlcml.euclid.Transform2;
+import org.xmlcml.graphics.svg.path.PathPrimitiveList;
+import org.xmlcml.graphics.svg.path.SVGPathParser;
 
 /**
  * parts of path (M, L, C, Z) currently not LHSQTA

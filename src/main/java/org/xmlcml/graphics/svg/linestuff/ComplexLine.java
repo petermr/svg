@@ -1,7 +1,6 @@
 package org.xmlcml.graphics.svg.linestuff;
 
 import java.util.ArrayList;
-
 import java.util.Arrays;
 import java.util.List;
 

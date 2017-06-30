@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.IntArray;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
@@ -17,7 +16,6 @@ import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
 
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 /**

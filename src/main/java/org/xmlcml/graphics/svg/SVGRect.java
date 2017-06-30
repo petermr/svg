@@ -29,7 +29,6 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.euclid.Util;
-import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 
 import nu.xom.Element;
 import nu.xom.Node;

@@ -18,6 +18,7 @@ import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
+import org.xmlcml.graphics.svg.SVGImage;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
@@ -25,10 +26,12 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGTitle;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.extract.AbstractExtractor;
+import org.xmlcml.graphics.svg.extract.ImageExtractor;
 import org.xmlcml.graphics.svg.extract.PathExtractor;
 import org.xmlcml.graphics.svg.extract.ShapeExtractor;
 import org.xmlcml.graphics.svg.extract.TextExtractor;
@@ -50,6 +53,7 @@ public class SVGStore {
 	private List<SVGText> horizontalTexts;
 	private List<SVGText> verticalTexts;
 
+	private ImageExtractor imageExtractor;
 	private PathExtractor pathExtractor;
 	private ShapeExtractor shapeExtractor;
 	private TextExtractor textExtractor;
@@ -59,10 +63,11 @@ public class SVGStore {
 	private String fileRoot;
 	private SVGElement svgElement;
 	private String debugRoot = "target/debug/";
+	private String imageDebug = "target/images/";
 	private String pathDebug = "target/paths/";
 	private String shapeDebug = "target/shapes/";
 	private String textDebug = "target/texts/";
-	private String plotDebug = "target/plots/";
+	private File plotDebug = new File("target/plots/");
 
 	private AxialLineList longHorizontalEdgeLines;
 	private AxialLineList longVerticalEdgeLines;
@@ -72,10 +77,13 @@ public class SVGStore {
 	public Double cornerEps = 0.5; // to start with
 	
 	private boolean removeWhitespace = false;
+	private Real2Range imageBox;
 	private Real2Range lineBbox;
 	private Real2Range pathBox;
 	private Real2Range textBox;
 	private Real2Range totalBox;
+
+
 
 
 	/** this may change as we decide what types of object interact with store
@@ -91,6 +99,7 @@ public class SVGStore {
 
 	public void readGraphicsComponents(File file) throws FileNotFoundException {
 		this.fileRoot = FilenameUtils.getBaseName(file.getName());
+		LOG.debug(">fr>"+fileRoot);
 		readGraphicsComponents(new FileInputStream(file));
 	}
 	
@@ -134,6 +143,13 @@ public class SVGStore {
 		g.appendChild(new SVGTitle("path"));
 	//		gg.appendChild(g.copy());
 		
+		this.imageExtractor = new ImageExtractor(this);
+		this.imageExtractor.extractImages(this.svgElement);
+		imageBox = imageExtractor.getBoundingBox();
+		g = this.pathExtractor.debug(imageDebug+this.fileRoot+".debug.svg");
+		g.appendChild(new SVGTitle("image"));
+	//		gg.appendChild(g.copy());
+		
 	
 		this.textExtractor = new TextExtractor(this);
 		this.textExtractor.extractTexts(this.svgElement);
@@ -151,7 +167,7 @@ public class SVGStore {
 		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
 		
-		SVGSVG.wrapAndWriteAsSVG(gg, new File(plotDebug + fileRoot+".debug.svg"));
+		SVGSVG.wrapAndWriteAsSVG(gg, new File(plotDebug, fileRoot+".debug.svg"));
 	}
 
 	/** some plots have publisher cruft outside the limits, especially negative Y.
@@ -382,6 +398,14 @@ public class SVGStore {
 	}
 
 
+	public File getPlotDebug() {
+		return plotDebug;
+	}
+
+	public void setPlotDebug(File plotDebug) {
+		this.plotDebug = plotDebug;
+	}
+
 	public RealRange createRange(SVGLineList lines, Direction direction) {
 		RealRange hRange = null;
 		if (lines.size() > 0) {
@@ -394,6 +418,60 @@ public class SVGStore {
 			}
 		}
 		return hRange;
+	}
+
+	public List<Real2Range> getImageBoxes() {
+		List<Real2Range> boxes = new ArrayList<Real2Range>();
+		for (SVGImage image : imageExtractor.getImageList()) {
+			Real2Range box = image.getBoundingBox();
+			boxes.add(box);
+		}
+		return boxes;
+	}
+	
+	/** expand bounding boxes and merge
+	 * 
+	 * @param d
+	 */
+	public List<Real2Range> getMergedBoundingBoxes(double d) {
+		List<Real2Range> boundingBoxes = new ArrayList<Real2Range>();
+		for (SVGShape shape : shapeExtractor.getOrCreateAllShapeList()) {
+			Real2Range bbox = shape.getBoundingBox();
+			bbox.extendBothEndsBy(Direction.HORIZONTAL, d, d);
+			bbox.extendBothEndsBy(Direction.VERTICAL, d, d);
+			boundingBoxes.add(bbox);
+		}
+		mergeBoundingBoxes(boundingBoxes);
+		return boundingBoxes;
+	}
+
+	private void mergeBoundingBoxes(List<Real2Range> boundingBoxes) {
+		boolean change = true;
+		while (change) {
+			Real2Range bbox0 = null;
+			Real2Range bbox1 = null;
+			Real2Range bbox2 = null;
+			change = false;
+//			LOG.debug("BBOXES: "+boundingBoxes.size());
+			for (int i = 0; i < boundingBoxes.size(); i++) {
+				bbox0 = boundingBoxes.get(i);
+				for (int j = i + 1; j < boundingBoxes.size(); j++) {
+					bbox1 = boundingBoxes.get(j);
+					Real2Range bbox3 = bbox0.intersectionWith(bbox1);
+					if (bbox3 != null && bbox3.isValid()) {
+						bbox2 = bbox0.plus(bbox1);
+						change = true;
+						break;
+					}
+				}
+				if (change) break;
+			}
+			if (change) {
+				boundingBoxes.remove(bbox0);
+				boundingBoxes.remove(bbox1);
+				boundingBoxes.add(bbox2);
+			}
+		}
 	}
 
 

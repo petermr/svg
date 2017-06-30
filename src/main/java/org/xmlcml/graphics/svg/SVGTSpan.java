@@ -16,13 +16,14 @@
 
 package org.xmlcml.graphics.svg;
 
-import nu.xom.Element;
-import nu.xom.Node;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 
-import java.util.ArrayList;
-import java.util.List;
+import nu.xom.Element;
+import nu.xom.Node;
 
 /** draws text.
  * 

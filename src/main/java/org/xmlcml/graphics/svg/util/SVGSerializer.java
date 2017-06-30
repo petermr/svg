@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.log4j.Logger;
+
 import nu.xom.Serializer;
 import nu.xom.Text;
-
-import org.apache.log4j.Logger;
 
 public class SVGSerializer extends Serializer {
 	private final static Logger LOG = Logger.getLogger(SVGSerializer.class);

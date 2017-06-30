@@ -16,11 +16,12 @@
 
 package org.xmlcml.graphics.svg;
 
+import org.xmlcml.euclid.Real2;
+import org.xmlcml.euclid.Real2Range;
+
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
-import org.xmlcml.euclid.Real2;
-import org.xmlcml.euclid.Real2Range;
 
 /** supports use/symbol
   <defs>

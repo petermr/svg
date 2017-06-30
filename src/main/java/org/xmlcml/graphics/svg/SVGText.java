@@ -1,19 +1,8 @@
 package org.xmlcml.graphics.svg;
 
-import nu.xom.*;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.xmlcml.euclid.*;
-import org.xmlcml.euclid.Angle.Units;
-import org.xmlcml.graphics.svg.SVGLine.LineDirection;
-import org.xmlcml.graphics.svg.fonts.FontWidths;
-import org.xmlcml.graphics.svg.text.SVGPhrase;
-import org.xmlcml.graphics.svg.text.SVGWord;
-import org.xmlcml.xml.XMLConstants;
-import org.xmlcml.xml.XMLUtil;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
@@ -21,6 +10,31 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Angle;
+import org.xmlcml.euclid.Angle.Units;
+import org.xmlcml.euclid.EuclidConstants;
+import org.xmlcml.euclid.Real;
+import org.xmlcml.euclid.Real2;
+import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.RealArray;
+import org.xmlcml.euclid.RealRange;
+import org.xmlcml.euclid.RealSquareMatrix;
+import org.xmlcml.euclid.Transform2;
+import org.xmlcml.euclid.Util;
+import org.xmlcml.euclid.Vector2;
+import org.xmlcml.graphics.svg.SVGLine.LineDirection;
+import org.xmlcml.graphics.svg.fonts.FontWidths;
+import org.xmlcml.xml.XMLConstants;
+import org.xmlcml.xml.XMLUtil;
+
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.Nodes;
+import nu.xom.Text;
 
 /** 
  * Draws text.
@@ -893,6 +907,11 @@ public class SVGText extends SVGElement {
 //		}
 	}
 
+	public void setSVGXFontWidth(RealArray array) {
+		SVGUtil.setSVGXAttribute(this, WIDTH, array.getStringArray());
+//		}
+	}
+
 	public GlyphVector getGlyphVector() {
 		if (getFontSize() == null) {
 			return null;
@@ -1176,6 +1195,14 @@ public class SVGText extends SVGElement {
 	public boolean isRot90() {
 		boolean rot90 = ROT90.isEqualTo(this.getAngleOfRotation(), ANGLE_EPS);
 		return rot90;
+	}
+
+	public void setX(RealArray array) {
+		this.addAttribute(new Attribute(X, array.getStringArray()));
+	}
+
+	public void setY(RealArray array) {
+		this.addAttribute(new Attribute(Y, array.getStringArray()));
 	}
 
 

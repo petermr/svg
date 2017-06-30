@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nu.xom.Attribute;
-import nu.xom.Element;
-
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Axis.Axis2;
 import org.xmlcml.euclid.Real;
@@ -32,6 +29,9 @@ import org.xmlcml.graphics.svg.linestuff.BoundingBoxManager.BoxEdge;
 import org.xmlcml.graphics.svg.linestuff.ComplexLine.LineOrientation;
 import org.xmlcml.graphics.svg.util.GraphUtil;
 import org.xmlcml.stml.STMLArray;
+
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 
 public class SVGPolylineAnalyzer {

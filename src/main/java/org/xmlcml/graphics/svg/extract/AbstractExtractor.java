@@ -8,7 +8,6 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.plot.PlotBox;
 import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** superclass for extractorAnnotators.

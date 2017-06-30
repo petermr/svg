@@ -1,6 +1,5 @@
 package org.xmlcml.graphics.svg.extract;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGPolygon;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
-import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
@@ -45,6 +43,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	private List<SVGRect> rectList;
 	private List<SVGTriangle> triangleList;
 	private List<SVGShape> unknownShapeList;
+	private List<SVGShape> allShapeList;
 	
 	public ShapeExtractor(SVGStore svgStore) {
 		super(svgStore);
@@ -316,6 +315,37 @@ public class ShapeExtractor extends AbstractExtractor {
 	public Real2Range getBoundingBox() {
 		boundingBox = SVGElement.createBoundingBox(originalPathList);
 		return boundingBox;
+	}
+
+//	debug(g, rectList, "black", "#ffff77", 0.2);
+//	debug(g, polygonList, "black", "orange", 0.3);
+//	debug(g, triangleList, "black", "#ffeeff", 0.3);
+//	debug(g, ellipseList, "black", "red", 0.3);
+//	debug(g, lineList, "cyan", "red", 0.3);
+//	debug(g, polylineList, "magenta", "green", 0.3);
+//	debug(g, circleList, "black", "blue", 0.3); // highest priority
+//	debug(g, pathList, "purple", "pink", 0.3);
+
+	public List<SVGShape> getOrCreateAllShapeList() {
+		if (allShapeList == null) {
+			allShapeList = new ArrayList<SVGShape>();
+		// how to do this properly? help!
+			addShapes(rectList);
+			addShapes(polygonList);
+			addShapes(polylineList);
+			addShapes(triangleList);
+			addShapes(ellipseList);
+			addShapes(lineList);
+			addShapes(circleList);
+			addShapes(pathList);
+		}
+		return allShapeList;
+	}
+
+	private void addShapes(List<? extends SVGShape> shapeList) {
+		for (SVGShape shape : shapeList) {
+			allShapeList.add(shape);
+		}
 	}
 
 

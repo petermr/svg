@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.JodaDate;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.xml.XMLUtil;
 

@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Vector2;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
-import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 
 public class SVGErrorBar extends SVGG {
 

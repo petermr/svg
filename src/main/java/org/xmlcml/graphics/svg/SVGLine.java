@@ -32,7 +32,6 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
-import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.xml.XMLConstants;
 import org.xmlcml.xml.XMLUtil;

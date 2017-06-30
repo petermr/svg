@@ -16,15 +16,16 @@
 
 package org.xmlcml.graphics.svg;
 
-import nu.xom.Elements;
-import nu.xom.Nodes;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.euclid.Vector2;
 
-import java.util.ArrayList;
-import java.util.List;
+import nu.xom.Elements;
+import nu.xom.Nodes;
 
 public class SVGGBox extends SVGG {
 	private static Logger LOG = Logger.getLogger(SVGGBox.class);

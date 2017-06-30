@@ -2,17 +2,14 @@ package org.xmlcml.graphics.svg.words;
 
 import java.util.List;
 
-
-
-
-import nu.xom.Attribute;
-
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGTSpan;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.xml.XMLConstants;
+
+import nu.xom.Attribute;
 
 /** may be obsolete, but not checked */
 public class TypedNumber {

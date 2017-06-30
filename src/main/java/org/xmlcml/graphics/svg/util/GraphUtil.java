@@ -5,11 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.List;
 
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Nodes;
-
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Line2;
 import org.xmlcml.euclid.Real;
@@ -25,6 +20,11 @@ import org.xmlcml.graphics.svg.SVGScript;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.linestuff.BoundingBoxManager;
 import org.xmlcml.xml.XMLConstants;
+
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Nodes;
 
 public class GraphUtil {
 	private final static Logger LOG = Logger.getLogger(GraphUtil.class);
