@@ -1,7 +1,6 @@
 package org.xmlcml.graphics.svg.path;
 
 import java.io.File;
-import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;

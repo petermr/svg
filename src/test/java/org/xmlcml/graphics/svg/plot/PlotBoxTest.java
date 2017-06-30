@@ -1,7 +1,6 @@
 package org.xmlcml.graphics.svg.plot;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.apache.log4j.Level;

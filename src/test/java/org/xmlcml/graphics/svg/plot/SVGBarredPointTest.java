@@ -19,9 +19,6 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.plot.SVGBarredPoint;
-import org.xmlcml.graphics.svg.plot.SVGBarredPointList;
-import org.xmlcml.graphics.svg.plot.SVGErrorBar;
 
 public class SVGBarredPointTest {
 

@@ -7,8 +7,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.plot.GraphPlotBox;
-import org.xmlcml.graphics.svg.plot.SVGLineAnalyzer;
 
 public class SVGLineAnalyzerTest {
 

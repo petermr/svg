@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.graphics.svg.SVGLine;
-import org.xmlcml.graphics.svg.linestuff.LineMerger;
 import org.xmlcml.graphics.svg.linestuff.LineMerger.MergeMethod;
 
 public class LineMergerTest {

@@ -2,22 +2,16 @@ package org.xmlcml.graphics.svg.plot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.plot.Axis;
-import org.xmlcml.graphics.svg.plot.AxisAnalyzer;
-import org.xmlcml.graphics.svg.plot.GraphPlotBox;
 
 public class AxisAnalyzerTest {
 

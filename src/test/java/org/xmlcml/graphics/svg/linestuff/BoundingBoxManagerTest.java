@@ -1,6 +1,7 @@
 package org.xmlcml.graphics.svg.linestuff;
 
 import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2Range;

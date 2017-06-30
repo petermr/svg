@@ -1,14 +1,19 @@
 package org.xmlcml.graphics.svg.util;
 
-import nu.xom.Attribute;
-import nu.xom.Element;
-import org.junit.Assert;
-import org.junit.Test;
-import org.xmlcml.graphics.svg.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.xmlcml.graphics.svg.Fixtures;
+import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.SVGG;
+import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.SVGText;
+
+import nu.xom.Attribute;
+import nu.xom.Element;
 
 public class CompacterTest {
 

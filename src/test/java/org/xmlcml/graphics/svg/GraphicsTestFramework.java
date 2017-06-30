@@ -1,7 +1,10 @@
 package org.xmlcml.graphics.svg;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**main purpose is to provide a simple area for visual inspection of 
  * drawing to Graphics (drawElement())
