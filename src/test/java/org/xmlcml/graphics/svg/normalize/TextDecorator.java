@@ -1,17 +1,24 @@
 package org.xmlcml.graphics.svg.normalize;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
+import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.SVGG;
+import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.StyleAttribute;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 import nu.xom.Attribute;
 
@@ -121,14 +128,20 @@ public class TextDecorator extends AbstractDecorator {
 	}
 
 	public SVGG convertTexts2Array() {
+		String[] color = {"red", "green", "blue", "cyan", "magenta", "yellow", "pink", "brown", "gray", "lilac", "purple"};
+		Map<String, String> colorByStyle = new HashMap<String, String>();
+		int icol = 0;
 		SVGG g = new SVGG();
+		Multiset<String> styleSet = HashMultiset.create();
 		for (List<SVGText> textList : textListList) {
 			RealArray xArray = new RealArray();
 			RealArray wArray = new RealArray();
 			StringBuilder sb = new StringBuilder();
 			StringBuilder sbw = new StringBuilder();
+			Real2Range bbox = new Real2Range();
 			for (int i = 0; i < textList.size(); i++) {
 				SVGText text = textList.get(i);
+				bbox.plusEquals(text.getBoundingBox());
 				xArray.addElement(text.getX());
 				sb.append(text.getValue());
 				wArray.addElement(text.getSVGXFontWidth());
@@ -137,9 +150,23 @@ public class TextDecorator extends AbstractDecorator {
 			arrayText.setX(xArray);
 			arrayText.setSVGXFontWidth(wArray);
 			arrayText.setText(sb.toString());
-			StyleAttribute.createStyleAttribute(arrayText, true);
+			StyleAttribute styleAttribute = StyleAttribute.createStyleAttribute(arrayText, true);
+			String style = styleAttribute.getStringValue();
+			styleSet.add(style);
+			String col = colorByStyle.get(style);
+			if (col == null) {
+				col = color[icol];
+				icol = Math.min(color.length - 1, ++icol);
+				colorByStyle.put(style, col);
+			}
 			g.appendChild(arrayText);
+			SVGRect rect = SVGRect.createFromReal2Range(bbox);
+			rect.setFill(col);
+			rect.setOpacity(0.3);
+			g.appendChild(rect);
 		}
+		
+		LOG.debug(styleSet+"; "+styleSet.entrySet().size());
 		return g;
 	}
 

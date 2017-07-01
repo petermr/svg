@@ -59,7 +59,8 @@ public class StyleAttribute {
 		Collections.sort(attNames);
 		StringBuilder sb = new StringBuilder();
 		for (String attName : attNames) {
-			sb.append(attName+":"+nameValueMap.get(attName)+";");
+			String units = attName.equals("font-size") ? "px" : "";
+			sb.append(attName+":"+nameValueMap.get(attName)+units+";");
 		}
 		return sb.toString();
 	}
