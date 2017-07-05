@@ -1,5 +1,6 @@
 package org.xmlcml.graphics.svg.normalize;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,11 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
+import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.StyleAttribute;
+import org.xmlcml.graphics.svg.util.Colorizer;
+import org.xmlcml.graphics.svg.util.Colorizer.ColorizerType;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -34,6 +38,9 @@ public class TextDecorator extends AbstractDecorator {
 		LOG.setLevel(Level.DEBUG);
 	}
 
+	public static final boolean BOXES = true;
+	private static final boolean NO_BOXES = false;
+
 	private static final double X_EPS = 0.01;
 	private static final double Y_EPS = 0.01;
 	
@@ -42,7 +49,11 @@ public class TextDecorator extends AbstractDecorator {
 	private RealArray xValues;
 	private RealArray yValues;
 	private List<SVGText> textList;
-	private List<List<SVGText>> textListList;
+	private List<List<SVGText>> uncompactedTextListList;
+//	private List<SVGText> compactedTextListList;
+	private Real2Range textBoundingBox;
+	private StyleAttribute styleAttribute;
+	private boolean isAddBoxes;
 
 	public TextDecorator() {
 		setDefaults();
@@ -60,11 +71,11 @@ public class TextDecorator extends AbstractDecorator {
 		this.yValues = new RealArray();
 	}
 
-	public List<List<SVGText>> normalize(List<SVGText> texts) {
-		textListList = new ArrayList<List<SVGText>>();
+	public SVGG compact(List<SVGText> texts) {
+		uncompactedTextListList = new ArrayList<List<SVGText>>();
 		if (texts != null && texts.size() > 0) {
 			int ichar = 1;
-			resetText0(texts.get(0));
+			addSingleCharText(texts.get(0));
 			while (ichar < texts.size()) {
 				SVGText text1 = texts.get(ichar);
 				ichar++;
@@ -73,17 +84,17 @@ public class TextDecorator extends AbstractDecorator {
 				Set<String> attNames1Not0 = attributeComparer.getAttNames1Not0();
 				if (attNames0Not1.size() + attNames1Not0.size() != 0) {
 					LOG.debug("attnames change "+attNames0Not1.size() + attNames1Not0);
-					resetText0(text1);
+					addSingleCharText(text1);
 					continue;
 				}
 				Set<Pair<Attribute, Attribute>> unequalAttValues = attributeComparer.getUnequalTextValues();
 				if (unequalAttValues.size() != 0) {
 					LOG.debug(unequalAttValues);
-					resetText0(text1);
+					addSingleCharText(text1);
 					continue;
 				} else if (!this.hasEqualYCoord(textList.get(0), text1, yeps)) {
 					LOG.debug("ycoord changed "+textList.get(0)+" // "+text1);
-					resetText0(text1);
+					addSingleCharText(text1);
 					continue;
 				} else {
 					LOG.trace("adding "+text1);
@@ -91,12 +102,18 @@ public class TextDecorator extends AbstractDecorator {
 				}
 			}
 		}
-		return textListList;
+		return makeCompactedTextsAndAddToG();
+
+	}
+	
+	public SVGG decompact(List<SVGText> texts) {
+		throw new RuntimeException("decompact NYI");
 	}
 
-	private void resetText0(SVGText text) {
+
+	private void addSingleCharText(SVGText text) {
 		textList = new ArrayList<SVGText>();
-		textListList.add(textList);
+		uncompactedTextListList.add(textList);
 		textList.add(text);
 		attributeComparer.setElement0(text);
 	}
@@ -105,6 +122,10 @@ public class TextDecorator extends AbstractDecorator {
 		return textList == null || textList.size() == 0 ? null :  textList.get(0).getY();
 	}
 
+	/** does this do anything?
+	 * Not yet
+	 * @return
+	 */
 	public SVGText getNormalizedText() {
 		SVGText normalizedText = null;
 		if (textList != null && textList.size() > 0) {
@@ -127,41 +148,19 @@ public class TextDecorator extends AbstractDecorator {
 		return Real.isEqual(y0, y1, eps);
 	}
 
-	public SVGG convertTexts2Array() {
-		String[] color = {"red", "green", "blue", "cyan", "magenta", "yellow", "pink", "brown", "gray", "lilac", "purple"};
-		Map<String, String> colorByStyle = new HashMap<String, String>();
-		int icol = 0;
+	public SVGG makeCompactedTextsAndAddToG() {
+		Map<String, Color> colorByStyle = new HashMap<String, Color>();
 		SVGG g = new SVGG();
 		Multiset<String> styleSet = HashMultiset.create();
-		for (List<SVGText> textList : textListList) {
-			RealArray xArray = new RealArray();
-			RealArray wArray = new RealArray();
-			StringBuilder sb = new StringBuilder();
-			StringBuilder sbw = new StringBuilder();
-			Real2Range bbox = new Real2Range();
-			for (int i = 0; i < textList.size(); i++) {
-				SVGText text = textList.get(i);
-				bbox.plusEquals(text.getBoundingBox());
-				xArray.addElement(text.getX());
-				sb.append(text.getValue());
-				wArray.addElement(text.getSVGXFontWidth());
-			}
-			SVGText arrayText = new SVGText(textList.get(0));
-			arrayText.setX(xArray);
-			arrayText.setSVGXFontWidth(wArray);
-			arrayText.setText(sb.toString());
-			StyleAttribute styleAttribute = StyleAttribute.createStyleAttribute(arrayText, true);
+		Colorizer colorizer = Colorizer.createColorizer(ColorizerType.CONTRAST);
+		for (List<SVGText> textList : uncompactedTextListList) {
+			SVGText compactedText = createCompactText(textList);
+			g.appendChild(compactedText);
 			String style = styleAttribute.getStringValue();
 			styleSet.add(style);
-			String col = colorByStyle.get(style);
-			if (col == null) {
-				col = color[icol];
-				icol = Math.min(color.length - 1, ++icol);
-				colorByStyle.put(style, col);
-			}
-			g.appendChild(arrayText);
-			SVGRect rect = SVGRect.createFromReal2Range(bbox);
-			rect.setFill(col);
+			Color col = getNextAvailableColor(colorByStyle, style, colorizer);
+			SVGRect rect = SVGRect.createFromReal2Range(textBoundingBox);
+			rect.setFill(col.toString());
 			rect.setOpacity(0.3);
 			g.appendChild(rect);
 		}
@@ -169,6 +168,40 @@ public class TextDecorator extends AbstractDecorator {
 		LOG.debug(styleSet+"; "+styleSet.entrySet().size());
 		return g;
 	}
+
+	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, Colorizer colorizer) {
+		Color color = colorByStyle.get(style);
+		if (color == null) {
+			color = colorizer.getNextAvailableColor(colorByStyle.size());
+			colorByStyle.put(style, color);
+		}
+		return color;
+	}
+
+	private SVGText createCompactText(List<SVGText> textList) {
+		RealArray xCoordinateArray = new RealArray();
+		RealArray widthArray = new RealArray();
+		StringBuilder textContentBuilder = new StringBuilder();
+		textBoundingBox = new Real2Range();
+		for (int i = 0; i < textList.size(); i++) {
+			SVGText text = textList.get(i);
+			textBoundingBox.plusEquals(text.getBoundingBox());
+			xCoordinateArray.addElement(text.getX());
+			textContentBuilder.append(text.getValue());
+			widthArray.addElement(text.getSVGXFontWidth());
+		}
+		SVGText arrayText = new SVGText(textList.get(0));
+		arrayText.setX(xCoordinateArray);
+		arrayText.setSVGXFontWidth(widthArray);
+		arrayText.setText(textContentBuilder.toString());
+		styleAttribute = StyleAttribute.createStyleAttribute(arrayText, true);
+		return arrayText;
+	}
+
+	public void setAddBoxes(boolean b) {
+		this.isAddBoxes = b;
+	}
+
 
 	
 }
