@@ -62,6 +62,22 @@ public class SVGPath extends SVGShape {
 		LOG.setLevel(Level.DEBUG);
 	}
 
+	private static final String SIGNATURE = "signature";
+	private static final String MZ = "MZ";
+	private static final String ML = "ML";
+	private static final String NOT_L = "[^L]";
+	private static final String NOT_C = "[^C]";
+	private static final String SP = " ";
+	private static final String Z = "Z";
+	private static final String C = "C";
+	private static final String Q = "Q";
+	private static final String L = "L";
+	private static final String M = "M";
+	private static final String BLUE = "blue";
+	private static final String MCCCC = "MCCCC";
+	private static final String MCCCCZ = "MCCCCZ";
+	private static final String NONE = "none";
+	private static final String BLACK = "black";
 	private static final String MLLLL = "MLLLL";
 	private static final String MLLLLZ = "MLLLLZ";
 	public final static String CC = "CC";
@@ -164,9 +180,9 @@ public class SVGPath extends SVGShape {
 		return isClosed;
 	}
 	public static void setDefaultStyle(SVGPath path) {
-		path.setStroke("black");
+		path.setStroke(BLACK);
 		path.setStrokeWidth(0.5);
-		path.setFill("none");
+		path.setFill(NONE);
 	}
 	
 	/** 
@@ -185,17 +201,17 @@ public class SVGPath extends SVGShape {
 		String s = XMLConstants.S_EMPTY;
 		StringBuilder sb = new StringBuilder();
 		if (xy.size() > 0) {
-			sb.append("M");
+			sb.append(M);
 			sb.append(xy.get(0).getX()+S_SPACE);
 			sb.append(xy.get(0).getY()+S_SPACE);
 		}
 		if (xy.size() > 1) {
 			for (int i = 1; i < xy.size(); i++ ) {
-				sb.append("L");
+				sb.append(L);
 				sb.append(xy.get(i).getX()+S_SPACE);
 				sb.append(xy.get(i).getY()+S_SPACE);
 			}
-			sb.append("Z");
+			sb.append(Z);
 		}
 		s = sb.toString();
 		return s;
@@ -313,7 +329,7 @@ public class SVGPath extends SVGShape {
 		createCoordArray();
 		SVGCircle circle = null;
 		String signature = getSignature();
-		if (signature.equals("MCCCCZ") || signature.equals("MCCCC") && isClosed) {
+		if (signature.equals(MCCCCZ) || signature.equals(MCCCC) && isClosed) {
 			PathPrimitiveList primList = ensurePrimitives();
 			Angle angleEps = new Angle(0.05, Units.RADIANS);
 			Real2Array centreArray = new Real2Array();
@@ -481,7 +497,7 @@ public class SVGPath extends SVGShape {
 	 * @return default none
 	 */
 	protected String getBBFill() {
-		return "none";
+		return NONE;
 	}
 
 	/** 
@@ -492,7 +508,7 @@ public class SVGPath extends SVGShape {
 	 * @return default blue
 	 */
 	protected String getBBStroke() {
-		return "blue";
+		return BLUE;
 	}
 
 	/** property of graphic bounding box
@@ -601,15 +617,15 @@ public class SVGPath extends SVGShape {
 			int segType = pathIterator.currentSegment(coords);
 			coords = normalizeSmallCoordsToZero(coords);
 			if (PathIterator.SEG_MOVETO == segType) {
-				dd.append(" M "+coords[0]+" "+coords[1]);
+				dd.append(SP+M+SP+coords[0]+SP+coords[1]);
 			} else if (PathIterator.SEG_LINETO == segType) {
-				dd.append(" L "+coords[0]+" "+coords[1]);
+				dd.append(SP+L+SP+coords[0]+SP+coords[1]);
 			} else if (PathIterator.SEG_QUADTO == segType) {
-				dd.append(" Q "+coords[0]+" "+coords[1]+" "+coords[2]+" "+coords[3]);
+				dd.append(SP+Q+SP+coords[0]+SP+coords[1]+SP+coords[2]+SP+coords[3]);
 			} else if (PathIterator.SEG_CUBICTO == segType) {
-				dd.append(" C "+coords[0]+" "+coords[1]+" "+coords[2]+" "+coords[3]+" "+coords[4]+" "+coords[5]);
+				dd.append(SP+C+SP+coords[0]+SP+coords[1]+SP+coords[2]+SP+coords[3]+SP+coords[4]+SP+coords[5]);
 			} else if (PathIterator.SEG_CLOSE == segType) {
-				dd.append(" Z ");
+				dd.append(SP+Z+SP);
 			} else {
 				throw new RuntimeException("UNKNOWN "+segType);
 			}
@@ -661,18 +677,18 @@ public class SVGPath extends SVGShape {
 			return null;
 		}
 		// can only have one M
-		if (signature.substring(1).indexOf("M") != -1) {
+		if (signature.substring(1).indexOf(M) != -1) {
 			return null;
 		}
-		signature.replaceAll("[^C]", "").length();
+		signature.replaceAll(NOT_C, "").length();
 		StringBuilder sb = new StringBuilder();
 		if (signature.length() >= minPrimitives) {
-			int cCount = signature.replaceAll("[^C]", "").length();
-			int lCount = signature.replaceAll("[^L]", "").length();
+			int cCount = signature.replaceAll(NOT_C, "").length();
+			int lCount = signature.replaceAll(NOT_L, "").length();
 			if (lCount >= minL && maxC >= cCount) {
 				for (SVGPathPrimitive primitive : primitiveList) {
 					if (primitive instanceof CubicPrimitive) {
-						sb.append("L"+primitive.getLastCoord().toString());
+						sb.append(L+primitive.getLastCoord().toString());
 					} else {
 						sb.append(primitive.toString());
 					}
@@ -807,7 +823,7 @@ public class SVGPath extends SVGShape {
 	}
 
 	public static boolean isRepeatedML(String sig) {
-		return sig.startsWith("ML") && sig.replaceAll("ML", "").length() == 0;
+		return sig.startsWith(ML) && sig.replaceAll(ML, "").length() == 0;
 	}
 
 	public static List<SVGLine> createLinesFromPaths(List<SVGPath> pathList) {
@@ -877,7 +893,7 @@ public class SVGPath extends SVGShape {
 	@Override
 	public boolean isZeroDimensional() {
 		String signature = this.getSignature().toUpperCase();
-		return (signature.equals("MZ") || signature.equals("M"));
+		return (signature.equals(MZ) || signature.equals(M));
 	}
 
 	@Override
@@ -890,8 +906,8 @@ public class SVGPath extends SVGShape {
 
 
 	public void getOrCreateSignature() {
-		if (getAttribute("signature") == null) {
-			addAttribute(new Attribute("signature", getSignature()));
+		if (getAttribute(SIGNATURE) == null) {
+			addAttribute(new Attribute(SIGNATURE, getSignature()));
 		}
 	}
 
@@ -915,7 +931,11 @@ public class SVGPath extends SVGShape {
 		Set<String> dStringSet = new HashSet<String>();
 		for (SVGPath path : pathList) {
 			if (path == null) continue;
-			String d = path.getDString();
+			String d = path.getDString().trim();
+// sometimes this ends with Z - trim it off
+			if (d.endsWith(Z)) {
+				d = d.substring(0,  d.length() - 1).trim();
+			}
 			if (dStringSet.contains(d)) {
 				continue;
 			}
