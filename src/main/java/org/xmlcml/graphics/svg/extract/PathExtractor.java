@@ -16,6 +16,8 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.store.SVGStore;
 
 import com.google.common.collect.HashMultiset;
@@ -56,19 +58,25 @@ public class PathExtractor extends AbstractExtractor{
 		
 	}
 
+	/** may wish to pass controls in a DTO
+	 * 
+	 * @param svgElement
+	 */
 	public void extractPaths(SVGElement svgElement) {
 		this.originalPathList = SVGPath.extractPaths(svgElement);
 		SVGPath.addSignatures(originalPathList);
-//		svgLogger.write("originalPathList", originalPathList);
 		positiveBoxPathList = new ArrayList<SVGPath>(originalPathList);
 		SVGElement.removeElementsOutsideBox(positiveBoxPathList, positiveXBox);
-//		svgLogger.write("positiveBoxPathList", positiveBoxPathList);
 		nonNegativePathList = SVGPath.removePathsWithNegativeY(positiveBoxPathList);
-//		svgLogger.write("nonNegativePathList", nonNegativePathList);
+		LOG.debug("nonNegativePathList "+nonNegativePathList.size());
 		trimmedShadowedPathList = SVGPath.removeShadowedPaths(nonNegativePathList);
-//		currentPathList = trimmedShadowedPathList;
+		LOG.debug("trimmedShadowedPathList "+ trimmedShadowedPathList.size());
+		
 		currentPathList = originalPathList;
-//		svgLogger.write("trimmedShadowedPathList", trimmedShadowedPathList);
+		LOG.debug("currentPathList "+currentPathList.size());
+		currentPathList = SVGPath.removeShadowedPaths(currentPathList);
+		LOG.debug("currentPathList "+ currentPathList.size());
+		return;
 	}
 
 	public PathExtractor(SVGStore svgStore) {
