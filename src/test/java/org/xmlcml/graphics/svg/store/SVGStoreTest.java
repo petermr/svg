@@ -80,6 +80,16 @@ public class SVGStoreTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testShadowedPaths() throws Exception {
+		File file = new File(Fixtures.PLOT_DIR, "tilburgVectors/10.1186_s13027-016-0058-9_1.svg");
+		SVGStore store = new SVGStore();
+		LOG.debug("reading: "+file);
+		String root = FilenameUtils.getBaseName(file.toString());
+		store.readGraphicsComponents(file);
+//		displayBoxes(new File("target/plot/debug/images/"), store, root, imageBoxes, "mauve");
+	}
 
 	// =====================
 	

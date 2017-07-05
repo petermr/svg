@@ -77,6 +77,7 @@ public class SVGStore {
 	public Double cornerEps = 0.5; // to start with
 	
 	private boolean removeWhitespace = false;
+	private boolean removeDuplicatePaths = true;
 	private Real2Range imageBox;
 	private Real2Range lineBbox;
 	private Real2Range pathBox;
