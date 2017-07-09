@@ -15,11 +15,10 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
-import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.StyleAttribute;
-import org.xmlcml.graphics.svg.util.Colorizer;
-import org.xmlcml.graphics.svg.util.Colorizer.ColorizerType;
+import org.xmlcml.graphics.svg.util.ColorStore;
+import org.xmlcml.graphics.svg.util.ColorStore.ColorizerType;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -74,36 +73,38 @@ public class TextDecorator extends AbstractDecorator {
 	public SVGG compact(List<SVGText> texts) {
 		uncompactedTextListList = new ArrayList<List<SVGText>>();
 		if (texts != null && texts.size() > 0) {
-			int ichar = 1;
 			addSingleCharText(texts.get(0));
-			while (ichar < texts.size()) {
-				SVGText text1 = texts.get(ichar);
-				ichar++;
-				attributeComparer.setElement1(text1);
-				Set<String> attNames0Not1 = attributeComparer.getAttNames0Not1();
-				Set<String> attNames1Not0 = attributeComparer.getAttNames1Not0();
-				if (attNames0Not1.size() + attNames1Not0.size() != 0) {
-					LOG.debug("attnames change "+attNames0Not1.size() + attNames1Not0);
-					addSingleCharText(text1);
-					continue;
-				}
-				Set<Pair<Attribute, Attribute>> unequalAttValues = attributeComparer.getUnequalTextValues();
-				if (unequalAttValues.size() != 0) {
-					LOG.debug(unequalAttValues);
-					addSingleCharText(text1);
-					continue;
-				} else if (!this.hasEqualYCoord(textList.get(0), text1, yeps)) {
-					LOG.debug("ycoord changed "+textList.get(0)+" // "+text1);
-					addSingleCharText(text1);
-					continue;
-				} else {
-					LOG.trace("adding "+text1);
-					textList.add(text1);
-				}
+			for (int ichar = 1; ichar < texts.size(); ichar++) {
+				addCharacterToTextLists(texts.get(ichar));
+			}
+			for (SVGText text : texts) {
+				text.detach();
 			}
 		}
-		return makeCompactedTextsAndAddToG();
+		SVGG g = makeCompactedTextsAndAddToG();
+		return g;
 
+	}
+
+	private void addCharacterToTextLists(SVGText text) {
+		attributeComparer.setElement1(text);
+		Set<String> attNames0Not1 = attributeComparer.getAttNames0Not1();
+		Set<String> attNames1Not0 = attributeComparer.getAttNames1Not0();
+		if (attNames0Not1.size() + attNames1Not0.size() != 0) {
+			LOG.debug("attnames change "+attNames0Not1.size() + attNames1Not0);
+			addSingleCharText(text);
+		}
+		Set<Pair<Attribute, Attribute>> unequalAttValues = attributeComparer.getUnequalTextValues();
+		if (unequalAttValues.size() != 0) {
+			LOG.debug(unequalAttValues);
+			addSingleCharText(text);
+		} else if (!this.hasEqualYCoord(textList.get(0), text, yeps)) {
+			LOG.debug("ycoord changed "+textList.get(0)+" // "+text);
+			addSingleCharText(text);
+		} else {
+			LOG.trace("adding "+text);
+			textList.add(text);
+		}
 	}
 	
 	public SVGG decompact(List<SVGText> texts) {
@@ -152,24 +153,26 @@ public class TextDecorator extends AbstractDecorator {
 		Map<String, Color> colorByStyle = new HashMap<String, Color>();
 		SVGG g = new SVGG();
 		Multiset<String> styleSet = HashMultiset.create();
-		Colorizer colorizer = Colorizer.createColorizer(ColorizerType.CONTRAST);
+		ColorStore colorizer = ColorStore.createColorizer(ColorizerType.CONTRAST);
 		for (List<SVGText> textList : uncompactedTextListList) {
 			SVGText compactedText = createCompactText(textList);
 			g.appendChild(compactedText);
 			String style = styleAttribute.getStringValue();
 			styleSet.add(style);
+			/** not the right place for this
 			Color col = getNextAvailableColor(colorByStyle, style, colorizer);
 			SVGRect rect = SVGRect.createFromReal2Range(textBoundingBox);
 			rect.setFill(col.toString());
 			rect.setOpacity(0.3);
 			g.appendChild(rect);
+			*/
 		}
 		
 		LOG.debug(styleSet+"; "+styleSet.entrySet().size());
 		return g;
 	}
 
-	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, Colorizer colorizer) {
+	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, ColorStore colorizer) {
 		Color color = colorByStyle.get(style);
 		if (color == null) {
 			color = colorizer.getNextAvailableColor(colorByStyle.size());
