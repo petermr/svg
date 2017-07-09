@@ -136,7 +136,7 @@ public class SVGSVG extends SVGElement {
 			svgsvg.setHeight(height);
 			svgsvg.setWidth(width);
 			try {
-				LOG.trace("Writing SVG "+file.getAbsolutePath());
+				LOG.debug("Writing SVG "+file.getAbsolutePath());
 				file.getParentFile().mkdirs();
 				FileOutputStream fos = new FileOutputStream(file);
 				SVGUtil.debug(svgsvg, fos, 1);
