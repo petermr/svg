@@ -71,6 +71,7 @@ public class TextNormalizerTest {
 		SVGG g = textDecorator.makeCompactedTextsAndAddToG();
 		File file2 = new File(new File("target/text/normalize"), fileRoot+".svg");
 		SVGSVG.wrapAndWriteAsSVG(g, file2);
-		Assert.assertEquals("filesize",  131585, FileUtils.sizeOf(file2));
+		long size = FileUtils.sizeOf(file2);
+		Assert.assertTrue("filesize "+size,   size > 130000 && size < 140000);
 	}
 }
