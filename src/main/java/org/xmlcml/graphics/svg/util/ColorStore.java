@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
  * @author pm286
  *
  */
-public class Colorizer {
-	private static final Logger LOG = Logger.getLogger(Colorizer.class);
+public class ColorStore {
+	private static final Logger LOG = Logger.getLogger(ColorStore.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -1011,16 +1011,16 @@ Color.YELLOW,
 		}
 		public Color[] getColors() {return colors;}
 	}
-	public static Colorizer createColorizer(ColorizerType type) {
+	public static ColorStore createColorizer(ColorizerType type) {
 		if (ColorizerType.CONTRAST.equals(type)) {
-			return new Colorizer(ColorizerType.CONTRAST);
+			return new ColorStore(ColorizerType.CONTRAST);
 		}
 		return null;
 	}
 
 	private ColorizerType type;
 	
-	public Colorizer(ColorizerType type) {
+	public ColorStore(ColorizerType type) {
 		this.type = type;
 	}
 
