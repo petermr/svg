@@ -19,9 +19,12 @@ import nu.xom.Attribute;
  */
 public class StyleAttribute {
 	private static final Logger LOG = Logger.getLogger(StyleAttribute.class);
-	
 	static {
 		LOG.setLevel(Level.DEBUG);
+	}
+	public enum Preserve {
+		KEEP,
+		REMOVE
 	}
 	private static final String STYLE = "style";
 	private Map<String, String> nameValueMap;
@@ -30,18 +33,18 @@ public class StyleAttribute {
 		nameValueMap = new HashMap<String, String>();
 	}
 	
-	public static StyleAttribute createStyleAttribute(SVGElement element, boolean removeReplace) {
+	public static StyleAttribute createStyleAttribute(SVGElement element, Preserve preserve) {
 		StyleAttribute styleAttribute = new StyleAttribute();
 		for (int i = element.getAttributeCount() - 1; i >= 0; i--) {
 			Attribute attribute = element.getAttribute(i);
 			if (AttributeComparer.STYLE_SET.contains(attribute.getLocalName())) {
 				styleAttribute.add(attribute);
-				if (removeReplace) {
+				if (Preserve.REMOVE == preserve) {
 					attribute.detach();
 				}
 			}
 		}
-		if (removeReplace) {
+		if (Preserve.REMOVE == preserve) {
 			element.addAttribute(new Attribute(STYLE, styleAttribute.getStringValue()));
 		}
 		return styleAttribute;

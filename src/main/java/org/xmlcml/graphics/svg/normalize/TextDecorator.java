@@ -17,6 +17,7 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.StyleAttribute;
+import org.xmlcml.graphics.svg.StyleAttribute.Preserve;
 import org.xmlcml.graphics.svg.util.ColorStore;
 import org.xmlcml.graphics.svg.util.ColorStore.ColorizerType;
 
@@ -73,7 +74,7 @@ public class TextDecorator extends AbstractDecorator {
 	public SVGG compact(List<SVGText> texts) {
 		uncompactedTextListList = new ArrayList<List<SVGText>>();
 		if (texts != null && texts.size() > 0) {
-			addSingleCharText(texts.get(0));
+			addSingleCharTextToUncompactedList(texts.get(0));
 			for (int ichar = 1; ichar < texts.size(); ichar++) {
 				addCharacterToTextLists(texts.get(ichar));
 			}
@@ -92,15 +93,15 @@ public class TextDecorator extends AbstractDecorator {
 		Set<String> attNames1Not0 = attributeComparer.getAttNames1Not0();
 		if (attNames0Not1.size() + attNames1Not0.size() != 0) {
 			LOG.debug("attnames change "+attNames0Not1.size() + attNames1Not0);
-			addSingleCharText(text);
+			addSingleCharTextToUncompactedList(text);
 		}
 		Set<Pair<Attribute, Attribute>> unequalAttValues = attributeComparer.getUnequalTextValues();
 		if (unequalAttValues.size() != 0) {
 			LOG.debug(unequalAttValues);
-			addSingleCharText(text);
+			addSingleCharTextToUncompactedList(text);
 		} else if (!this.hasEqualYCoord(textList.get(0), text, yeps)) {
 			LOG.debug("ycoord changed "+textList.get(0)+" // "+text);
-			addSingleCharText(text);
+			addSingleCharTextToUncompactedList(text);
 		} else {
 			LOG.trace("adding "+text);
 			textList.add(text);
@@ -112,7 +113,7 @@ public class TextDecorator extends AbstractDecorator {
 	}
 
 
-	private void addSingleCharText(SVGText text) {
+	private void addSingleCharTextToUncompactedList(SVGText text) {
 		textList = new ArrayList<SVGText>();
 		uncompactedTextListList.add(textList);
 		textList.add(text);
@@ -150,37 +151,35 @@ public class TextDecorator extends AbstractDecorator {
 	}
 
 	public SVGG makeCompactedTextsAndAddToG() {
-		Map<String, Color> colorByStyle = new HashMap<String, Color>();
 		SVGG g = new SVGG();
 		Multiset<String> styleSet = HashMultiset.create();
-		ColorStore colorizer = ColorStore.createColorizer(ColorizerType.CONTRAST);
 		for (List<SVGText> textList : uncompactedTextListList) {
 			SVGText compactedText = createCompactText(textList);
 			g.appendChild(compactedText);
 			String style = styleAttribute.getStringValue();
 			styleSet.add(style);
-			/** not the right place for this
-			Color col = getNextAvailableColor(colorByStyle, style, colorizer);
-			SVGRect rect = SVGRect.createFromReal2Range(textBoundingBox);
-			rect.setFill(col.toString());
-			rect.setOpacity(0.3);
-			g.appendChild(rect);
-			*/
 		}
 		
 		LOG.debug(styleSet+"; "+styleSet.entrySet().size());
 		return g;
 	}
 
-	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, ColorStore colorizer) {
-		Color color = colorByStyle.get(style);
-		if (color == null) {
-			color = colorizer.getNextAvailableColor(colorByStyle.size());
-			colorByStyle.put(style, color);
-		}
-		return color;
-	}
+//	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, ColorStore colorizer) {
+//		Color color = colorByStyle.get(style);
+//		if (color == null) {
+//			color = colorizer.getNextAvailableColor(colorByStyle.size());
+//			colorByStyle.put(style, color);
+//		}
+//		return color;
+//	}
 
+	/** compacts a list of SVGTexts into a gingle SVGText.
+	 * retains current boundingBox and styleAttribute.
+	 * Does not test that y or styleAttribute is constant
+	 * 
+	 * @param textList
+	 * @return
+	 */
 	private SVGText createCompactText(List<SVGText> textList) {
 		RealArray xCoordinateArray = new RealArray();
 		RealArray widthArray = new RealArray();
@@ -197,7 +196,7 @@ public class TextDecorator extends AbstractDecorator {
 		arrayText.setX(xCoordinateArray);
 		arrayText.setSVGXFontWidth(widthArray);
 		arrayText.setText(textContentBuilder.toString());
-		styleAttribute = StyleAttribute.createStyleAttribute(arrayText, true);
+		styleAttribute = StyleAttribute.createStyleAttribute(arrayText, Preserve.REMOVE);
 		return arrayText;
 	}
 

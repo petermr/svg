@@ -72,6 +72,6 @@ public class TextNormalizerTest {
 		File file2 = new File(new File("target/text/normalize"), fileRoot+".svg");
 		SVGSVG.wrapAndWriteAsSVG(g, file2);
 		long size = FileUtils.sizeOf(file2);
-		Assert.assertTrue("filesize "+size,   size > 130000 && size < 140000);
+		Assert.assertTrue("filesize "+size,   size > 100000 && size < 140000);
 	}
 }

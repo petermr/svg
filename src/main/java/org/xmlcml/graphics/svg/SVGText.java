@@ -121,7 +121,7 @@ public class SVGText extends SVGElement {
 
 	private void setXYAndText(Real2 xy, String text) {
 		if (new Real2(0.0, 0.0).isEqualTo(xy, 0.000001)) {
-			throw new RuntimeException("Text of ),0 is suspicious");
+			LOG.warn("Text of (0,0) is suspicious");
 		}
 		setXY(xy);
 		setText(text);
@@ -322,7 +322,7 @@ public class SVGText extends SVGElement {
 				this.appendChild(text);
 			} catch (nu.xom.IllegalCharacterDataException e) {
 				//e.printStackTrace();
-				throw new RuntimeException("Cannot append text: "+text+" (char-"+(int)text.charAt(0)+")", e);
+				LOG.error("Cannot append text: "+text+" (char-"+(int)text.charAt(0)+")", e);
 			}
 		}
 		boundingBox = null;

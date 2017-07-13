@@ -17,6 +17,7 @@
 package org.xmlcml.graphics.svg;
 
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,6 +152,10 @@ public class SVGRect extends SVGShape {
 		this(bbox.getXMin(), bbox.getYMin(), bbox.getXRange().getRange(), bbox.getYRange().getRange());
 	}
 	
+	public SVGRect(Point2D p0, Point2D p1) {
+		this(new Real2(p0.getX(), p0.getY()), new Real2(p1.getX(), p1.getY()));
+	}
+
 	protected void drawElement(Graphics2D g2d) {
 		saveGraphicsSettingsAndApplyTransform(g2d);
 		ensureCumulativeTransform();
