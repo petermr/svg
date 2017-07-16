@@ -27,7 +27,6 @@ import nu.xom.Nodes;
 
 public class SVGUtil {
 
-	private static final String PX = "px";
 	private static final String TRANSFORMS_APPLIED = "transformsApplied";
 	private static final Logger LOG = Logger.getLogger(SVGUtil.class);
 
@@ -37,7 +36,7 @@ public class SVGUtil {
 	 * also copies ant transform attribute
 	 * @param element to amend (is changed)
 	 */
-	public static SVGG interposeGBetweenChildren(SVGElement element) {
+	public static SVGG interposeGBetweenChildren(GraphicsElement element) {
 		SVGG g = new SVGG();
 		element.appendChild(g);
 		while (element.getChildCount() > 1) {
@@ -55,7 +54,7 @@ public class SVGUtil {
 	 * @param xmlString
 	 * @return
 	 */
-	public static SVGElement parseToSVGElement(String xmlString) {
+	public static GraphicsElement parseToSVGElement(String xmlString) {
 		Element element = XMLUtil.parseXML(xmlString);
 		return SVGElement.readAndCreateSVG(element);
 	}
@@ -75,7 +74,7 @@ public class SVGUtil {
 		}
 	}
 
-	public static List<SVGElement> getQuerySVGElements(SVGElement svgElement, String xpath) {
+	public static List<SVGElement> getQuerySVGElements(GraphicsElement svgElement, String xpath) {
 		List<Element> elements = XMLUtil.getQueryElements(svgElement, xpath, SVGConstants.SVG_XPATH);
 		List<SVGElement> svgElements = new ArrayList<SVGElement>();
 		for (Element element : elements) {
@@ -100,7 +99,7 @@ public class SVGUtil {
 	 * @param xy
 	 * @return transformed pair
 	 */
-	public static Real2 getTransformedXY(SVGElement element, Real2 xy) {
+	public static Real2 getTransformedXY(GraphicsElement element, Real2 xy) {
 		Transform2 t2 = element.getCumulativeTransform();
 		return xy.getTransformed(t2);
 	}
@@ -126,7 +125,7 @@ public class SVGUtil {
 	/** finds root SVG element ancestor and then removes all transformation in the tree
 	 * @param element - any element in tree will do
 	 */
-	public static void applyAndRemoveCumulativeTransformsFromDocument(SVGElement element) {
+	public static void applyAndRemoveCumulativeTransformsFromDocument(GraphicsElement element) {
 		List<SVGElement> roots = SVGUtil.getQuerySVGElements(element, "/svg:svg");
 		if (roots.size() == 1) {
 			SVGSVG root = (SVGSVG) roots.get(0);
@@ -162,14 +161,14 @@ public class SVGUtil {
    <path style="clip-path:url(#clipPath1); stroke:none;" d="M327.397 218.897 L328.023 215.899 L329.074 215.899 C329.433 215.899 329.692 215.936 329.854 216.007 C330.011 216.08 330.167 216.231 330.321 216.46 C330.545 216.792 330.744 217.186 330.92 217.639 L331.403 218.897 L332.412 218.897 L331.898 217.626 C331.725 217.201 331.497 216.792 331.214 216.397 C331.088 216.222 330.903 216.044 330.657 215.863 C331.459 215.755 332.039 215.52 332.399 215.158 C332.759 214.796 332.937 214.341 332.937 213.791 C332.937 213.397 332.855 213.072 332.691 212.813 C332.527 212.557 332.3 212.38 332.013 212.287 C331.723 212.192 331.299 212.145 330.74 212.145 L327.907 212.145 L326.493 218.897 L327.397 218.897 ZM328.653 212.888 L330.856 212.888 C331.203 212.888 331.447 212.914 331.592 212.966 C331.736 213.018 331.855 213.117 331.941 213.264 C332.032 213.41 332.075 213.58 332.075 213.776 C332.075 214.011 332.016 214.227 331.898 214.43 C331.778 214.634 331.609 214.794 331.39 214.914 C331.17 215.033 330.893 215.11 330.552 215.145 C330.376 215.16 330.0 215.167 329.424 215.167 L328.175 215.167 L328.653 212.888 "/>
 
    */
-	public static void removeAllClipPaths(SVGElement svg) {
+	public static void removeAllClipPaths(GraphicsElement svg) {
 		List<SVGElement> clipPathNodes = SVGUtil.getQuerySVGElements(svg, "//svg:defs/svg:clipPath");
 		for (int i = 0; i < clipPathNodes.size(); i++) {
 			clipPathNodes.get(i).detach();
 		}
 		Nodes clipPathElements = svg.query("//*[@style[contains(.,'clip-path')]]");
 		for (int i = 0; i < clipPathElements.size(); i++) {
-			((SVGElement) clipPathElements.get(i)).setClipPath(null);
+			((GraphicsElement) clipPathElements.get(i)).setClipPath(null);
 		}
 	}
 
@@ -191,12 +190,12 @@ public class SVGUtil {
 	
 	public static void denormalizeFontSizes(SVGSVG svg) {
 		List<SVGElement> gs = SVGUtil.getQuerySVGElements(svg, "//svg:g[@font-size and svg:text[not(@font-size)]]");
-		for (SVGElement g : gs) {
+		for (GraphicsElement g : gs) {
 			Double fontSize = g.getFontSize();
 			LOG.trace("FS "+fontSize);
 			g.getAttribute("font-size").detach();
 			List<SVGElement> texts = SVGUtil.getQuerySVGElements(g, "./svg:text[not(@font-size)]");
-			for (SVGElement text : texts) {
+			for (GraphicsElement text : texts) {
 				text.setFontSize(fontSize);
 			}
 		}
@@ -210,14 +209,14 @@ public class SVGUtil {
 		}
 	}
 
-	public static void drawBoxes(List<? extends SVGElement> elementList, SVGElement svgParent,
+	public static void drawBoxes(List<? extends SVGElement> elementList, GraphicsElement svgParent,
 			String stroke, String fill, double strokeWidth, double opacity) {
 		for (SVGElement element : elementList) {
 			SVGElement.drawBox(element.getBoundingBox(), element, stroke, fill, strokeWidth, opacity);
 		}
 	}
 
-	public static void drawBoxes(List<? extends SVGElement> elementList, SVGElement svgParent, double strokeWidth, double opacity) {
+	public static void drawBoxes(List<? extends SVGElement> elementList, GraphicsElement svgParent, double strokeWidth, double opacity) {
 		for (SVGElement element : elementList) {
 			SVGElement.drawBox(element.getBoundingBox(), element, element.getStroke(), element.getFill(), strokeWidth, opacity);
 		}
@@ -375,17 +374,17 @@ public class SVGUtil {
 		return shapeList;
 	}
 
-	public static String getSVGXAttribute(SVGElement svgElement, String attName) {
+	public static String getSVGXAttribute(GraphicsElement svgElement, String attName) {
 		Attribute attribute = getSVGXAttributeAttribute(svgElement, attName);
 		return (attribute == null) ? null : attribute.getValue();
 	}
 
-	public static Attribute getSVGXAttributeAttribute(SVGElement svgElement, String attName) {
+	public static Attribute getSVGXAttributeAttribute(GraphicsElement svgElement, String attName) {
 		Attribute attribute = svgElement.getAttribute(attName, SVGConstants.SVGX_NS);
 		return attribute;
 	}
 
-	public static void setSVGXAttribute(SVGElement svgElement, String attName, String value) {
+	public static void setSVGXAttribute(GraphicsElement svgElement, String attName, String value) {
 		if (attName != null && value != null) {
 			Attribute attribute = new Attribute(SVGConstants.SVGX_PREFIX+XMLConstants.S_COLON+attName, SVGConstants.SVGX_NS, value);
 			svgElement.addAttribute(attribute);
@@ -420,7 +419,7 @@ public class SVGUtil {
 			SVGG g = new SVGG();
 			svg.appendChild(g);
 			g.setTransform(t2);
-			for (SVGElement element : elementList) {
+			for (GraphicsElement element : elementList) {
 				g.appendChild(SVGElement.readAndCreateSVG(element));
 			}
 		}
@@ -439,7 +438,7 @@ public class SVGUtil {
 		return isNull;
 	}
 
-	public static List<SVGShape> makeShapes(SVGElement svgChunk) {
+	public static List<SVGShape> makeShapes(GraphicsElement svgChunk) {
 		List<SVGPath> pathList = SVGPath.extractSelfAndDescendantPaths(svgChunk);
 		SVGSVG.wrapAndWriteAsSVG(svgChunk, new File("target/debug/shapes0.svg"));
 
@@ -455,8 +454,8 @@ public class SVGUtil {
 	 * @return
 	 */
 	public static String convertUnits(String w) {
-		if (w != null && w.endsWith(PX)) {
-			w = w.substring(0,  w.length() - PX.length());
+		if (w != null && w.endsWith(GraphicsElement.PX)) {
+			w = w.substring(0,  w.length() - GraphicsElement.PX.length());
 		}
 		return w;
 	}

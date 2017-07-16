@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGEllipse;
@@ -158,12 +159,12 @@ public class ShapeExtractor extends AbstractExtractor {
 	}
 	
 	public static void addList(SVGG g, List<? extends SVGElement> list) {
-		for (SVGElement element : list) {
+		for (GraphicsElement element : list) {
 			g.appendChild(element.copy());
 		}
 	}
 
-	public void extractRawPrimitives(SVGElement svgElement) {
+	public void extractRawPrimitives(GraphicsElement svgElement) {
 		List<SVGCircle> circles = SVGCircle.extractSelfAndDescendantCircles(svgElement);
 		circleList.addAll(circles);
 		List<SVGEllipse> ellipses = SVGEllipse.extractSelfAndDescendantEllipses(svgElement);
@@ -201,7 +202,7 @@ public class ShapeExtractor extends AbstractExtractor {
 		SVGElement.removeElementsInsideBox(unknownShapeList, positiveXBox);
 	}
 
-	public void extractShapes(List<SVGPath> pathList, SVGElement svgElement) {
+	public void extractShapes(List<SVGPath> pathList, GraphicsElement svgElement) {
 		convertToShapes(pathList);
 //		svgLogger.write("after convertToShapes", pathList);
 		extractRawPrimitives(svgElement);
@@ -280,7 +281,7 @@ public class ShapeExtractor extends AbstractExtractor {
 //	debug(g, pathList, "purple", "pink", 0.3);
 
 	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity) {
-		for (SVGElement e : elementList) {
+		for (GraphicsElement e : elementList) {
 			SVGShape shape = (SVGShape) e.copy();
 			SVGShape shape1 = (SVGShape) shape.copy();
 			Double strokeWidth = shape.getStrokeWidth();

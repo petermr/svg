@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGShape;
@@ -21,7 +21,7 @@ public class SVGPlot extends SVGDiagram {
 	private List<SVGLine> horizontalList;
 	private List<SVGLine> verticalList;
 
-	public SVGPlot(SVGElement diagram) {
+	public SVGPlot(GraphicsElement diagram) {
 		this.rawDiagram = diagram;
 	}
 

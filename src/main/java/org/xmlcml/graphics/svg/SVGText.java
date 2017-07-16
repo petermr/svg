@@ -140,7 +140,7 @@ public class SVGText extends SVGElement {
 
 	protected void init() {
 		super.setDefaultStyle();
-		setDefaultStyle(this);
+//		setDefaultStyle(this);
 	}
 	
 	private void clearRotate() {
@@ -150,7 +150,7 @@ public class SVGText extends SVGElement {
 		setBoundingBoxCached(false);
 	}
 
-	public static void setDefaultStyle(SVGElement text) {
+	public static void setDefaultStyle(GraphicsElement text) {
 		text.setStroke("none");
 		text.setFontSize(1.0);
 	}
@@ -432,8 +432,11 @@ public class SVGText extends SVGElement {
 				if (lengths == null) {
 					lengths = FontWidths.SANS_SERIF;
 				}
-				double fontSize = getFontSize();
+				Double fontSize = getFontSize();
 				estimatedHorizontallength = 0.0;
+				if (fontSize == null) {
+					throw new RuntimeException("missing font-size: "+this.toXML());
+				}
 				for (int i = 0; i < s.length(); i++) {
 					char c = s.charAt(i);
 					if (c > 255) {
@@ -745,7 +748,7 @@ public class SVGText extends SVGElement {
 	 */
 	public static List<SVGText> extractTexts(List<SVGElement> elements) {
 		List<SVGText> textList = new ArrayList<SVGText>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGText) {
 				textList.add((SVGText) element);
 			}
@@ -759,7 +762,7 @@ public class SVGText extends SVGElement {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGText> extractSelfAndDescendantTexts(SVGElement svgElement) {
+	public static List<SVGText> extractSelfAndDescendantTexts(GraphicsElement svgElement) {
 		return SVGText.extractTexts(SVGUtil.getQuerySVGElements(svgElement, ALL_TEXT_XPATH));
 	}
 	
@@ -771,7 +774,7 @@ public class SVGText extends SVGElement {
 	 * @param eps tolerance in rotation angle
 	 * @return
 	 */
-	public static List<SVGText> extractSelfAndDescendantTextsWithSpecificAngle(SVGElement svgElement, Angle targetAngle, double eps) {
+	public static List<SVGText> extractSelfAndDescendantTextsWithSpecificAngle(GraphicsElement svgElement, Angle targetAngle, double eps) {
 		List<SVGText> textList = extractSelfAndDescendantTexts(svgElement);
 		List<SVGText> newTextList = new ArrayList<SVGText>();
 		for (SVGText text : textList) {
@@ -1111,7 +1114,7 @@ public class SVGText extends SVGElement {
 	 */
 	public static void drawTextList(List<? extends SVGElement> textList, File file) {
 		SVGG g = new SVGG();
-		for (SVGElement text : textList) {
+		for (GraphicsElement text : textList) {
 			g.appendChild(text.copy());
 		}
 		SVGSVG.wrapAndWriteAsSVG(g, file);
@@ -1120,7 +1123,7 @@ public class SVGText extends SVGElement {
 	public static List<SVGText> getRotatedTexts(List<SVGText> texts, Angle angle, double eps) {
 		List<SVGElement> elements = SVGElement.getRotatedElementList(texts, angle, eps);
 		List<SVGText> textList = new ArrayList<SVGText>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			textList.add((SVGText) element);
 		}
 		return textList;

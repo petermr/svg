@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGImage;
 
@@ -85,7 +86,7 @@ public class HiddenGraphics {
 		SVGImage.writeBufferedImage(img, mimeType, file);
 	}
 	
-	public BufferedImage createImageTranslatedToOrigin(SVGElement element) {
+	public BufferedImage createImageTranslatedToOrigin(GraphicsElement element) {
 		SVGElement elementCopy = SVGElement.readAndCreateSVG(element);
 		return createImage(elementCopy);
 	}

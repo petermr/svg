@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGImage;
@@ -25,7 +26,7 @@ public class ImageExtractor extends AbstractExtractor{
 	private List<SVGImage> imageList;
 	private String imageBoxColor;
 
-	public void extractImages(SVGElement svgElement) {
+	public void extractImages(GraphicsElement svgElement) {
 		this.imageList = SVGImage.extractSelfAndDescendantImages(svgElement);
 	}
 
@@ -38,7 +39,7 @@ public class ImageExtractor extends AbstractExtractor{
 		imageBoxColor = "pink";
 	}
 
-	public SVGElement analyzeImages(List<SVGImage> imageList) {
+	public GraphicsElement analyzeImages(List<SVGImage> imageList) {
 		this.imageList = imageList;
 		SVGG g = new SVGG();
 		g.setClassName("images");

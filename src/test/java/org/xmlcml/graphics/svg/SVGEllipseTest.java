@@ -31,7 +31,8 @@ private static final Logger LOG = Logger.getLogger(SVGEllipseTest.class);
 		ellipse.setFill("none");
 		ellipse.setStroke("black");
 		ellipse.setStrokeWidth(1.0);
-		Assert.assertEquals("<ellipse xmlns=\"http://www.w3.org/2000/svg\" cx=\"10.0\" cy=\"20.0\" rx=\"5.0\" ry=\"15.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
+		Assert.assertEquals("<ellipse xmlns=\"http://www.w3.org/2000/svg\" cx=\"10.0\" cy=\"20.0\" rx=\"5.0\" ry=\"15.0\""
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\""
 				+ " />", ellipse.toXML());
 		Assert.assertEquals(10., ellipse.getX(), epsilon);
 		Assert.assertEquals(20., ellipse.getY(), epsilon);

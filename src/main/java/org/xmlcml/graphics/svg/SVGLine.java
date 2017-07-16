@@ -73,7 +73,6 @@ public class SVGLine extends SVGShape {
 	}
 	public final static String ALL_LINE_XPATH = ".//svg:line";
 	
-	private static final String STYLE = "style";
 	private static final String X1 = "x1";
 	private static final String X2 = "x2";
 	private static final String Y1 = "y1";
@@ -139,9 +138,9 @@ public class SVGLine extends SVGShape {
 	
 	protected void init() {
 		super.setDefaultStyle();
-		setDefaultStyle(this);
+//		setDefaultStyle(this);
 	}
-	public static void setDefaultStyle(SVGElement line) {
+	public static void setDefaultStyle(GraphicsElement line) {
 		line.setStroke("black");
 		line.setStrokeWidth(1.0);
 	}
@@ -409,7 +408,7 @@ public class SVGLine extends SVGShape {
 		return getXY(0) + S_SPACE + getXY(1);
 	}
 
-	public static List<SVGLine> findHorizontalOrVerticalLines(SVGElement svgElement, double eps) {
+	public static List<SVGLine> findHorizontalOrVerticalLines(GraphicsElement svgElement, double eps) {
 		List<SVGLine> horizontalVerticalList = new ArrayList<SVGLine>();
 		Nodes lines = svgElement.query(".//svg:line", XMLConstants.SVG_XPATH);
 		for (int i = 0; i < lines.size(); i++) {
@@ -500,7 +499,7 @@ public class SVGLine extends SVGShape {
 	 */
 	public static List<SVGLine> extractLines(List<SVGElement> elements) {
 		List<SVGLine> lineList = new ArrayList<SVGLine>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGLine) {
 				lineList.add((SVGLine) element);
 			}
@@ -543,7 +542,7 @@ public class SVGLine extends SVGShape {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGLine> extractSelfAndDescendantLines(SVGElement svgElement) {
+	public static List<SVGLine> extractSelfAndDescendantLines(GraphicsElement svgElement) {
 		return SVGLine.extractLines(SVGUtil.getQuerySVGElements(svgElement, ALL_LINE_XPATH));
 	}
 

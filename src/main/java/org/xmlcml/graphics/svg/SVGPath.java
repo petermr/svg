@@ -173,7 +173,7 @@ public class SVGPath extends SVGShape {
 
 	protected void init() {
 		super.setDefaultStyle();
-		setDefaultStyle(this);
+//		setDefaultStyle(this);
 	}
 	
 	public boolean isClosed() {
@@ -712,7 +712,7 @@ public class SVGPath extends SVGShape {
 	 */
 	public static List<SVGPath> extractPaths(List<SVGElement> elements) {
 		List<SVGPath> pathList = new ArrayList<SVGPath>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGPath) {
 				pathList.add((SVGPath) element);
 			}
@@ -731,11 +731,11 @@ public class SVGPath extends SVGShape {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGPath> extractPaths(SVGElement svgElement) {
+	public static List<SVGPath> extractPaths(GraphicsElement svgElement) {
 		return SVGPath.extractPaths(SVGUtil.getQuerySVGElements(svgElement, ALL_PATH_XPATH));
 	}
 
-	public static List<SVGPath> extractSelfAndDescendantPaths(SVGElement svgElement) {
+	public static List<SVGPath> extractSelfAndDescendantPaths(GraphicsElement svgElement) {
 		return SVGPath.extractPaths(SVGUtil.getQuerySVGElements(svgElement, ALL_PATH_XPATH));
 	}
 

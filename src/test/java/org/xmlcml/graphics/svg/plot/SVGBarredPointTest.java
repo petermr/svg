@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGCircle;
-import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLineList;
@@ -31,7 +31,7 @@ public class SVGBarredPointTest {
 	
 	@Test
 	public void testBarredPoint() throws IOException {
-		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<SVGCircle> circleList = SVGPath.createCirclesFromPaths(pathList);
 		Assert.assertEquals("circles",  52, circleList.size());
@@ -46,7 +46,7 @@ public class SVGBarredPointTest {
 	
 	@Test
 	public void testErrorBar() throws IOException {
-		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<SVGCircle> circleList = SVGPath.createCirclesFromPaths(pathList);
 		List<SVGLineList> lineListList = SVGPath.createLineListListFromPaths(pathList, null);
@@ -64,7 +64,7 @@ public class SVGBarredPointTest {
 	
 	@Test
 	public void testErrorBars() throws IOException {
-		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<SVGCircle> circleList = SVGPath.createCirclesFromPaths(pathList);
 		List<SVGLineList> lineListList = SVGPath.createLineListListFromPaths(pathList, null);
@@ -89,7 +89,7 @@ public class SVGBarredPointTest {
 	
 	@Test
 	public void testErrorBarList() throws IOException {
-		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<SVGCircle> circleList = SVGPath.createCirclesFromPaths(pathList);
 		List<SVGLineList> lineListList = SVGPath.createLineListListFromPaths(pathList, null);
@@ -109,7 +109,7 @@ public class SVGBarredPointTest {
 	
 	@Test
 	public void testDrawErrorBarList() throws IOException {
-		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "barredPoints.svg")));
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<SVGCircle> circleList = SVGPath.createCirclesFromPaths(pathList);
 		List<SVGLineList> lineListList = SVGPath.createLineListListFromPaths(pathList, null);

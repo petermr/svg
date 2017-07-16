@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
@@ -89,7 +90,7 @@ public class ArrowFactory {
 	}
 
 	public void detach(List<? extends SVGElement> list) {
-		for (SVGElement element : list) {
+		for (GraphicsElement element : list) {
 			element.detach();
 		}
 	}

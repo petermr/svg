@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
@@ -34,7 +35,7 @@ public class TextExtractor extends AbstractExtractor {
 		super(svgStore);
 	}
 
-	public void extractTexts(SVGElement svgElement) {
+	public void extractTexts(GraphicsElement svgElement) {
 		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
 		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, svgStore.isRemoveWhitespace());
@@ -49,22 +50,24 @@ public class TextExtractor extends AbstractExtractor {
 	public SVGG debug(String outFilename) {
 		SVGG g = new SVGG();
 		// derived
-		debug(g, originalTextList,"yellow",  "black", 0.3);
-		debug(g, nonNegativeYTextList, "red", "black", 0.3);
-		debug(g, nonNegativeNonEmptyTextList, "green", "black", 0.3);
+		debug(g, originalTextList,"yellow",  "black", 0.3, 10.0, "Helvetica");
+		debug(g, nonNegativeYTextList, "red", "black", 0.3, 12.0, "serif");
+		debug(g, nonNegativeNonEmptyTextList, "green", "black", 0.3, 14.0, "monospace");
 		drawBox(g, "green", 2.0);
 
 		writeDebug("texts",outFilename, g);
 		return g;
 	}
 
-	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity) {
-		for (SVGElement e : elementList) {
+	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity, double fontSize, String fontFamily) {
+		for (GraphicsElement e : elementList) {
 			SVGText text = (SVGText) e.copy();
-			text.setStyle(null);
+			text.setCSSStyleAndRemoveOldStyle(null);
 			text.setStroke(stroke);
 			text.setStrokeWidth(0.4);
 			text.setFill(fill);
+			text.setFontSize(fontSize);
+			text.setFontFamily(fontFamily);
 			text.setOpacity(opacity);
 			String s = text.getValue();
 			if (text.isRot90()) {

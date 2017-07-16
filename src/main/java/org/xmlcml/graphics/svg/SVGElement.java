@@ -86,7 +86,6 @@ public class SVGElement extends GraphicsElement {
 	public final static String MATRIX = "matrix";
 	public final static String ROTATE = "rotate";
 	public final static String SCALE = "scale";
-	public final static String STYLE = "style";
 	public final static String TRANSFORM = "transform";
 	public final static String TRANSLATE = "translate";
 	public final static String X = "x";
@@ -256,12 +255,12 @@ public class SVGElement extends GraphicsElement {
 	 * @param file
 	 * @return
 	 */
-	public static SVGElement readAndCreateSVG(InputStream is) {
+	public static GraphicsElement readAndCreateSVG(InputStream is) {
 		Element element = XMLUtil.parseQuietlyToDocument(is).getRootElement();
 		return (element == null ? null : readAndCreateSVG(element));
 	}
 	
-	protected static void createSubclassedChildren(Element oldElement, SVGElement newElement) {
+	protected static void createSubclassedChildren(Element oldElement, GraphicsElement newElement) {
 		if (oldElement != null) {
 			for (int i = 0; i < oldElement.getChildCount(); i++) {
 				Node node = oldElement.getChild(i);
@@ -283,7 +282,7 @@ public class SVGElement extends GraphicsElement {
 		}
 	}
 	
-	public boolean isEqualTo(SVGElement element) {
+	public boolean isEqualTo(GraphicsElement element) {
 		boolean equals = false;
 		if (element.getClass().equals(this.getClass())) {
 			XMLUtil.equalsCanonically(element, this, true);
@@ -779,20 +778,20 @@ public class SVGElement extends GraphicsElement {
 	public static void test(String filename) throws IOException {
 		FileOutputStream fos = new FileOutputStream(filename);
 		SVGSVG svg = new SVGSVG();
-		SVGElement g = new SVGG();
+		GraphicsElement g = new SVGG();
 		g.setFill("yellow");
 		svg.appendChild(g);
-		SVGElement line = new SVGLine(new Real2(100, 200), new Real2(300, 50));
+		GraphicsElement line = new SVGLine(new Real2(100, 200), new Real2(300, 50));
 		line.setFill("red");
 		line.setStrokeWidth(3.);
 		line.setStroke("blue");
 		g.appendChild(line);
-		SVGElement circle = new SVGCircle(new Real2(300, 150), 20);
+		GraphicsElement circle = new SVGCircle(new Real2(300, 150), 20);
 		circle.setStroke("red");
 		circle.setFill("yellow");
 		circle.setStrokeWidth(3.);
 		g.appendChild(circle);
-		SVGElement text = new SVGText(new Real2(50, 100), "Foo");
+		GraphicsElement text = new SVGText(new Real2(50, 100), "Foo");
 		text.setFontFamily("TimesRoman");
 		text.setStroke("green");
 		text.setFill("red");
@@ -1147,7 +1146,7 @@ public class SVGElement extends GraphicsElement {
 		return 1.0;
 	}
 
-	public static void drawBoundingBoxes(List<SVGElement> elements, SVGElement svgParent, String stroke, String fill, double strokeWidth, double opacity) {
+	public static void drawBoundingBoxes(List<SVGElement> elements, GraphicsElement svgParent, String stroke, String fill, double strokeWidth, double opacity) {
 		for (SVGElement element : elements) {
 			SVGRect svgBox = SVGElement.drawBox(element.getBoundingBox(), svgParent, stroke, fill, strokeWidth, opacity);
 		}
@@ -1158,12 +1157,12 @@ public class SVGElement extends GraphicsElement {
 		}
 	}
 	
-	public static void drawBoxes(List<Real2Range> boxes, SVGElement svgParent, String stroke, String fill, double strokeWidth, double opacity) {
+	public static void drawBoxes(List<Real2Range> boxes, GraphicsElement svgParent, String stroke, String fill, double strokeWidth, double opacity) {
 		for (Real2Range box : boxes) {
 			SVGRect svgBox = SVGElement.drawBox(box, svgParent, stroke, fill, strokeWidth, opacity);
 		}
 	}
-	public static SVGRect drawBox(Real2Range box, SVGElement svgParent,
+	public static SVGRect drawBox(Real2Range box, GraphicsElement svgParent,
 			String stroke, String fill, double strokeWidth, double opacity) {
 		SVGRect svgBox = createGraphicalBox(box, stroke, fill, strokeWidth, opacity);
 		if (svgBox != null && svgParent != null) {
@@ -1176,7 +1175,7 @@ public class SVGElement extends GraphicsElement {
 		return SVGElement.drawBox(getBoundingBox(), this, stroke, fill, strokeWidth, opacity);
 	}
 
-	public static void applyTransformsWithinElementsAndFormat(SVGElement svgElement) {
+	public static void applyTransformsWithinElementsAndFormat(GraphicsElement svgElement) {
 		List<SVGElement> elementList = generateElementList(svgElement, ".//svg:*[@transform]");
 		for (SVGElement element : elementList) {
 			element.applyTransformAttributeAndRemove();
@@ -1228,7 +1227,7 @@ public class SVGElement extends GraphicsElement {
 
 	public void removeEmptySVGG() {
 		List<SVGElement> emptyGList = SVGUtil.getQuerySVGElements(this, ".//svg:g[(count(*)+count(svg:*))=0]");
-		for (SVGElement g : emptyGList) {
+		for (GraphicsElement g : emptyGList) {
 			g.detach();
 		}
 		LOG.trace("removed emptyG: "+emptyGList.size());
@@ -1412,7 +1411,7 @@ public class SVGElement extends GraphicsElement {
 		COMMON_ATT_NAMES.add(StyleBundle.FONT_SIZE);
 	}
 
-	public static List<SVGElement> extractSelfAndDescendantElements(SVGElement element) {
+	public static List<SVGElement> extractSelfAndDescendantElements(GraphicsElement element) {
 		return SVGUtil.getQuerySVGElements(element, ALL_ELEMENT_XPATH);
 	}
 
@@ -1421,7 +1420,7 @@ public class SVGElement extends GraphicsElement {
 		return SVGUtil.getQuerySVGElements(g, ALL_ELEMENT_XPATH);
 	}
 
-	public static List<SVGElement> getRotatedDescendantElements(SVGElement svgElement, Angle angle, double eps) {
+	public static List<SVGElement> getRotatedDescendantElements(GraphicsElement svgElement, Angle angle, double eps) {
 		List<SVGElement> elementList = SVGElement.extractSelfAndDescendantElements(svgElement);
 		List<SVGElement> filteredList = getRotatedElementList(elementList, angle, eps);
 		return filteredList;
@@ -1529,19 +1528,29 @@ public class SVGElement extends GraphicsElement {
 	 * @return null if none
 	 */
 	public Double getFontSize() {
+		this.convertOldStyleToStyle();
 		Double value = StyleBundle.getFontSize(this);
 		if (value == null) {
-			String attVal = this.getAttributeValue(StyleBundle.FONT_SIZE);
+			LOG.debug("missing font: "+this.getStyle());
+			String attVal = getAttributeFromStyle(StyleBundle.FONT_SIZE);
+			if (attVal == null) {
+				attVal = this.getAttributeValue(StyleBundle.FONT_SIZE);
+			}
 			value = attVal == null ? null : StyleBundle.getDouble(attVal);
 		}
 		return value;
+	}
+
+	private String getAttributeFromStyle(String attName) {
+		StyleAttributeFactory styleAttributeFactory = this.getOrCreateStyleAttributeFactory();
+		return styleAttributeFactory == null ? null : styleAttributeFactory.getAttributeValue(attName);
 	}
 
 	/** remove stroke, stroke-width, fill from element.
 	 *  
 	 * @param element
 	 */
-	public static void removeStyleAttributes(SVGElement element) {
+	public static void removeStyleAttributes(GraphicsElement element) {
 		removeAttributeByName(element, STROKE);
 		removeAttributeByName(element, STROKE_WIDTH);
 		removeAttributeByName(element, FILL);
@@ -1552,7 +1561,7 @@ public class SVGElement extends GraphicsElement {
 	 * @param element
 	 * @param name
 	 */
-	public static void removeAttributeByName(SVGElement element, String name) {
+	public static void removeAttributeByName(GraphicsElement element, String name) {
 		Attribute attribute = element.getAttribute(name);
 		if (attribute != null) {
 			attribute.detach();
@@ -1592,19 +1601,13 @@ public class SVGElement extends GraphicsElement {
 		}
 	}
 	
-	public void setStyle(String style) {
-		Attribute styleAttribute = this.getAttribute(STYLE); 
-		if (styleAttribute != null) {
-			styleAttribute.detach();
-		}
-		if (style != null) {
-			Attribute att = new Attribute(STYLE, style);
-			this.addAttribute(att);
-		}
-	}
-
 	public void addTitle(String t) {
 		SVGTitle title = new SVGTitle(t);
 		this.appendChild(title);
 	}
+	
+	public static SVGElement readAndCreateSVG(String textXml) {
+		return SVGElement.readAndCreateSVG(XMLUtil.parseXML(textXml));
+	}
+
 }

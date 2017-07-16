@@ -105,7 +105,7 @@ public class SVGSVG extends SVGElement {
 	public static SVGSVG wrapAndWriteAsSVG(List<? extends SVGElement> svgList, File file) {
 		SVGG g = new SVGG();
 		if (svgList != null) {
-			for (SVGElement element : svgList) {
+			for (GraphicsElement element : svgList) {
 				g.appendChild(element.copy());
 			}
 		}
@@ -115,7 +115,7 @@ public class SVGSVG extends SVGElement {
 	/** defaults to heigh=800 width=700.
 	 * 
 	 * */
-	public static SVGSVG wrapAndWriteAsSVG(SVGElement svgg, File file) {
+	public static SVGSVG wrapAndWriteAsSVG(GraphicsElement svgg, File file) {
 		return wrapAndWriteAsSVG(svgg, file, 800.0, 700.0);
 	}
 	
@@ -129,7 +129,7 @@ public class SVGSVG extends SVGElement {
 	 * @param width
 	 * @return
 	 */
-	public static SVGSVG wrapAndWriteAsSVG(SVGElement svgg, File file, double height, double width) {
+	public static SVGSVG wrapAndWriteAsSVG(GraphicsElement svgg, File file, double height, double width) {
 		SVGSVG svgsvg = svgg instanceof SVGSVG ? (SVGSVG) svgg : new SVGSVG();
 		if (svgg != null) {
 			svgsvg = wrapAsSVG(svgg);
@@ -148,7 +148,7 @@ public class SVGSVG extends SVGElement {
 		return svgsvg;
 	}
 
-	public static SVGSVG wrapAsSVG(SVGElement svgg) {
+	public static SVGSVG wrapAsSVG(GraphicsElement svgg) {
 		SVGSVG svgsvg = null;
 		if (svgg != null) {
 			if (svgg.getParent() != null) {
@@ -193,7 +193,7 @@ public class SVGSVG extends SVGElement {
 	 * this can be used to set scales, rendering, etc.
 	 * @param element to amend (is changed)
 	 */
-	public static SVGG interposeGBetweenChildren(SVGElement element) {
+	public static SVGG interposeGBetweenChildren(GraphicsElement element) {
 		SVGG g = new SVGG();
 		element.appendChild(g);
 		while (element.getChildCount() > 1) {

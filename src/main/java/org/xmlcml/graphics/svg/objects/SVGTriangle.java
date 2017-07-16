@@ -7,6 +7,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
@@ -130,7 +131,7 @@ public class SVGTriangle extends SVGPolygon {
 	
 	public static List<SVGTriangle> extractTriangles(List<? extends SVGElement> elements) {
 		List<SVGTriangle> triangleList = new ArrayList<SVGTriangle>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGTriangle) {
 				triangleList.add((SVGTriangle) element);
 			}

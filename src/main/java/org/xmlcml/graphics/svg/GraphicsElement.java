@@ -32,6 +32,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Transform2;
+import org.xmlcml.graphics.svg.normalize.AttributeComparer;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Attribute;
@@ -55,6 +56,9 @@ public class GraphicsElement extends Element implements SVGConstants {
 	public static final String FILL = "fill";
 	public static final String STROKE = "stroke";
 	public static final String STROKE_WIDTH = "stroke-width";
+
+	public static final String STYLE = "style";
+	public static final String PX = "px";
 
 	public enum FontWeight {
 		BOLD,
@@ -84,13 +88,15 @@ public class GraphicsElement extends Element implements SVGConstants {
 
 	
 	protected Transform2 cumulativeTransform = null/*new Transform2()*/;
-	protected boolean useStyleAttribute = false;
+	protected boolean useStyleAttribute = true;
 	private StyleBundle styleBundle;
 	
 	//save when drawing to Graphics2D	
 	private Color saveColor;
 	private Stroke saveStroke;
 	private AffineTransform savedAffineTransform;
+
+	private StyleAttributeFactory styleAttributeFactory;
 		
 	/** 
 	 * Constructor.
@@ -115,6 +121,8 @@ public class GraphicsElement extends Element implements SVGConstants {
     
     protected void init() {
     	setDefaultStyle();
+    	// new style we shouldn't use old-style attributes
+    	setUseStyleAttribute(true);
     }
     
     public void setDefaultStyle() {
@@ -225,8 +233,11 @@ public class GraphicsElement extends Element implements SVGConstants {
         return namespace;
     }
 
-    public void applyStyles() {
-    	addAttribute(new Attribute(StyleBundle.STYLE, styleBundle.toString()));
+    public void addStyleAttribute() {
+    	StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory(this.getAttributeValue(STYLE));
+    	StyleAttributeFactory bundleAttributeFactory = new StyleAttributeFactory(styleBundle.toString());
+    	StyleAttributeFactory newStyleAttributeFactory = styleAttributeFactory.createMergedAttributeFactory(bundleAttributeFactory);
+    	addAttribute(new Attribute(StyleBundle.STYLE, newStyleAttributeFactory.getAttributeValue()));
     }
     
 	public boolean isUseStyleAttribute() {
@@ -432,20 +443,20 @@ public class GraphicsElement extends Element implements SVGConstants {
 	public static void test(String filename) throws IOException {
 		FileOutputStream fos = new FileOutputStream(filename);
 		SVGSVG svg = new SVGSVG();
-		SVGElement g = new SVGG();
+		GraphicsElement g = new SVGG();
 		g.setFill("yellow");
 		svg.appendChild(g);
-		SVGElement line = new SVGLine(new Real2(100, 200), new Real2(300, 50));
+		GraphicsElement line = new SVGLine(new Real2(100, 200), new Real2(300, 50));
 		line.setFill("red");
 		line.setStrokeWidth(3.);
 		line.setStroke("blue");
 		g.appendChild(line);
-		SVGElement circle = new SVGCircle(new Real2(300, 150), 20);
+		GraphicsElement circle = new SVGCircle(new Real2(300, 150), 20);
 		circle.setStroke("red");
 		circle.setFill("yellow");
 		circle.setStrokeWidth(3.);
 		g.appendChild(circle);
-		SVGElement text = new SVGText(new Real2(50, 100), "Foo");
+		GraphicsElement text = new SVGText(new Real2(50, 100), "Foo");
 		text.setFontFamily("TimesRoman");
 		text.setStroke("green");
 		text.setFill("red");
@@ -496,7 +507,7 @@ public class GraphicsElement extends Element implements SVGConstants {
 		if (useStyleAttribute) {
 			convertFromExplicitAttributes();
 			styleBundle.setSubStyle(attName, value);
-			applyStyles();
+			addStyleAttribute();
 		} else {
 			convertToExplicitAttributes();
 			if (value != null) {
@@ -677,6 +688,45 @@ public class GraphicsElement extends Element implements SVGConstants {
 		fill(g2d, path);
 	}
 
+	public void removeAttribute(String style) {
+		Attribute styleAttribute = this.getAttribute(style);
+		if (styleAttribute != null) {
+			styleAttribute.detach();
+		}
+	}
+
+	/** set Style as CSS packed attribute.
+	 * Use very carefully. Prefer
+	 * setCSSStyle(packedValue); which checks
+	 * 
+	 * @param style
+	 */
+	protected void setStyle(String style) {
+		Attribute styleAttribute = this.getAttribute(STYLE); 
+		if (styleAttribute != null) {
+			styleAttribute.detach();
+		}
+		if (style != null) {
+			Attribute att = new Attribute(STYLE, style);
+			this.addAttribute(att);
+		}
+	}
+
+	/** removes all old-style attributes (e.g. fill="black") from element.
+	 * 
+	 */
+	public void removeOldStyleAttributes() {
+		int attCount = this.getAttributeCount();
+		int detached = 0;
+		for (int i = attCount - 1; i >= 0; i--) {
+			Attribute attribute = this.getAttribute(i);
+			if (AttributeComparer.STYLE_SET.contains(attribute.getLocalName())) {
+				attribute.detach();
+				detached++;
+			}
+		}
+	}
+
 	/**
 	 * translate SVG string to Java2D
 	 * opacity defaults to 1.0
@@ -725,7 +775,105 @@ public class GraphicsElement extends Element implements SVGConstants {
 		}
 		return color;
 	}
+
+	public void removeAllStyles() {
+		this.removeOldStyleAttributes();
+		this.removeStyleAttribute();
+	}
+
+	private void removeStyleAttribute() {
+		Attribute styleAttribute = this.getAttribute(STYLE);
+		if (styleAttribute != null) styleAttribute.detach();
+	}
+
+	public void setCSSStyle(String cssValue) {
+		if (cssValue == null || cssValue.equals("")) {
+			removeAttribute(STYLE);
+		} else {
+			StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory(cssValue);
+			this.setStyle(styleAttributeFactory.getAttributeValue());
+		}
+	}
+
+	public void setCSSStyleAndRemoveOldStyle(String cssStyle) {
+		this.removeOldStyleAttributes();
+		this.setCSSStyle(cssStyle);
+	}
 	
+	/** create SAF for an element.
+	 * 
+	 * @return null if this has no STYLE attribute.
+	 */
+	public StyleAttributeFactory getOrCreateStyleAttributeFactory() {
+		if (styleAttributeFactory == null) {
+			styleAttributeFactory = null;
+			String style = this.getStyle();
+			if (style != null && !"".equals(style)) {
+				styleAttributeFactory = new StyleAttributeFactory(style);
+			}
+		}
+		return styleAttributeFactory;
+	}
+	
+	public void convertOldStyleToStyle() {
+		StyleAttributeFactory oldStyleAttributeFactory = this.createOldStyleAttributeFactory();
+		if (oldStyleAttributeFactory.getStyleMap().size() > 0) {
+			StyleAttributeFactory existingStyleAttributeFactory = this.getExistingStyleAttributeFactory();
+			StyleAttributeFactory newStyleAttributeFactory = oldStyleAttributeFactory.createMergedAttributeFactory(existingStyleAttributeFactory);
+			String attributeValue = newStyleAttributeFactory.getAttributeValue();
+			this.setCSSStyleAndRemoveOldStyle(attributeValue);
+		}
+	}
+
+	/** creates a StyleAttributeFactory from the old-style (fill="black") attributes.
+	 * 
+	 * this is UNAFFECTED
+	 * @return
+	 */
+	public StyleAttributeFactory createOldStyleAttributeFactory() {
+		StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory();
+		for (int i = this.getAttributeCount() - 1; i >= 0; i--) {
+			Attribute attribute = this.getAttribute(i);
+			if (AttributeComparer.STYLE_SET.contains(attribute.getLocalName())) {
+				styleAttributeFactory.addToMap(attribute);
+			}
+		}
+		return styleAttributeFactory;
+	}
+	
+	/** create a StyleAttributeFactory from the STYLE attribute.
+	 * does not affect the element
+	 * 
+	 * @param element
+	 * @return
+	 */
+	public StyleAttributeFactory getExistingStyleAttributeFactory() {
+		Attribute styleAtt = this.getAttribute(STYLE);
+		return (styleAtt == null) ? null : new StyleAttributeFactory(styleAtt.getValue());
+	}
+
+	public static String addPxUnits(String s) {
+		return (s == null || !s.trim().endsWith(PX)) ? s : s + PX;
+	}
+
+	public static String removeTrailingPx(String s) {
+		s = s.trim();
+		if (s.endsWith(GraphicsElement.PX)) {
+			s = s.substring(0,  (s.length() - GraphicsElement.PX.length()));
+		}
+		return s;
+	}
+
+	public static String addUnits(String value, String units) {
+		if (units != null && !"".equals(units) && !value.trim().endsWith(PX)) {
+			value += units;
+		}
+		return value;
+	}
+	
+
+
+
 
 }
 

@@ -31,7 +31,8 @@ private static final Logger LOG = Logger.getLogger(SVGCircleTest.class);
 		circle.setFill("none");
 		circle.setStroke("black");
 		circle.setStrokeWidth(1.0);
-		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" cx=\"10.0\" cy=\"20.0\" r=\"15.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
+		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" cx=\"10.0\" cy=\"20.0\" r=\"15.0\""
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\""
 				+ " />", circle.toXML());
 		Assert.assertEquals(10., circle.getX(), epsilon);
 		Assert.assertEquals(20., circle.getY(), epsilon);

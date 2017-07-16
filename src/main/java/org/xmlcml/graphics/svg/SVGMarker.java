@@ -147,8 +147,8 @@ public class SVGMarker extends SVGElement {
     }
 
 
-    public void setSymbol(SVGElement symbol) {
-    	SVGElement symb = this.getSymbol();
+    public void setSymbol(GraphicsElement symbol) {
+    	GraphicsElement symb = this.getSymbol();
     	if (symb != null) {
     		symb.detach();
     	}
@@ -169,7 +169,7 @@ public class SVGMarker extends SVGElement {
 	public SVGMarker(Real2 xy) {
 		this();
 //		SVGElement symbol = new SVGCircle(xy.plus(new Real2(-size, -size)), size);
-		SVGElement symbol = new SVGCircle(xy, size);
+		GraphicsElement symbol = new SVGCircle(xy, size);
 		this.appendChild(symbol);
 	}
 
@@ -246,7 +246,7 @@ public class SVGMarker extends SVGElement {
 		return null;
 	}
 	
-	public SVGElement getSymbol() {
+	public GraphicsElement getSymbol() {
 		if (this.getChildElements().size()  == 1) {
 			Element element = this.getChildElements().get(0);
 			return (element instanceof SVGElement) ? (SVGElement) element : null;

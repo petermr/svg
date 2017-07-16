@@ -62,7 +62,7 @@ public class SVGPolygonTest {
 		polygon.setStrokeWidth(1.0);
 		Assert.assertEquals("<polygon xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "points=\"10.0 110.0 20.0 120.0 30.0 130.0 40.0 140.0 50.0 150.0 60.0 160.0\""
-				+ " fill=\"none\" stroke=\"black\" stroke-width=\"1.0\" />", polygon.toXML());
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\" />", polygon.toXML());
 		Assert.assertTrue(new Real2Array(
 				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
 				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})
@@ -93,7 +93,7 @@ public class SVGPolygonTest {
 		polygon.setStrokeWidth(1.0);
 		Assert.assertEquals("<polygon xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "points=\"10.0 110.0 20.0 120.0 30.0 130.0 40.0 140.0 50.0 150.0 60.0 160.0\""
-				+ " fill=\"none\" stroke=\"black\" stroke-width=\"1.0\" />", polygon.toXML());
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\" />", polygon.toXML());
 		Assert.assertTrue(new Real2Array(
 				new RealArray(new double[]{ 10., 20., 30., 40., 50., 60.}),
 				new RealArray(new double[]{ 110., 120., 130., 140., 150., 160.})

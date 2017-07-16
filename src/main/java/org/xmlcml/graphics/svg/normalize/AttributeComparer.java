@@ -164,7 +164,6 @@ public static String[] FONT = {
 		for (String[] stringArray : stringArrays) {
 			set.addAll(Arrays.asList(stringArray));
 		}
-		LOG.debug(set.size());
 	}
 
 	private Map<String, Attribute> elementAttributeByName0;

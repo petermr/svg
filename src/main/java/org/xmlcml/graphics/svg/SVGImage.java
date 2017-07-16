@@ -323,7 +323,7 @@ public class SVGImage extends SVGShape {
 	 */
 	public static List<SVGImage> extractImages(List<SVGElement> elements) {
 		List<SVGImage> imageList = new ArrayList<SVGImage>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGImage) {
 				imageList.add((SVGImage) element);
 			}
@@ -336,7 +336,7 @@ public class SVGImage extends SVGShape {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGImage> extractSelfAndDescendantImages(SVGElement svgElement) {
+	public static List<SVGImage> extractSelfAndDescendantImages(GraphicsElement svgElement) {
 		return SVGImage.extractImages(SVGUtil.getQuerySVGElements(svgElement, ALL_IMAGE_XPATH));
 	}
 

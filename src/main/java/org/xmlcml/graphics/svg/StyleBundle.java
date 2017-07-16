@@ -351,7 +351,8 @@ public class StyleBundle implements XMLConstants {
 	public static Double getDouble(String s) {
 		Double d = null;
 		if (s != null && !"null".equals(s)) {
-			s = removeTrailingPx(s);
+			s = GraphicsElement.removeTrailingPx(s);
+			s = GraphicsElement.removeTrailingPx(s);
 			try {
 				d = Double.parseDouble(s);
 			} catch (NumberFormatException e) {
@@ -361,13 +362,6 @@ public class StyleBundle implements XMLConstants {
 		return d;
 	}
 
-	private static String removeTrailingPx(String s) {
-		if (s.endsWith("px")) {
-			s = s.substring(0,  s.length() - "px".length());
-		}
-		return s;
-	}
-	
 	public String getClipPath() {
 		return clipPath;
 	}
@@ -459,13 +453,13 @@ public class StyleBundle implements XMLConstants {
 
 	private String addDouble(String s, Double value, String name) {
 		if (value != null && !Double.isNaN(value)) {
-			s += " "+name+" : "+value+S_SEMICOLON;
+			s += ""+name+":"+value+S_SEMICOLON;
 		}
 		return s;
 	}
 	private String addString(String s, String value, String name) {
 		if (value != null && !value.trim().equals(S_EMPTY)) {
-			s += " "+name+" : "+value+S_SEMICOLON;
+			s += ""+name+":"+value+S_SEMICOLON;
 		}
 		return s;
 	}

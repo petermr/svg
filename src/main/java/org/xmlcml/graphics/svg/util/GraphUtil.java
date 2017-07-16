@@ -13,6 +13,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.euclid.Vector2;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGSVG;
@@ -105,12 +106,12 @@ public class GraphUtil {
 		return ss;
 	}
 
-	public static void debugTextXML(SVGElement textChunk, int length) {
+	public static void debugTextXML(GraphicsElement textChunk, int length) {
 		String s = textChunk.toXML();
 		LOG.debug(s.substring(0, Math.min(s.length(), length)));
 	}
 
-	public static void debugTextValue(SVGElement textChunk, int length) {
+	public static void debugTextValue(GraphicsElement textChunk, int length) {
 		String s = textChunk.getValue();
 		LOG.debug(s.substring(0, Math.min(s.length(), length)));
 	}
@@ -123,7 +124,7 @@ public class GraphUtil {
 		}
 	}
 
-	public static Nodes query(SVGElement svgElement, String xpath) {
+	public static Nodes query(GraphicsElement svgElement, String xpath) {
 		Nodes nodes = null;
 		try {
 			nodes = svgElement.query(xpath, XMLConstants.SVG_XPATH);
@@ -133,7 +134,7 @@ public class GraphUtil {
 		return nodes;
 	}
 	
-	public static SVGElement readAndCreateSVGFromFile(String filename) {
+	public static GraphicsElement readAndCreateSVGFromFile(String filename) {
 		Element element = readAndCreateElement(filename);
 		return SVGElement.readAndCreateSVG(element);
 	}
@@ -175,7 +176,7 @@ public class GraphUtil {
 	public static void writeFileAsSVGSVGWithMouse(String filename, Element element) {
 		try {
 			File file = createFile(filename);
-			SVGElement svgElement = (SVGElement) ensureSVGSVGElement(element);
+			GraphicsElement svgElement = (GraphicsElement) ensureSVGSVGElement(element);
 			List<SVGElement> gList = SVGUtil.getQuerySVGElements(svgElement, "./svg:g");
 			if (gList.size() > 0) {
 				addZoomScript(svgElement);
@@ -195,7 +196,7 @@ public class GraphUtil {
 		}
 	}
 
-	private static void addZoomScript(SVGElement svgElement) {
+	private static void addZoomScript(GraphicsElement svgElement) {
 		svgElement.addNamespaceDeclaration(XMLConstants.XLINK_PREFIX, XMLConstants.XLINK_NS);
 		SVGScript scriptRefElement = new SVGScript();
 		scriptRefElement.setHRef(SVG_PAN_JS);

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.Util;
-import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.xml.XMLUtil;
@@ -42,11 +42,11 @@ public class SVGWord extends SVGG {
 		this.setClassName(CLASS);
 	}
 
-	public SVGWord(SVGElement svgText) {
+	public SVGWord(GraphicsElement svgText) {
 		this.appendChild(svgText.copy());
 	}
 
-	public SVGWord(SVGElement svgText, boolean isRot90) {
+	public SVGWord(GraphicsElement svgText, boolean isRot90) {
 		this.appendChild(svgText.copy());
 		this.setRot90(isRot90);
 	}
@@ -84,7 +84,7 @@ public class SVGWord extends SVGG {
 			dist = thisBox.getXMin() - lastBox.getXMax();
 		}
 		dist = Util.format(dist, 3);
-		LOG.debug("dist: "+dist);
+		LOG.trace("dist: "+dist);
 		return dist;
 	}
 
@@ -109,7 +109,7 @@ public class SVGWord extends SVGG {
 	}
 	
 	public Double getFontSize() {
-		SVGElement text = this.getSVGText();
+		GraphicsElement text = this.getSVGText();
 		return text == null ? null : text.getFontSize();
 	}
 
@@ -161,7 +161,7 @@ public class SVGWord extends SVGG {
 	}
 	
 	public String getSVGTextValue() {
-		SVGElement text = this.getSVGText();
+		GraphicsElement text = this.getSVGText();
 		return text == null ? null : text.getValue();
 	}
 

@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.graphics.svg.Fixtures;
-import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGPathPrimitive;
@@ -117,7 +117,7 @@ public class SVGPathDStringParserTest {
 
 	@Test
 	public void testRelativeCubic1() {
-		SVGElement svgElement = SVGSVG.readAndCreateSVG(new File(Fixtures.PATHS_DIR, "relcubics.svg"));
+		GraphicsElement svgElement = SVGSVG.readAndCreateSVG(new File(Fixtures.PATHS_DIR, "relcubics.svg"));
 		SVGPath path = SVGPath.extractPaths(svgElement).get(0);
 		path.detach();
 		path.getAttribute("stroke").detach();
@@ -145,7 +145,7 @@ public class SVGPathDStringParserTest {
 	
 	@Test
 	public void testRelativeCubic1a() {
-		SVGElement svgElement = SVGSVG.readAndCreateSVG(new File(Fixtures.PATHS_DIR, "relcubics.svg"));
+		GraphicsElement svgElement = SVGSVG.readAndCreateSVG(new File(Fixtures.PATHS_DIR, "relcubics.svg"));
 		SVGPath path = SVGPath.extractPaths(svgElement).get(0);
 		path.detach();
 		path.getAttribute("stroke").detach();

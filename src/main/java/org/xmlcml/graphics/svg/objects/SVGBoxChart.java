@@ -2,7 +2,7 @@ package org.xmlcml.graphics.svg.objects;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.GraphicsElement;
 
 public class SVGBoxChart extends SVGDiagram {
 	
@@ -17,7 +17,7 @@ public class SVGBoxChart extends SVGDiagram {
 		this.setClassName(BOX_CHART);
 	}
 	
-	public SVGBoxChart(SVGElement diagram) {
+	public SVGBoxChart(GraphicsElement diagram) {
 		this();
 		this.rawDiagram = diagram;
 	}

@@ -31,7 +31,7 @@ public class SVGLineList extends SVGG implements Iterable<SVGLine> {
 	 */
 	public static SVGLineList createLineList(List<SVGElement> elements) {
 		SVGLineList lineList = new SVGLineList();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGLine) {
 				lineList.add((SVGLine) element);
 			}

@@ -28,8 +28,8 @@ private static final Logger LOG = Logger.getLogger(SVGRectTest.class);
 		double width = 15.;
 		double height = 25.;
 		SVGRect rect = new SVGRect( 10., 20., width, height);
-		Assert.assertEquals("<rect xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\""
-				+ " fill=\"none\" x=\"10.0\" y=\"20.0\" width=\"15.0\" height=\"25.0\" />", rect.toXML());
+		Assert.assertEquals("<rect xmlns=\"http://www.w3.org/2000/svg\""
+				+ " x=\"10.0\" y=\"20.0\" width=\"15.0\" height=\"25.0\" />", rect.toXML());
 		Assert.assertEquals(10., rect.getX(), epsilon);
 		Assert.assertEquals(20., rect.getY(), epsilon);
 		Assert.assertTrue(new Real2(10., 20.).isEqualTo(rect.getXY(), epsilon));
@@ -42,8 +42,8 @@ private static final Logger LOG = Logger.getLogger(SVGRectTest.class);
 	@Test
 	public void testCreateXY() {
 		SVGRect rect = new SVGRect( new Real2(10., 20.), new Real2(25., 45.));
-		Assert.assertEquals("<rect xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\""
-				+ " fill=\"none\" x=\"10.0\" y=\"20.0\" width=\"15.0\" height=\"25.0\" />", rect.toXML());
+		Assert.assertEquals("<rect xmlns=\"http://www.w3.org/2000/svg\""
+				+ " x=\"10.0\" y=\"20.0\" width=\"15.0\" height=\"25.0\" />", rect.toXML());
 		Assert.assertEquals(10., rect.getX(), epsilon);
 		Assert.assertEquals(20., rect.getY(), epsilon);
 		Assert.assertEquals(15., rect.getWidth(), epsilon);

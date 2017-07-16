@@ -15,6 +15,7 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
@@ -61,7 +62,7 @@ public class SVGStore {
 	private Real2Range positiveXBox;
 
 	private String fileRoot;
-	private SVGElement svgElement;
+	private GraphicsElement svgElement;
 	private String debugRoot = "target/debug/";
 	private String imageDebug = "target/images/";
 	private String pathDebug = "target/paths/";
@@ -108,11 +109,11 @@ public class SVGStore {
 		if (inputStream == null) {
 			throw new RuntimeException("Null input stream");
 		}
-		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(inputStream);
 		readGraphicsElements(svgElement);
 	}
 
-	public void readGraphicsElements(SVGElement svgElement) {
+	public void readGraphicsElements(GraphicsElement svgElement) {
 		if (svgElement != null) {
 			this.extractSVGComponents(svgElement);
 			this.createHorizontalAndVerticalLines();
@@ -124,9 +125,9 @@ public class SVGStore {
 		}
 	}
 
-	private void extractSVGComponents(SVGElement svgElem) {
+	private void extractSVGComponents(GraphicsElement svgElem) {
 		LOG.debug("********* made SVG components *********");
-		svgElement = (SVGElement) svgElem.copy();
+		svgElement = (GraphicsElement) svgElem.copy();
 		SVGG g;
 		SVGG gg = new SVGG();
 		
@@ -327,7 +328,7 @@ public class SVGStore {
 	}
 
 
-	public SVGElement createSVGElement() {
+	public GraphicsElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
 		g.appendChild(shapeExtractor.createSVGAnnotations());

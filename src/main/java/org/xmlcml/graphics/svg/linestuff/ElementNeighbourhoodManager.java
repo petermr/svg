@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGLine;
 
@@ -239,7 +240,7 @@ public class ElementNeighbourhoodManager {
 		}
 	}
 
-	public ElementNeighbourhood getNeighbourhood(SVGElement svgElement) {
+	public ElementNeighbourhood getNeighbourhood(GraphicsElement svgElement) {
 		ensureNeighbourhoodByElementMap();
 		return neighbourhoodByElementMap.get(svgElement);
 	}

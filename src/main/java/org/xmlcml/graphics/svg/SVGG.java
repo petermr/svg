@@ -35,6 +35,12 @@ import nu.xom.Node;
  */
 public class SVGG extends SVGElement {
 	
+	private static final String FILE = "file";
+	private static final String DATE_TYPE = "dateType";
+	private static final String SCALE = "scale";
+	private static final String TRANSFORM = "transform";
+	private static final String HEIGHT = "height";
+	private static final String WIDTH = "width";
 	private static final String STRING_VALUE = "string-value";
 
 	@SuppressWarnings("unused")
@@ -70,7 +76,7 @@ public class SVGG extends SVGElement {
         return new SVGG(this);
     }
 
-	protected void copyAttributes(SVGElement element) {
+	protected void copyAttributes(GraphicsElement element) {
 		for (int i = 0; i < element.getAttributeCount(); i++) {
 			this.addAttribute(new Attribute(element.getAttribute(i)));
 		}
@@ -88,21 +94,23 @@ public class SVGG extends SVGElement {
 	 * @param width
 	 */
 	public void setWidth(double width) {
-		addAttribute(new Attribute("width", String.valueOf(width)+"px"));
+		String widthx = GraphicsElement.addPxUnits(String.valueOf(width));
+		addAttribute(new Attribute(WIDTH, widthx));
 	}
 
 	/**
 	 * @param height
 	 */
 	public void setHeight(double height) {
-		addAttribute(new Attribute("height", String.valueOf(height)+"px"));
+		String heightx = GraphicsElement.addPxUnits(String.valueOf(height));
+		addAttribute(new Attribute(HEIGHT, heightx));
 	}
 
 	/**
 	 * @param scale
 	 */
 	public void setScale(double scale) {
-		addAttribute(new Attribute("transform", "scale("+scale+","+scale+")"));
+		addAttribute(new Attribute(TRANSFORM, SCALE + "("+scale+","+scale+")"));
 	}
 	
 	/** 
@@ -125,7 +133,7 @@ public class SVGG extends SVGElement {
 	 */
 	public static List<SVGG> extractGs(List<SVGElement> elements) {
 		List<SVGG> gList = new ArrayList<SVGG>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGG) {
 				gList.add((SVGG) element);
 			}
@@ -139,13 +147,13 @@ public class SVGG extends SVGElement {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGG> extractSelfAndDescendantGs(SVGElement svgElement) {
+	public static List<SVGG> extractSelfAndDescendantGs(GraphicsElement svgElement) {
 		return SVGG.extractGs(SVGUtil.getQuerySVGElements(svgElement, ALL_G_XPATH));
 	}
 
 	public void copyElementsFrom(List<? extends SVGElement> elementList) {
 		if (elementList != null) {
-			for (SVGElement element : elementList) {
+			for (GraphicsElement element : elementList) {
 				this.appendChild(SVGElement.readAndCreateSVG(element));
 			}
 		}
@@ -160,7 +168,7 @@ public class SVGG extends SVGElement {
 	 * @return null if not found
 	 */
 	public final static SVGG createSVGGChunk(File svgFile, String xPath, int index) {
-		SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
+		GraphicsElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 		List<SVGElement> elementList = SVGG.generateElementList(svgElement, xPath);
 		SVGG graphic = (elementList.size() == 0) ? null : (SVGG) elementList.get(index);
 		return graphic;
@@ -204,11 +212,11 @@ public class SVGG extends SVGElement {
 	}
 
 	public void setDate(String dateType, String dateString) {
-		this.addAttribute(new Attribute("dateType", dateString.toString()));
+		this.addAttribute(new Attribute(DATE_TYPE, dateString.toString()));
 	}
 	
 	public void setFilename(String filename) {
-		this.addAttribute(new Attribute("file", filename));
+		this.addAttribute(new Attribute(FILE, filename));
 	}
 
 }

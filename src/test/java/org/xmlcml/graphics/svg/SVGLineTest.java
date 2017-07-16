@@ -138,22 +138,22 @@ public class SVGLineTest {
 		SVGLine line0 = new SVGLine(new Real2(36.9, 100.0), new Real2(173.9, 100.0));
 		SVGLine line1 = new SVGLine(new Real2(173.9, 100.0), new Real2(335.1, 100.0));
 		SVGLine line = SVGLine.createMergedHorizontalOrVerticalLine(line0, line1, 0.5);
-		Assert.assertEquals("exact x"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" "
+		Assert.assertEquals("exact x"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "x1=\"36.9\" y1=\"100.0\" x2=\"335.1\" y2=\"100.0\" />", line.toXML());
 		line0 = new SVGLine(new Real2(100.0, 36.9), new Real2(100.0, 173.9));
 		line1 = new SVGLine(new Real2(100.0, 173.9), new Real2(100.0, 335.1));
 		line = SVGLine.createMergedHorizontalOrVerticalLine(line0, line1, 0.5);
-		Assert.assertEquals("exact y "+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" "
+		Assert.assertEquals("exact y "+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "x1=\"100.0\" y1=\"36.9\" x2=\"100.0\" y2=\"335.1\" />", line.toXML());
 		line0 = new SVGLine(new Real2(36.9, 100.0), new Real2(173.9, 100.0));
 		line1 = new SVGLine(new Real2(167.1, 100.0), new Real2(335.1, 100.0));
 		line = SVGLine.createMergedHorizontalOrVerticalLine(line0, line1, 0.5);
-		Assert.assertEquals("overlap x"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" "
+		Assert.assertEquals("overlap x"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "x1=\"36.9\" y1=\"100.0\" x2=\"335.1\" y2=\"100.0\" />", line.toXML());
 		line0 = new SVGLine(new Real2(100.0, 36.9), new Real2(100.0, 173.9));
 		line1 = new SVGLine(new Real2(100.0, 167.1), new Real2(100.0, 335.1));
 		line = SVGLine.createMergedHorizontalOrVerticalLine(line0, line1, 0.5);
-		Assert.assertEquals("overlap y"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" "
+		Assert.assertEquals("overlap y"+line.toXML(), "<line xmlns=\"http://www.w3.org/2000/svg\" "
 				+ "x1=\"100.0\" y1=\"36.9\" x2=\"100.0\" y2=\"335.1\" />", line.toXML());
 	}
 	
@@ -190,7 +190,7 @@ public class SVGLineTest {
 		Assert.assertEquals(1, newLineList.size());
 		SVGLine newLine = newLineList.get(0);
 		Assert.assertEquals("merged",  
-				"<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" x1=\"36.9\" y1=\"100.0\" x2=\"503.1\" y2=\"100.0\" />",
+				"<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"36.9\" y1=\"100.0\" x2=\"503.1\" y2=\"100.0\" />",
 				newLine.toXML());
 	}
 	
@@ -207,7 +207,7 @@ public class SVGLineTest {
 		Assert.assertEquals(1, newLineList.size());
 		SVGLine newLine = newLineList.get(0);
 		Assert.assertEquals("merged",  
-				"<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" x1=\"36.9\" y1=\"100.0\" x2=\"503.1\" y2=\"100.0\" />",
+				"<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"36.9\" y1=\"100.0\" x2=\"503.1\" y2=\"100.0\" />",
 				newLine.toXML());
 	}
 	
@@ -218,8 +218,8 @@ public class SVGLineTest {
 		line.setFill("none");
 		line.setStroke("black");
 		line.setStrokeWidth(1.0);
-		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
-				+ " />", line.toXML());
+		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\""
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\" />", line.toXML());
 		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
 		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
 		Assert.assertTrue(new Real2(25., 45.).isEqualTo(line.getXY(1), epsilon));
@@ -234,8 +234,8 @@ public class SVGLineTest {
 		line.setFill("none");
 		line.setStroke("black");
 		line.setStrokeWidth(1.0);
-		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\" fill=\"none\" stroke=\"black\" stroke-width=\"1.0\""
-				+ " />", line.toXML());
+		Assert.assertEquals("<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"10.0\" y1=\"20.0\" x2=\"25.0\" y2=\"45.0\""
+				+ " style=\"fill:none;stroke:black;stroke-width:1.0;\" />", line.toXML());
 		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
 		Assert.assertTrue(new Real2(10., 20.).isEqualTo(line.getXY(0), epsilon));
 		Assert.assertTrue(new Real2(25., 45.).isEqualTo(line.getXY(1), epsilon));

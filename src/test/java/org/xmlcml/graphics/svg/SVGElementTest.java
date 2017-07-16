@@ -48,7 +48,7 @@ public class SVGElementTest {
 	public final void testcreateSVGElement() {
 		Element oldElement =TestUtils.parseValidFile(GRAPHICS_RESOURCE + XMLConstants.U_S
 				+ "image12.svg");
-		SVGElement newSvg = SVGElement.readAndCreateSVG(oldElement);
+		GraphicsElement newSvg = SVGElement.readAndCreateSVG(oldElement);
 		Assert.assertEquals("class", SVGSVG.class, newSvg.getClass());
 		TestUtils.assertEqualsCanonically("copy",TestUtils.parseValidFile(GRAPHICS_RESOURCE + XMLConstants.U_S
 				+ "image12.svg"), newSvg, true);
@@ -192,7 +192,7 @@ public class SVGElementTest {
 				+ "<text transform=\"matrix(0.0,-1.0,1.0,0.0,-547.66901,916.33099)\" x=\"184.331\" y=\"732.0\" >P</text>"
 				+ "<g transform=\"matrix(0.0,1.0,-1.0,0.0,-500.,900.)\"><rect x1=\"10\" y1=\"50\" width=\"100\" height=\"30\"/></g>"
 				+ "</svg>";
-		SVGElement svgElement = SVGUtil.parseToSVGElement(xmlString);
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(xmlString);
 		List<SVGElement> rotatedElements = SVGElement.getRotatedDescendantElements(svgElement, new Angle(Math.PI/2.0), 0.001);
 		Assert.assertEquals(2,  rotatedElements.size());
 		

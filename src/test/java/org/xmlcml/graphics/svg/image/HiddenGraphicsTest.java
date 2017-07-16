@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.graphics.svg.Fixtures;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGImage;
@@ -37,7 +38,7 @@ public class HiddenGraphicsTest {
 	@Test
 	public void testHiddenGraphics0() {
 		HiddenGraphics hg = new HiddenGraphics();
-		SVGElement g = createExampleSvg();
+		GraphicsElement g = createExampleSvg();
     }
 
 	@Test

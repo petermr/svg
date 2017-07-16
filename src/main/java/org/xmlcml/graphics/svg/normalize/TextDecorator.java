@@ -16,8 +16,8 @@ import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.StyleAttribute;
-import org.xmlcml.graphics.svg.StyleAttribute.Preserve;
+import org.xmlcml.graphics.svg.StyleAttributeFactory;
+import org.xmlcml.graphics.svg.StyleAttributeFactory.AttributeStrategy;
 import org.xmlcml.graphics.svg.util.ColorStore;
 import org.xmlcml.graphics.svg.util.ColorStore.ColorizerType;
 
@@ -52,7 +52,7 @@ public class TextDecorator extends AbstractDecorator {
 	private List<List<SVGText>> uncompactedTextListList;
 //	private List<SVGText> compactedTextListList;
 	private Real2Range textBoundingBox;
-	private StyleAttribute styleAttribute;
+	private StyleAttributeFactory styleAttribute;
 	private boolean isAddBoxes;
 
 	public TextDecorator() {
@@ -156,7 +156,8 @@ public class TextDecorator extends AbstractDecorator {
 		for (List<SVGText> textList : uncompactedTextListList) {
 			SVGText compactedText = createCompactText(textList);
 			g.appendChild(compactedText);
-			String style = styleAttribute.getStringValue();
+			String style = compactedText.getStyle();
+//			String style = styleAttribute.getAttributeValue();
 			styleSet.add(style);
 		}
 		
@@ -196,7 +197,7 @@ public class TextDecorator extends AbstractDecorator {
 		arrayText.setX(xCoordinateArray);
 		arrayText.setSVGXFontWidth(widthArray);
 		arrayText.setText(textContentBuilder.toString());
-		styleAttribute = StyleAttribute.createStyleAttribute(arrayText, Preserve.REMOVE);
+		StyleAttributeFactory.createAndAddOldStyleAttribute(arrayText);
 		return arrayText;
 	}
 

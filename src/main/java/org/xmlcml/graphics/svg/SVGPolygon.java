@@ -123,7 +123,7 @@ public class SVGPolygon extends SVGPoly {
 	 */
 	public static List<SVGPolygon> extractPolygons(List<SVGElement> elements) {
 		List<SVGPolygon> polygonList = new ArrayList<SVGPolygon>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGPolygon) {
 				polygonList.add((SVGPolygon) element);
 			}
@@ -131,7 +131,7 @@ public class SVGPolygon extends SVGPoly {
 		return polygonList;
 	}
 
-	public static List<SVGPolygon> extractSelfAndDescendantPolygons(SVGElement g) {
+	public static List<SVGPolygon> extractSelfAndDescendantPolygons(GraphicsElement g) {
 		return SVGPolygon.extractPolygons(SVGUtil.getQuerySVGElements(g, ALL_POLYGON_XPATH));
 	}
 	

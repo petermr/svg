@@ -12,6 +12,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.Transform2;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
@@ -232,7 +233,7 @@ public class Axis {
 	 * @param boxThickness
 	 * @param boxLengthExtension
 	 */
-	public List<SVGText> extractText(SVGElement container) {
+	public List<SVGText> extractText(GraphicsElement container) {
 		if (LineOrientation.HORIZONTAL.equals(lineOrientation)) {
 			return extractHorizontalAxisText(container, Direction.BELOW); // below to start with
 		} else if (LineOrientation.VERTICAL.equals(lineOrientation)) {
@@ -242,7 +243,7 @@ public class Axis {
 		}
 	}
 
-	private List<SVGText> extractHorizontalAxisText(SVGElement container, Direction direction) {
+	private List<SVGText> extractHorizontalAxisText(GraphicsElement container, Direction direction) {
 		Real2Range bbox = complexLine.getBoundingBoxWithoutJoints();
 		LOG.trace(bbox);
 		Real2Range bboxExt = bbox.getReal2RangeExtendedInX((double)X_SIDE, (double)X_SIDE);
@@ -255,7 +256,7 @@ public class Axis {
 		return textList;
 	}
 
-	private List<SVGText> extractVerticalAxisText(SVGElement container, Direction direction) {
+	private List<SVGText> extractVerticalAxisText(GraphicsElement container, Direction direction) {
 		Real2Range bbox = complexLine.getBoundingBoxWithoutJoints();
 		LOG.trace(bbox);
 		Real2Range bboxExt = bbox.getReal2RangeExtendedInY((double)Y_SIDE, (double)Y_SIDE);
@@ -276,7 +277,7 @@ public class Axis {
 	 * @param boxLengthExtension
 	 */
 	@Deprecated // because it relies on TSpans
-	public void processScaleValuesAndTitles(SVGElement container) {
+	public void processScaleValuesAndTitles(GraphicsElement container) {
 		texts = SVGUtil.getQuerySVGElements(container, ".//svg:text");
 		countTSpanChildren("ALL ", texts);
 		Real2Range textBox = getTextBox(complexLine.getBackbone());
@@ -289,7 +290,7 @@ public class Axis {
 		if (LineOrientation.HORIZONTAL.equals(lineOrientation)) {
 			List<SVGText> horizontalTexts = getTexts(boundedTexts, LineOrientation.HORIZONTAL);
 			countTSpanChildren("HOR ", horizontalTexts);
-			for (SVGElement horizontalText : horizontalTexts) {
+			for (GraphicsElement horizontalText : horizontalTexts) {
 				LOG.trace("HOR TEXT"+horizontalText);
 			}
 			analyzeHorizontalAxis(horizontalTexts);
@@ -339,7 +340,7 @@ public class Axis {
 
 	private void countTSpanChildren(String msg, List<? extends SVGElement> texts) {
 		int tspanCount = 0;
-		for (SVGElement text : texts) {
+		for (GraphicsElement text : texts) {
 			tspanCount += ((SVGText)text).getChildTSpans().size();
 		}
 		LOG.trace(msg+" TSPANS****************"+tspanCount);
@@ -395,7 +396,7 @@ public class Axis {
 
  */
 		SVGLine backbone = complexLine.getBackbone();
-		SVGElement parent = (SVGElement) backbone.getParent();
+		GraphicsElement parent = (GraphicsElement) backbone.getParent();
 		if (parent == null) {
 			throw new RuntimeException("backbone has no parent");
 		}
@@ -413,11 +414,11 @@ public class Axis {
 		}
 		groupFields(svgg, VALUES, numericTextsOld);
 		List<SVGElement> axisMarks = SVGUtil.getQuerySVGElements(svgg, "./svg:*[contains(@class, '"+AXIS_PREF+"')]");
-		for (SVGElement axisMark : axisMarks) {
+		for (GraphicsElement axisMark : axisMarks) {
 			axisMark.setStroke("yellow");
 		}
 		List<SVGElement> rects = SVGUtil.getQuerySVGElements(svgg, ".//svg:rect");
-		for (SVGElement rect : rects) {
+		for (GraphicsElement rect : rects) {
 			rect.detach();
 		}
 	}
@@ -459,12 +460,12 @@ public class Axis {
 
 	private void transformArrayFromPixelsToScale(List<SVGPolyline> polylines) {
 		getOrientation();
-		SVGElement parentSVG = (SVGElement)complexLine.getBackbone().getParent();
+		GraphicsElement parentSVG = (GraphicsElement)complexLine.getBackbone().getParent();
 		if (parentSVG == null) {
 			LOG.trace("NULL SVG PARENT");
 		} else {
 			ensureTickmarks();
-			SVGElement parent = (SVGElement) parentSVG.getParent();
+			GraphicsElement parent = (GraphicsElement) parentSVG.getParent();
 			for (SVGPoly polyline : polylines) {
 				Real2Array polylineCoords = polyline.getReal2Array();
 				RealArray polylineAxisPixelCoords = (LineOrientation.HORIZONTAL.equals(lineOrientation)) ?
@@ -622,7 +623,7 @@ public class Axis {
 	private STMLArray createNumericValuesOld(List<SVGText> numericTexts) {
 		STMLArray array = null;
 		if (numericTexts.size() == 1 ) {
-			SVGElement text = numericTexts.get(0);
+			GraphicsElement text = numericTexts.get(0);
 			String dataType = text.getAttributeValue(TypedNumber.DATA_TYPE);
 			String numbers = text.getAttributeValue(TypedNumber.NUMBERS);
 			LOG.trace("NUMBERS: "+numbers);
@@ -637,7 +638,7 @@ public class Axis {
 			String dataType = getCommonDataTypeOld(numericTexts);
 			if (dataType != null) {
 				List<String> values = new ArrayList<String>();
-				for (SVGElement numericText : numericTexts) {
+				for (GraphicsElement numericText : numericTexts) {
 					values.add(TypedNumber.getNumericValue(numericText));
 				}
 				if (XMLConstants.XSD_INTEGER.equals(dataType)) {
@@ -654,7 +655,7 @@ public class Axis {
 
 	private String getCommonDataTypeOld(List<SVGText> numericTexts) {
 		String dataType = null;
-		for (SVGElement numericText : numericTexts) {
+		for (GraphicsElement numericText : numericTexts) {
 			String dt = numericText.getAttributeValue(TypedNumber.DATA_TYPE);
 			if (dataType == null) {
 				dataType = dt;
@@ -810,7 +811,7 @@ public class Axis {
 		return realArray;
 	}
 	
-	void addAxisAttribute(SVGElement element, String id) {
+	void addAxisAttribute(GraphicsElement element, String id) {
 		element.addAttribute(new Attribute(AXIS, id));
 	}
 

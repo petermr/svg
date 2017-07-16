@@ -75,9 +75,9 @@ public class SVGEllipse extends SVGShape {
 	
 	protected void init() {
 		super.setDefaultStyle();
-		setDefaultStyle(this);
+//		setDefaultStyle(this);
 	}
-	public static void setDefaultStyle(SVGElement ellipse) {
+	public static void setDefaultStyle(GraphicsElement ellipse) {
 		ellipse.setStroke("black");
 		ellipse.setStrokeWidth(0.5);
 		ellipse.setFill("#aaffff");
@@ -274,7 +274,7 @@ public class SVGEllipse extends SVGShape {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGEllipse> extractSelfAndDescendantEllipses(SVGElement svgElement) {
+	public static List<SVGEllipse> extractSelfAndDescendantEllipses(GraphicsElement svgElement) {
 		return SVGEllipse.extractEllipses(SVGUtil.getQuerySVGElements(svgElement, ALL_ELLIPSE_XPATH));
 	}
 
@@ -285,7 +285,7 @@ public class SVGEllipse extends SVGShape {
 	 */
 	public static List<SVGEllipse> extractEllipses(List<SVGElement> elements) {
 		List<SVGEllipse> ellipseList = new ArrayList<SVGEllipse>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGEllipse) {
 				ellipseList.add((SVGEllipse) element);
 			}

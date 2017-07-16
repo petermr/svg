@@ -12,6 +12,7 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGEllipse;
@@ -880,8 +881,8 @@ public class Path2ShapeConverter {
 	 * @param input
 	 * @param resultList
 	 */
-	public static void copyAttributes(SVGElement input, List<? extends SVGElement> resultList) {
-		for (SVGElement result : resultList) {
+	public static void copyAttributes(GraphicsElement input, List<? extends SVGElement> resultList) {
+		for (GraphicsElement result : resultList) {
 			copyAttributes(input, result);
 		}
 	}
@@ -892,7 +893,7 @@ public class Path2ShapeConverter {
 	 * @param input
 	 * @param result
 	 */
-	public static void copyAttributes(SVGElement input, SVGElement result) {
+	public static void copyAttributes(GraphicsElement input, GraphicsElement result) {
 		input.setUseStyleAttribute(false);
 		for (String attName : new String[]{
 				StyleBundle.FILL, 
@@ -1013,7 +1014,7 @@ public class Path2ShapeConverter {
 	 * // FIXME - don't think we have to work on lists of Paths
 	 * @param svgElement
 	 */
-	public List<SVGShape> convertPathsToShapes(SVGElement svgElement) {
+	public List<SVGShape> convertPathsToShapes(GraphicsElement svgElement) {
 		List<SVGPath> pathList = SVGPath.extractPaths(svgElement);
 		List<List<SVGShape>> shapeListList = convertPathsToShapesAndSplitAtMoves(pathList);
 		replaceEachPathWithShapesOrPaths(shapeListList, pathList);

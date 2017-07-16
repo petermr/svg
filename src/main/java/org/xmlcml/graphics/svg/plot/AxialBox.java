@@ -7,6 +7,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
@@ -122,10 +123,10 @@ public class AxialBox {
 		return bbox;
 	}
 
-	public SVGElement createSVGElement() {
+	public GraphicsElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.setClassName("axialBox");
-		for (SVGElement element : containedGraphicalElements) {
+		for (GraphicsElement element : containedGraphicalElements) {
 			g.appendChild(element.copy());
 		}
 		addAnnotatedBox(g, captureBox, "yellow");

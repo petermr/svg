@@ -98,7 +98,7 @@ public class SVGClipPath extends SVGElement {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGClipPath> extractClipPaths(SVGElement svgElement) {
+	public static List<SVGClipPath> extractClipPaths(GraphicsElement svgElement) {
 		return SVGClipPath.extractClipPaths(SVGUtil.getQuerySVGElements(svgElement, ALL_SVG_PATH_XPATH));
 	}
 
@@ -110,7 +110,7 @@ public class SVGClipPath extends SVGElement {
 	 */
 	public static List<SVGClipPath> extractClipPaths(List<SVGElement> elements) {
 		List<SVGClipPath> clipPathList = new ArrayList<SVGClipPath>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGClipPath) {
 				clipPathList.add((SVGClipPath) element);
 			}
@@ -134,7 +134,7 @@ public class SVGClipPath extends SVGElement {
 		return largestClipPath;
 	}
 
-	public static Multimap<String, SVGElement> getElementsByClipPath(SVGElement svgElement) {
+	public static Multimap<String, SVGElement> getElementsByClipPath(GraphicsElement svgElement) {
 		Multimap<String, SVGElement> svgByClipPathId = ArrayListMultimap.create();
 		List<SVGElement> clippedElements = SVGUtil.getQuerySVGElements(svgElement, ".//*[@clip-path]");
 		for (SVGElement clippedElement : clippedElements) {
@@ -144,7 +144,7 @@ public class SVGClipPath extends SVGElement {
 		return svgByClipPathId;
 	}
 
-	public static String getClipPathRef(SVGElement element) {
+	public static String getClipPathRef(GraphicsElement element) {
 		String pathRef = null;
 		if (element != null) {
 			String clipPathAttVal = element.getAttributeValue(CLIP_PATH_ATT);
@@ -159,7 +159,7 @@ public class SVGClipPath extends SVGElement {
 		return pathRef;
 	}
 
-	public static Map<String, SVGClipPath> getClipPathById(SVGElement svgElement) {
+	public static Map<String, SVGClipPath> getClipPathById(GraphicsElement svgElement) {
 		Map<String, SVGClipPath> clipPathById = new HashMap<String, SVGClipPath>();
 		List<SVGClipPath> clipPathList = SVGClipPath.extractClipPaths(svgElement);
 		for (SVGClipPath clipPath : clipPathList) {
@@ -188,7 +188,7 @@ public class SVGClipPath extends SVGElement {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGClipPath> extractUsedClipPaths(SVGElement svgElement) {
+	public static List<SVGClipPath> extractUsedClipPaths(GraphicsElement svgElement) {
 		List<SVGClipPath> clipPaths = extractClipPaths(svgElement);
 		LOG.trace("clipPaths: "+clipPaths.size());
 		for (int i = clipPaths.size() - 1; i >= 0; i--) {
@@ -211,7 +211,7 @@ public class SVGClipPath extends SVGElement {
 	 * @param id
 	 * @return
 	 */
-	public static List<SVGElement> findElementsWithClipPath(SVGElement svgElement, String id) {
+	public static List<SVGElement> findElementsWithClipPath(GraphicsElement svgElement, String id) {
 		List<SVGElement> elementsWithClipPathId = SVGUtil.getQuerySVGElements(
 				svgElement, ".//*[contains(@clip-path,'"+id+"')]");
 		return elementsWithClipPathId;
@@ -225,7 +225,7 @@ public class SVGClipPath extends SVGElement {
 	 * @param svgElement
 	 * @param clipPathList
 	 */
-	public static void detachUnusedClipPathElements(SVGElement svgElement, List<SVGClipPath> clipPathList) {
+	public static void detachUnusedClipPathElements(GraphicsElement svgElement, List<SVGClipPath> clipPathList) {
 		if (clipPathList != null) {
 			int nclip = clipPathList.size();
 			for (int i = nclip - 1; i >= 0; i--) {

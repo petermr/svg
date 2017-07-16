@@ -191,7 +191,7 @@ public class SVGPathTest {
 		SVGPath newPath = svgPath.replaceAllUTurnsByButt(ANGLE_EPS);
 		SVGLine line = newPath.createLineFromMLLLL(ANGLE_EPS, LINE_EPS);
 		Assert.assertNotNull("line", line);
-		Assert.assertEquals("line", "<line xmlns=\"http://www.w3.org/2000/svg\" stroke=\"black\" stroke-width=\"1.0\" x1=\"415.5\" y1=\"517.98\" x2=\"415.5\" y2=\"526.26\" />",
+		Assert.assertEquals("line", "<line xmlns=\"http://www.w3.org/2000/svg\" x1=\"415.5\" y1=\"517.98\" x2=\"415.5\" y2=\"526.26\" />",
 				line.toXML().trim());
 		
 	}

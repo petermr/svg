@@ -133,7 +133,7 @@ public class SVGPolyline extends SVGPoly {
 	 * @param element
 	 * @return
 	 */
-	public static SVGPoly getOrCreatePolyline(SVGElement element) {
+	public static SVGPoly getOrCreatePolyline(GraphicsElement element) {
 		SVGPoly polyline = null;
 		if (element instanceof SVGLine) {
 			polyline = new SVGPolyline((SVGLine) element);
@@ -164,7 +164,7 @@ public class SVGPolyline extends SVGPoly {
 	 * @param element
 	 * @return
 	 */
-	public static SVGPoly createPolyline(SVGElement element) {
+	public static SVGPoly createPolyline(GraphicsElement element) {
 		SVGPoly polyline = null;
 		if (element instanceof SVGLine) {
 			polyline = new SVGPolyline((SVGLine) element);
@@ -474,7 +474,7 @@ public class SVGPolyline extends SVGPoly {
 	 */
 	public static List<SVGPolyline> extractPolylines(List<SVGElement> elements) {
 		List<SVGPolyline> polylineList = new ArrayList<SVGPolyline>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGPolyline) {
 				polylineList.add((SVGPolyline) element);
 			}
@@ -488,7 +488,7 @@ public class SVGPolyline extends SVGPoly {
 	 * @param svgElement
 	 * @return
 	 */
-	public static List<SVGPolyline> extractSelfAndDescendantPolylines(SVGElement svgElement) {
+	public static List<SVGPolyline> extractSelfAndDescendantPolylines(GraphicsElement svgElement) {
 		return SVGPolyline.extractPolylines(SVGUtil.getQuerySVGElements(svgElement, ALL_POLYLINE_XPATH));
 	}
 

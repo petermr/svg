@@ -15,8 +15,8 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
+import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGCircle;
-import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
@@ -147,7 +147,7 @@ public class PlotBox {
 		if (inputStream == null) {
 			throw new RuntimeException("Null input stream");
 		}
-		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
+		GraphicsElement svgElement = SVGUtil.parseToSVGElement(inputStream);
 		if (svgElement == null) {
 			throw new RuntimeException("Null svgElement");
 		}
@@ -174,7 +174,7 @@ public class PlotBox {
 		}
 	}
 
-	public void readAndCreateCSVPlot(SVGElement svgElement) {
+	public void readAndCreateCSVPlot(GraphicsElement svgElement) {
 		svgStore = new SVGStore(this);
 		svgStore.setFileRoot(fileRoot);
 		svgStore.readGraphicsElements(svgElement);
@@ -393,7 +393,7 @@ public class PlotBox {
 	
 	public void writeProcessedSVG(File file) {
 		if (file != null) {
-			SVGElement processedSVGElement = svgStore.createSVGElement();
+			GraphicsElement processedSVGElement = svgStore.createSVGElement();
 			processedSVGElement.appendChild(copyAnnotatedAxes());
 			SVGSVG.wrapAndWriteAsSVG(processedSVGElement, file);
 		}

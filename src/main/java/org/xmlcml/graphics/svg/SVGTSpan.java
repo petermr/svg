@@ -46,7 +46,7 @@ public class SVGTSpan extends SVGText {
 	}
 	protected void init() {
 		super.setDefaultStyle();
-		setDefaultStyle(this);
+//		setDefaultStyle(this);
 	}
 	
 	
@@ -91,7 +91,7 @@ public class SVGTSpan extends SVGText {
 	 */
 	public static List<SVGTSpan> extractTSpans(List<SVGElement> elements) {
 		List<SVGTSpan> tSpanList = new ArrayList<SVGTSpan>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGTSpan) {
 				tSpanList.add((SVGTSpan) element);
 			}

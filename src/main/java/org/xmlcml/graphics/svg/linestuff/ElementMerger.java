@@ -1,6 +1,6 @@
 package org.xmlcml.graphics.svg.linestuff;
 
-import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.GraphicsElement;
 
 /** merges two or more SVGElements
  * <p>
@@ -11,7 +11,7 @@ import org.xmlcml.graphics.svg.SVGElement;
  */
 public abstract class ElementMerger {
 
-	protected SVGElement elem0;
+	protected GraphicsElement elem0;
 	protected double eps;
 
 	/** this could be messy
@@ -29,7 +29,7 @@ public abstract class ElementMerger {
 //		return elementMerger;
 //	}
 	
-	public ElementMerger(SVGElement elem, double eps) {
+	public ElementMerger(GraphicsElement elem, double eps) {
 		this.elem0 = elem;
 		this.eps = eps;
 	}
@@ -41,6 +41,6 @@ public abstract class ElementMerger {
 	 * @param elem to merge
 	 * @return new element (null if none created)
 	 */
-	public abstract SVGElement createNewElement(SVGElement elem);
+	public abstract GraphicsElement createNewElement(GraphicsElement elem);
 
 }

@@ -77,14 +77,14 @@ public class SVGDefs extends SVGElement {
 		return TAG;
 	}
 
-	public static void removeDefs(SVGElement svgElement) {
+	public static void removeDefs(GraphicsElement svgElement) {
 		List<SVGDefs> defsList = extractSelfAndDescendantRects(svgElement);
 		for (SVGDefs defs : defsList) {
 			defs.detach();
 		}
 	}
 	
-	public static List<SVGDefs> extractSelfAndDescendantRects(SVGElement svgElem) {
+	public static List<SVGDefs> extractSelfAndDescendantRects(GraphicsElement svgElem) {
 		return SVGDefs.extractDefss(SVGUtil.getQuerySVGElements(svgElem, ALL_DEFS_XPATH));
 	}
 
@@ -95,7 +95,7 @@ public class SVGDefs extends SVGElement {
 	 */
 	public static List<SVGDefs> extractDefss(List<SVGElement> elements) {
 		List<SVGDefs> defsList = new ArrayList<SVGDefs>();
-		for (SVGElement element : elements) {
+		for (GraphicsElement element : elements) {
 			if (element instanceof SVGDefs) {
 				defsList.add((SVGDefs) element);
 			}
