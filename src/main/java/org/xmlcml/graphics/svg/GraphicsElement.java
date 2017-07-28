@@ -38,6 +38,7 @@ import org.xmlcml.xml.XMLUtil;
 import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
+import nu.xom.IllegalCharacterDataException;
 import nu.xom.Node;
 import nu.xom.Nodes;
 
@@ -688,10 +689,10 @@ public class GraphicsElement extends Element implements SVGConstants {
 		fill(g2d, path);
 	}
 
-	public void removeAttribute(String style) {
-		Attribute styleAttribute = this.getAttribute(style);
-		if (styleAttribute != null) {
-			styleAttribute.detach();
+	public void removeAttribute(String attName) {
+		Attribute attribute = this.getAttribute(attName);
+		if (attribute != null) {
+			attribute.detach();
 		}
 	}
 
@@ -835,7 +836,7 @@ public class GraphicsElement extends Element implements SVGConstants {
 		for (int i = this.getAttributeCount() - 1; i >= 0; i--) {
 			Attribute attribute = this.getAttribute(i);
 			if (AttributeComparer.STYLE_SET.contains(attribute.getLocalName())) {
-				styleAttributeFactory.addToMap(attribute);
+				styleAttributeFactory.addToMap(attribute, StyleAttributeFactory.CHECK_DUPLICATES);
 			}
 		}
 		return styleAttributeFactory;
@@ -869,6 +870,30 @@ public class GraphicsElement extends Element implements SVGConstants {
 			value += units;
 		}
 		return value;
+	}
+
+	public void ensureStyle(String styleValue) {
+		String value = this.getAttributeValue(STYLE);
+		if (GraphicsElement.isEmptyValue(value)) {
+			this.addAttribute(new Attribute(STYLE, styleValue));
+		}
+//		this.getOrCreateStyleAttributeFactory();
+//		String styleValue0 = styleAttributeFactory.getAttributeValue(styleName);
+//		if (GraphicsElement.isEmptyValue(styleValue0)) {
+//			styleAttributeFactory.p
+//		}
+//		String attVal = this.getAttributeValue(attName);
+//		if (attVal == null || attVal.trim().equals("")) {
+//			try {
+//				this.addAttribute(new Attribute(attName, attValue));
+//			} catch (IllegalCharacterDataException icde) {
+//				LOG.debug("Bad attribute character: "+attValue);
+//			}
+//		}
+	}
+
+	public static boolean isEmptyValue(String value) {
+		return value == null || value.trim().length() == 0;
 	}
 	
 
