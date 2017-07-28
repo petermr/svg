@@ -51,6 +51,7 @@ public class SVGStoreTest {
 //	@Ignore 
 	public void testManyPapers() throws IOException {
 		File[] files = Fixtures.FIGURE_DIR.listFiles();
+		LOG.debug(">FIG>"+Fixtures.FIGURE_DIR);
 		Assert.assertNotNull("files in "+Fixtures.FIGURE_DIR, files);
 		for (File file : files) {
 			if (file.toString().endsWith(".svg")) {
@@ -77,6 +78,27 @@ public class SVGStoreTest {
 				store.readGraphicsComponents(file);
 				List<Real2Range> imageBoxes = store.getImageBoxes();
 				displayBoxes(new File("target/plot/debug/images/"), store, root, imageBoxes, "mauve");
+			}
+		}
+	}
+	
+	@Test
+	public void testPapers() throws IOException {
+		File[] dirs = Fixtures.TABLE_DIR.listFiles();
+		for (File dir : dirs) {
+			String base = FilenameUtils.getName(dir.toString());
+			File svgDir = new File(dir, "svg");
+			for (File svgFile : svgDir.listFiles()) {
+				if (svgFile.toString().endsWith(".svg")) {
+					String root = FilenameUtils.getBaseName(svgFile.toString());
+					SVGStore store = new SVGStore();
+					LOG.debug("reading: "+svgFile);
+					store.readGraphicsComponents(svgFile);
+					List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
+					if (boundingBoxes.size() > 0) {
+						displayBoxes(new File("target/plot/debug/table/"+base+"/"), store, root, boundingBoxes, "green");
+					}
+				}
 			}
 		}
 	}

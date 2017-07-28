@@ -71,9 +71,12 @@ public class SVGTriangle extends SVGPolygon {
 		SVGTriangle triangle = null;
 		String signature = path.getSignature();
 		if (signature.equals("MCLCCC")) {
-			SVGPolygon polygon = (SVGPolygon) SVGPoly.createSVGPoly(path);
-			triangle = createTriangleMCLCCC(polygon.getReal2Array());
-			LOG.trace("TRIANGLE "+triangle.toXML());
+			SVGPoly svgPoly = SVGPoly.createSVGPoly(path);
+			if (svgPoly instanceof SVGPolygon) {
+				SVGPolygon polygon = (SVGPolygon) svgPoly;
+				triangle = createTriangleMCLCCC(polygon.getReal2Array());
+				LOG.trace("TRIANGLE "+triangle.toXML());
+			}
 		}
 		return triangle;
 	}

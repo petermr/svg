@@ -44,6 +44,9 @@ public class StyleAttributeFactory {
 		MERGE
 	}
 	private static final String STYLE = "style";
+	public static final boolean CHECK_DUPLICATES = true;
+	public static final boolean NO_CHECK_DUPLICATES = false;
+	
 	private Map<String, String> styleMap;
 	private String attributeValue;
 
@@ -105,11 +108,21 @@ public class StyleAttributeFactory {
 	 * 
 	 * @param att
 	 */
-	public void addToMap(Attribute att) {
-		if (styleMap.containsKey(att.getLocalName())) {
-			throw new RuntimeException("Duplicate attribute: "+att);
+	public void addToMap(Attribute att, boolean checkDuplicates) {
+		String attName = att.getLocalName();
+		String attValue = att.getValue();
+		addToMap(checkDuplicates, attName, attValue);
+	}
+
+	public void addToMap(boolean checkDuplicates, String attName, String attValue) {
+		if (checkDuplicates && styleMap.containsKey(attName)) {
+			throw new RuntimeException("Duplicate attribute name: "+attName);
 		}
-		styleMap.put(att.getLocalName(), att.getValue());
+		styleMap.put(attName, attValue);
+	}
+	
+	public void addToMap(String attName, String attValue) {
+		this.addToMap(false, attName, attValue); 
 	}
 	
 	/** returns CSS-like string sorted by attribute names.
@@ -216,6 +229,31 @@ public class StyleAttributeFactory {
 
 	public Map<String, String> getStyleMap() {
 		return styleMap;
+	}
+
+	/** applies heuristics to analyze FontFamily name.
+	 * 
+	 * @param style
+	 * @return
+	 */
+	public boolean expandStyle(String style) {
+		String fontFamily0 = this.getAttributeValue(StyleBundle.FONT_FAMILY);
+		String fontFamilyEnd = fontFamily0;
+		if (!GraphicsElement.isEmptyValue(fontFamily0)) {
+			String fontFamily = fontFamily0.replaceAll("^[A-Z]{6}\\+", ""); // strip prefix
+			String fontFamilyB = fontFamily.replaceAll("(\\-?[Bb][Oo][Ll][Dd]|\\.[Bb])", ""); // Bold | .b
+			boolean bold = !fontFamilyB.equals(fontFamily);
+			fontFamilyEnd = fontFamilyB.replaceAll("(\\-?[Ii][Tt][Aa][Ll]([Ii][Cc])?|\\.[Ii])", ""); // Ital(ic)? | .i
+			boolean italic = !fontFamilyEnd.equals(fontFamilyB);
+			this.addToMap(StyleBundle.FONT_FAMILY, fontFamilyEnd);
+			if (bold) {
+				this.addToMap(StyleBundle.FONT_WEIGHT, StyleBundle.BOLD);
+			}
+			if (italic) {
+				this.addToMap(StyleBundle.FONT_STYLE, StyleBundle.ITALIC);
+			}
+		}
+		return fontFamily0 != null && !fontFamilyEnd.equals(fontFamily0);
 	}
 
 }

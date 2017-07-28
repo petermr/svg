@@ -42,6 +42,9 @@ public class StyleBundle implements XMLConstants {
 	public static final String OPACITY = "opacity";
 	public static final String STROKE = "stroke";
 	public static final String STROKE_WIDTH = "stroke-width";
+	public static final String BOLD = "bold";
+	public static final String ITALIC = "italic";
+	public static final String NORMAL = "normal";
 	// not used in bundle
 	private static final String STROKE_LINECAP = "stroke-linecap";
 
