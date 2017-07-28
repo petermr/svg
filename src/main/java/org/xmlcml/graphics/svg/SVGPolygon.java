@@ -18,6 +18,7 @@ package org.xmlcml.graphics.svg;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -26,6 +27,7 @@ import org.xmlcml.euclid.Line2AndReal2Calculator;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Array;
+import org.xmlcml.euclid.Real2Range;
 
 import nu.xom.Element;
 import nu.xom.Node;
@@ -103,6 +105,30 @@ public class SVGPolygon extends SVGPoly {
 	 */
 	public String getTag() {
 		return TAG;
+	}
+
+	public static SVGPolygon createPolygon(SVGRect rect) {
+		return rect == null ? null : createPolygon(rect.getBoundingBox());
+	}
+	
+	/** create from a box.
+	 * 
+	 * @param r2r
+	 * @return
+	 */
+	public static SVGPolygon createPolygon(Real2Range r2r) {
+		SVGPolygon poly = null;
+		if (r2r != null) {
+			Real2[] corners = r2r.getCorners();
+			Real2Array polyXY = new Real2Array(Arrays.asList(new Real2[]{
+					corners[0], 
+					new Real2(corners[0].getX(), corners[1].getY()),
+					corners[1],
+					new Real2(corners[1].getX(), corners[0].getY())
+					}));
+			poly = new SVGPolygon(polyXY);
+		}
+		return poly;
 	}
 
 	
