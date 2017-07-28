@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 
@@ -98,6 +99,7 @@ public class PlotBoxTest {
 	}
 	
 	@Test
+	@Ignore // too many for routine tests
 	public void testTilburgVectors() throws IOException {
 		File TILBURG_DIR = new File(Fixtures.PLOT_DIR, "tilburgVectors");
 		String[] roots = {

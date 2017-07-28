@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.Fixtures;
@@ -35,7 +36,7 @@ public class SVGStoreTest {
 	}
 
 	@Test
-//	@Ignore
+	@Ignore // too many for testing
 	public void testMultipleFigure() throws IOException {
 		String fileRoot = "fulltext-page4";
 		SVGStore store = new SVGStore();
@@ -48,7 +49,7 @@ public class SVGStoreTest {
 	}
 	
 	@Test
-//	@Ignore 
+	@Ignore // too many for testing
 	public void testManyPapers() throws IOException {
 		File[] files = Fixtures.FIGURE_DIR.listFiles();
 		LOG.debug(">FIG>"+Fixtures.FIGURE_DIR);
@@ -67,6 +68,7 @@ public class SVGStoreTest {
 	}
 
 	@Test
+	@Ignore // too many for tests
 	public void testImages() throws IOException {
 		File[] files = new File(Fixtures.IMAGE_DIR, "10.2147_OTT.S94348").listFiles();
 		Assert.assertNotNull("files in "+Fixtures.IMAGE_DIR, files);
@@ -83,6 +85,7 @@ public class SVGStoreTest {
 	}
 	
 	@Test
+	@Ignore // uncomment to re-test papers 
 	public void testPapers() throws IOException {
 		File[] dirs = Fixtures.TABLE_DIR.listFiles();
 		for (File dir : dirs) {
