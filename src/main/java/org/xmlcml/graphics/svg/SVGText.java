@@ -1088,12 +1088,34 @@ public class SVGText extends SVGElement {
 		return "["+this.getText()+"("+this.getXY()+")"+"]";
 	}
 
+	public void unrotateRot90() {
+		
+	}
+	/** rotates text about current text x,y point
+	 * does NOT transform the point
+	 * generally called after the coordinate transformation
+	 * @param angle
+	 */
 	public void rotateText(Angle angle) {
-		Transform2 transform2;
-		transform2 = new Transform2(new Vector2(this.getXY()));
-		transform2 = transform2.concatenate(new Transform2(angle));
-		transform2 = transform2.concatenate(new Transform2(new Vector2(this.getXY().multiplyBy(-1.0))));
-		setTransform(transform2);
+		// current Rt matrix
+		Transform2 transform2orig = this.getTransform();
+		if (transform2orig == null) {
+			transform2orig = new Transform2(); // unit matrix
+		}
+		Angle angleOrig = transform2orig.getAngleOfRotation();
+		Real2 centre = transform2orig.getCentreOfRotation();
+		LOG.debug("C "+this.getText()+"; "+this.getTransform()+"; "+this.getXY()+"; "+centre);
+		Angle newAngle = angleOrig.plus(angle);
+		// final angle is zero, so remove transform attribute
+		if (Real.isEqual(newAngle.getRadian(), 0.0, ANGLE_EPS)) {
+			this.removeAttribute(TRANSFORM);
+		} else {
+			// non zero angle, apply it
+			Transform2 transform2 = new Transform2(new Vector2(centre));
+			transform2 = transform2.concatenate(new Transform2(newAngle));
+			transform2 = transform2.concatenate(new Transform2(new Vector2(centre.multiplyBy(-1.0))));
+			setTransform(transform2);
+		}
 	}
 
 	public static List<String> extractStrings(List<SVGText> textList) {
@@ -1157,7 +1179,7 @@ public class SVGText extends SVGElement {
 		}
 		return textList;
 	}
-
+	
 	/** Texts outside y=0 are not part of the plot but confuse calculation of
 	 * bounding box 
 	 * @param TextList
