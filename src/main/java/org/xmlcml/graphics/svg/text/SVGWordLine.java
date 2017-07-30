@@ -108,7 +108,7 @@ public class SVGWordLine extends SVGG {
 
 	private Real2 getFirstCorner(SVGWord svgWord) {
 		Real2Range bbox = svgWord.getChildRectBoundingBox();
-		return (bbox == null || bbox.getCorners() == null) ? null : bbox.getCorners()[0];
+		return (bbox == null || bbox.getLLURCorners() == null) ? null : bbox.getLLURCorners()[0];
 	}
 
 	public List<SVGPhrase> getOrCreateSVGPhraseList() {

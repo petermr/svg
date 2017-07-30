@@ -22,10 +22,12 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.Transform2;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Elements;
 import nu.xom.Node;
 
 /** 
@@ -88,6 +90,27 @@ public class SVGG extends SVGElement {
 	
 	public String getTag() {
 		return TAG;
+	}
+
+	/** applies transform to descendants.
+	 * Does NOT add transform the this.
+	 * The logic of this has not been tested
+	 * @param transform
+	 */
+	public void applyTransform(Transform2 transform) {
+		List<SVGElement> childElements = this.getChildSVGElements();
+	}
+	
+
+	private List<SVGElement> getChildSVGElements() {
+		List<SVGElement> childSVGElementList = new ArrayList<SVGElement>();
+		Elements childElements = this.getChildElements();
+		for (int i = 0; i < childElements.size(); i++) {
+			if (childElements.get(i) instanceof SVGElement) {
+				childSVGElementList.add((SVGElement) childElements.get(i));
+			}
+		}
+		return childSVGElementList;
 	}
 
 	/**

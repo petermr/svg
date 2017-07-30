@@ -329,7 +329,7 @@ public class BoundingBoxManager {
 	public static Real2Range createExtendedBox(SVGElement elem, double eps) {
 		Real2Range bbox = elem.getBoundingBox();
 		if (bbox != null) {
-			Real2[] corners = bbox.getCorners();
+			Real2[] corners = bbox.getLLURCorners();
 			Real2Range extendedBBox = new Real2Range(
 					new RealRange(corners[0].getX()-eps, corners[1].getX()+eps),
 					new RealRange(corners[0].getY()-eps, corners[1].getY()+eps));
@@ -358,7 +358,7 @@ public class BoundingBoxManager {
 	 * @return
 	 */
 	public static Real2Range createExtendedBox(Real2Range bbox, RealRange xExtension, RealRange yExtension) {
-		Real2[] corners = bbox.getCorners();
+		Real2[] corners = bbox.getLLURCorners();
 		Real2Range extendedBBox = new Real2Range(
 			new RealRange(corners[0].getX()+xExtension.getMin(), corners[1].getX()+xExtension.getMax()),
 			new RealRange(corners[0].getY()+yExtension.getMin(), corners[1].getY()+yExtension.getMax()));

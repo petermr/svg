@@ -255,7 +255,7 @@ public class SVGCircle extends SVGShape {
 		if (thisBbox == null) {
 			return false;
 		}
-		Real2[] corners = elementBox.getCorners();
+		Real2[] corners = elementBox.getLLURCorners();
 		if (!this.includes(corners[0]) || !this.includes(corners[1])) {
 			return false;
 		}

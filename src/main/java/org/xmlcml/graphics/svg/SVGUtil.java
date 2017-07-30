@@ -414,7 +414,7 @@ public class SVGUtil {
 		if (boundingBox != null) {
 			svg.setWidth(boundingBox.getXRange().getRange());
 			svg.setHeight(boundingBox.getYRange().getRange());
-			Real2 origin = boundingBox.getCorners()[0];
+			Real2 origin = boundingBox.getLLURCorners()[0];
 			Transform2 t2 = new Transform2(new Vector2(origin.multiplyBy(-1.0)));
 			SVGG g = new SVGG();
 			svg.appendChild(g);

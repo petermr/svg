@@ -54,7 +54,7 @@ public class SVGTextBox extends SVGG {
 	private boolean touches(Real2 point, double delta) {
 		if (bbox == null) {
 			bbox = rect.getBoundingBox();
-			corners = bbox.getCorners();
+			corners = bbox.getLLURCorners();
 			lines = new ArrayList<Line2>();
 			lines.add(new Line2(corners[0], new Real2(corners[0].getX(), corners[1].getY())));
 			lines.add(new Line2(new Real2(corners[0].getX(), corners[1].getY()), corners[1]));

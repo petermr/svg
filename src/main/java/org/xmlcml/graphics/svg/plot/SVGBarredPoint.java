@@ -145,7 +145,7 @@ public class SVGBarredPoint extends SVGG {
 		Real2Range errorBox = getOrCreateErrorBox();
 		if (errorBox.getXRange().getRange() < SVGConstants.EPS ||
 			errorBox.getYRange().getRange() < SVGConstants.EPS) {
-			Real2[] corners = errorBox.getCorners();
+			Real2[] corners = errorBox.getLLURCorners();
 			shape = new SVGLine(corners[0], corners[1]);
 		} else {
 			shape = SVGRect.createFromReal2Range(errorBox);

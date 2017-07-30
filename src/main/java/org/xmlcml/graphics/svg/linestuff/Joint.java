@@ -76,7 +76,7 @@ public class Joint implements Comparable<Joint> {
 	}
 
 	public boolean isAtEndOfBackbone(double eps) {
-		Real2[] corners = backbone.getBoundingBox().getCorners();
+		Real2[] corners = backbone.getBoundingBox().getLLURCorners();
 		boolean result0 = point.isEqualTo(corners[0], eps);
 		boolean result1 = point.isEqualTo(corners[1], eps);
 		return result0 || result1;

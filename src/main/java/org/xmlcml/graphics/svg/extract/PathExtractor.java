@@ -117,7 +117,7 @@ public class PathExtractor extends AbstractExtractor{
 		g.setClassName("annotateAsGlyphs");
 		for (String sig : pathBySig.keySet()) {
 			SVGPath path = pathBySig.get(sig);
-			Real2 xy = path.getBoundingBox().getCorners()[0];
+			Real2 xy = path.getBoundingBox().getLLURCorners()[0];
 			xy.plusEquals(new Real2(10., 10.));
 			g.appendChild(path.copy());
 			SVGText text = new SVGText(xy, sig);
@@ -142,7 +142,7 @@ public class PathExtractor extends AbstractExtractor{
 			Real2Range box = path.getBoundingBox();
 			String c = charBySig.get(sig);
 			if (c != null && !c.equals("")) {
-				Real2 xy = box.getCorners()[0].plus(new Real2(-5, -5));
+				Real2 xy = box.getLLURCorners()[0].plus(new Real2(-5, -5));
 				SVGText text = new SVGText(xy, c);
 				text.setFill(resolvedOutlineCol);
 				text.setStrokeWidth(0.1);

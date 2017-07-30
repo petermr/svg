@@ -406,7 +406,7 @@ public class SVGText extends SVGElement {
 			}
 			// significant rotation?
 			if (rotation != null && !rotation.isEqualTo(0., 0.001)) {
-				Real2[] corners = boundingBox.getCorners();
+				Real2[] corners = boundingBox.getLLURCorners();
 				corners[0].transformBy(t2);
 				corners[1].transformBy(t2);
 				boundingBox = new Real2Range(corners[0], corners[1]);
@@ -1228,6 +1228,15 @@ public class SVGText extends SVGElement {
 
 	public void setY(RealArray array) {
 		this.addAttribute(new Attribute(Y, array.getStringArray()));
+	}
+
+	public void rotateTextAboutPoint(Real2 centre, Transform2 t90) {
+		Real2 textXY = getXY();
+		Real2 delta = textXY.subtract(centre);
+		delta.transformBy(t90);
+		Real2 textXY1 = centre.plus(delta);
+		setXY(textXY1);
+		removeAttribute("transform");
 	}
 
 

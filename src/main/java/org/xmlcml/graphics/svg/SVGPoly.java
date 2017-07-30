@@ -442,7 +442,7 @@ public abstract class SVGPoly extends SVGShape {
 		SVGRect rect = null;
 		if (isBox(epsilon)) {
 			Real2Range r2r = getBoundingBox();
-			rect = new SVGRect(r2r.getCorners()[0], r2r.getCorners()[1]);
+			rect = new SVGRect(r2r.getLLURCorners()[0], r2r.getLLURCorners()[1]);
 			rect.setFill("none");
 		}
 		return rect;

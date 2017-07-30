@@ -136,7 +136,7 @@ public class LineMerger extends ElementMerger {
 			Real2Range bbox00 = line0.getBoundingBox();
 			Real2Range bbox10 = line1.getBoundingBox();
 			Real2Range bbox01 = bbox00.plusEquals(bbox10);
-			newLine = new SVGLine(bbox01.getCorners()[0], bbox01.getCorners()[1]);
+			newLine = new SVGLine(bbox01.getLLURCorners()[0], bbox01.getLLURCorners()[1]);
 		}
 		return newLine;
 	}

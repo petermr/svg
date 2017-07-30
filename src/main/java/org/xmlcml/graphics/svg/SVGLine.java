@@ -801,8 +801,8 @@ public class SVGLine extends SVGShape {
 			) {
 		
 			Real2Range bbox = line0.getBoundingBox().plus(line1.getBoundingBox());
-			Real2 point00 = bbox.getCorners()[0];
-			Real2 point11 = bbox.getCorners()[1];
+			Real2 point00 = bbox.getLLURCorners()[0];
+			Real2 point11 = bbox.getLLURCorners()[1];
 			newLine = new SVGLine();
 			XMLUtil.copyAttributes(line0, newLine);
 			newLine.setXY(point00, 0);

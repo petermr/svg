@@ -119,7 +119,7 @@ public class SVGPolygon extends SVGPoly {
 	public static SVGPolygon createPolygon(Real2Range r2r) {
 		SVGPolygon poly = null;
 		if (r2r != null) {
-			Real2[] corners = r2r.getCorners();
+			Real2[] corners = r2r.getLLURCorners();
 			Real2Array polyXY = new Real2Array(Arrays.asList(new Real2[]{
 					corners[0], 
 					new Real2(corners[0].getX(), corners[1].getY()),

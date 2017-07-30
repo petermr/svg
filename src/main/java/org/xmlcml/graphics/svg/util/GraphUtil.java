@@ -184,7 +184,7 @@ public class GraphUtil {
 				SVGG g = (SVGG) gList.get(0);
 				Real2Range bbox = BoundingBoxManager.createExtendedBox(g, 10);
 				if (bbox != null) {
-					Real2 corner = bbox.getCorners()[0];
+					Real2 corner = bbox.getLLURCorners()[0];
 					corner = corner.multiplyBy(-1);
 					g.setTransform(new Transform2(new Vector2(corner)));
 				}

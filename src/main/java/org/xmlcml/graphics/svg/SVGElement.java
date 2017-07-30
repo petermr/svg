@@ -30,11 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.Real2Range.BoxDirection;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
@@ -73,9 +75,13 @@ import nu.xom.canonical.Canonicalizer;
  */
 public class SVGElement extends GraphicsElement {
 
-	private static final int EXTRA_TRANSFORM_PRECISION = 2;
+	private static final Logger LOG = Logger.getLogger(SVGElement.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
 
-	private static Logger LOG = Logger.getLogger(SVGElement.class);
+
+	private static final int EXTRA_TRANSFORM_PRECISION = 2;
 
 //	public final static String ALL_ELEMENT_XPATH = "//svg:element";
 	public final static String ALL_ELEMENT_XPATH = "//svg:*";
@@ -438,7 +444,7 @@ public class SVGElement extends GraphicsElement {
 	 * @param transform
 	 */
 	public void applyTransform(Transform2 transform) {
-		LOG.trace("No transform applied to: "+this.getClass());
+		LOG.debug("No transform applied to: "+this.getClass());
 	}
 	
 	public static Transform2 createTransform2FromTransformAttribute(String transformAttributeValue) {
@@ -1384,7 +1390,7 @@ public class SVGElement extends GraphicsElement {
 	public Real2 getCentreForClockwise90Rotation() {
 		Real2Range bbox = getBoundingBox();
 		double yRange = bbox.getYRange().getRange();
-		Real2 centre = bbox.getCorners()[0].plus(new Real2(yRange/2.0, yRange/2.0));
+		Real2 centre = bbox.getLLURCorners()[0].plus(new Real2(yRange/2.0, yRange/2.0));
 		return centre;
 	}
 
@@ -1606,6 +1612,46 @@ public class SVGElement extends GraphicsElement {
 		this.appendChild(title);
 	}
 	
+	public SVGElement createElementWithRotatedDescendants(Angle angle) {
+		List<SVGElement> svgElementList = SVGElement.generateElementList(this, "*");
+		Real2Range bbox = getBoundingBox();
+		Real2 centre = bbox.getSquareBoxCentre(BoxDirection.LEFT);
+		SVGG g = new SVGG();
+		Transform2 rotationTransform = new Transform2(angle);
+		Transform2 rotationTranslationTransform = Transform2.getRotationAboutPoint(angle, centre);
+		for (SVGElement svgElement : svgElementList) {
+			SVGElement elementCopy = (SVGElement) svgElement.copy();
+			if (svgElement instanceof SVGText) {
+				SVGText text1 = (SVGText) elementCopy;
+//				text1.rotateTextAboutPoint(centre, rotationTransform);
+				text1.applyTransform(rotationTranslationTransform);
+				text1.removeAttribute("transform");
+				g.appendChild(text1);
+			} else {
+				Class<?> clazz = elementCopy.getClass();
+				elementCopy.applyTransform(rotationTranslationTransform);
+				g.appendChild(elementCopy);
+			}
+		}
+		return SVGSVG.wrapAsSVG(g);		
+	}
+	
+	/**  probably obsolete.
+	 * 
+	 * @param centre
+	 * @param t90
+	 */
+	private void rotateElementAboutPoint(Real2 centre, Transform2 t90) {
+		Real2 textXY = getXY();
+		Real2 delta = textXY.subtract(centre);
+		delta.transformBy(t90);
+		Real2 textXY1 = centre.plus(delta);
+		setXY(textXY1);
+		removeAttribute("transform");
+	}
+
+
+
 	public static SVGElement readAndCreateSVG(String textXml) {
 		return SVGElement.readAndCreateSVG(XMLUtil.parseXML(textXml));
 	}

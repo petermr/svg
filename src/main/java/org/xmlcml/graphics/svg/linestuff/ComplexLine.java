@@ -568,7 +568,7 @@ public class ComplexLine {
 	}
 
 	public Real2 getCornerAt(SideOrientation sideOrientation) {
-		Real2[] corners = backbone.getBoundingBox().getCorners();
+		Real2[] corners = backbone.getBoundingBox().getLLURCorners();
 		Real2 corner = null;
 		if (SideOrientation.MINUS.equals(sideOrientation)) {
 			corner = corners[0];

@@ -112,7 +112,7 @@ public class SVGRect extends SVGShape {
 	public static SVGRect createFromReal2Range(Real2Range r2r) {
 		SVGRect rect = null;
 		if (r2r != null) {
-			Real2[] corners = r2r.getCorners();
+			Real2[] corners = r2r.getLLURCorners();
 			if (corners != null && corners.length == 2) {
 				rect = new SVGRect(corners[0], corners[1]);
 			}
@@ -271,8 +271,8 @@ public class SVGRect extends SVGShape {
 	}
 
 	public boolean isEqual(SVGRect otherRect, double delta) {
-		Real2[] corners = this.getBoundingBox().getCorners();
-		Real2[] otherCorners = otherRect.getBoundingBox().getCorners();
+		Real2[] corners = this.getBoundingBox().getLLURCorners();
+		Real2[] otherCorners = otherRect.getBoundingBox().getLLURCorners();
 		return corners[0].getDistance(otherCorners[0]) < delta && corners[1].getDistance(otherCorners[1]) < delta;
 	}
 	

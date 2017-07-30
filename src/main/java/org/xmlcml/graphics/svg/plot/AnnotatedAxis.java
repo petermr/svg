@@ -135,7 +135,7 @@ public class AnnotatedAxis {
 		if (singleLine == null) {
 			if (plotBox.getSVGStore().getFullLineBox() != null) {
 				Real2Range bbox = plotBox.getSVGStore().getFullLineBox().getBoundingBox();
-				Real2[] corners = bbox.getCorners();
+				Real2[] corners = bbox.getLLURCorners();
 				if (AxisType.TOP.equals(axisType)) {
 					singleLine = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
 				} else if (AxisType.BOTTOM.equals(axisType)) {
