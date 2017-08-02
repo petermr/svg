@@ -177,7 +177,7 @@ public class PlotBox {
 	public void readAndCreateCSVPlot(GraphicsElement svgElement) {
 		svgStore = new SVGStore(this);
 		svgStore.setFileRoot(fileRoot);
-		svgStore.readGraphicsElements(svgElement);
+		svgStore.readGraphicsComponents(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
 		extractScaleTextsAndMakeScales();

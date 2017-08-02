@@ -45,6 +45,8 @@ public class ShapeExtractor extends AbstractExtractor {
 	private List<SVGTriangle> triangleList;
 	private List<SVGShape> unknownShapeList;
 	private List<SVGShape> allShapeList;
+	private List<List<SVGShape>> convertedShapeListList;
+	private List<SVGShape> convertedShapeList;
 	
 	public ShapeExtractor(SVGStore svgStore) {
 		super(svgStore);
@@ -72,8 +74,8 @@ public class ShapeExtractor extends AbstractExtractor {
 	 */
 	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		List<List<SVGShape>> shapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
-		for (List<SVGShape> shapeList : shapeListList) {
+		convertedShapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
+		for (List<SVGShape> shapeList : convertedShapeListList) {
 			for (SVGShape shape : shapeList) {
 				if (shape instanceof SVGCircle) {
 					circleList.add((SVGCircle) shape);
@@ -137,6 +139,22 @@ public class ShapeExtractor extends AbstractExtractor {
 		return unknownShapeList;
 	}
 
+	public List<List<SVGShape>> getConvertedShapeListList() {
+		return convertedShapeListList;
+	}
+
+	public List<SVGShape> getOrCreateConvertedShapeList() {
+		if (convertedShapeList == null) {
+			if (convertedShapeListList != null) {
+				convertedShapeList = new ArrayList<SVGShape>();
+				for (List<SVGShape> shapeList : convertedShapeListList) {
+					convertedShapeList.addAll(shapeList);
+				}
+			}
+		}
+		return convertedShapeList;
+	}
+
 	public void debug() {
 		LOG.debug(
 		"paths: " + pathList.size() 
@@ -164,7 +182,7 @@ public class ShapeExtractor extends AbstractExtractor {
 		}
 	}
 
-	public void extractRawPrimitives(GraphicsElement svgElement) {
+	public void createListsOfShapes(GraphicsElement svgElement) {
 		List<SVGCircle> circles = SVGCircle.extractSelfAndDescendantCircles(svgElement);
 		circleList.addAll(circles);
 		List<SVGEllipse> ellipses = SVGEllipse.extractSelfAndDescendantEllipses(svgElement);
@@ -204,8 +222,7 @@ public class ShapeExtractor extends AbstractExtractor {
 
 	public void extractShapes(List<SVGPath> pathList, GraphicsElement svgElement) {
 		convertToShapes(pathList);
-//		svgLogger.write("after convertToShapes", pathList);
-		extractRawPrimitives(svgElement);
+		createListsOfShapes(svgElement);
 		removeElementsOutsideBox(svgStore.getPositiveXBox());
 		
 		debug();

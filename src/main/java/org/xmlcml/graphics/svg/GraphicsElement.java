@@ -817,7 +817,7 @@ public class GraphicsElement extends Element implements SVGConstants {
 	}
 	
 	public void convertOldStyleToStyle() {
-		StyleAttributeFactory oldStyleAttributeFactory = this.createOldStyleAttributeFactory();
+		StyleAttributeFactory oldStyleAttributeFactory = this.createStyleAttributeFactoryFromOldStyles();
 		if (oldStyleAttributeFactory.getStyleMap().size() > 0) {
 			StyleAttributeFactory existingStyleAttributeFactory = this.getExistingStyleAttributeFactory();
 			StyleAttributeFactory newStyleAttributeFactory = oldStyleAttributeFactory.createMergedAttributeFactory(existingStyleAttributeFactory);
@@ -831,12 +831,15 @@ public class GraphicsElement extends Element implements SVGConstants {
 	 * this is UNAFFECTED
 	 * @return
 	 */
-	public StyleAttributeFactory createOldStyleAttributeFactory() {
+	public StyleAttributeFactory createStyleAttributeFactoryFromOldStyles() {
 		StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory();
 		for (int i = this.getAttributeCount() - 1; i >= 0; i--) {
 			Attribute attribute = this.getAttribute(i);
-			if (AttributeComparer.STYLE_SET.contains(attribute.getLocalName())) {
+			String attName = attribute.getLocalName();
+			if (AttributeComparer.STYLE_SET.contains(attName)) {
 				styleAttributeFactory.addToMap(attribute, StyleAttributeFactory.CHECK_DUPLICATES);
+			} else if (STYLE.equals(attName)) {
+				styleAttributeFactory.addStyleToMap(attribute);
 			}
 		}
 		return styleAttributeFactory;

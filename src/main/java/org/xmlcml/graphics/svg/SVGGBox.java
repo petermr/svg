@@ -74,20 +74,12 @@ public class SVGGBox extends SVGG {
 		return newBox;
 	}
 	
-//	public static SVGGBox createSVGGBox(Elements svgElements) {
-//		SVGGBox newBox = new SVGGBox();
-//		for (int i = 0; i < svgElements.size(); i++) {
-//			Element svgChild = svgElements.get(i);
-//			SVGGBox box = createSVGGBox((SVGG)svgChild);
-//		}
-//		return newBox;
+//	public void setLayout(SVGLayout layout) {
+//		this.layout = layout;
 //	}
-	public void setLayout(SVGLayout layout) {
-		this.layout = layout;
-	}
-	public SVGLayout getLayout() {
-		return layout;
-	}
+//	public SVGLayout getLayout() {
+//		return layout;
+//	}
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -98,7 +90,8 @@ public class SVGGBox extends SVGG {
 		Nodes rects = this.query("./*[local-name()='"+SVGRect.TAG+"']");
 		return (rects.size() == 1) ? (SVGRect) rects.get(0) : null;
 	}
-	protected Real2 getOffset(SVGLayout layout) {
+	
+	private Real2 getOffset(SVGLayout layout) {
 		SVGRect rect = this.getRect();
 		Real2 offset = new Real2();
 		if (rect != null) {
@@ -111,26 +104,26 @@ public class SVGGBox extends SVGG {
 		return offset;
 	}
 	
-	public void addSVGG(SVGGBox childSvg) {
-		Transform2 childTransform = childSvg.getTransform2FromAttribute();
+	private void addSVGG(SVGGBox childBox) {
+		Transform2 childTransform = childBox.getTransform2FromAttribute();
 		if (childTransform == null) {
 			childTransform = new Transform2();
 		}
 		Real2 totalDelta = new Real2();
-		List<SVGGBox> previousChildSvgs = this.getSVGGBoxChildren();
-		if (previousChildSvgs.size() > 0) {
-			for (SVGGBox previousChildSvg : previousChildSvgs) {
-				Real2 delta = previousChildSvg.getOffset(this.layout);
+		List<SVGGBox> previousChildBoxes = this.getSVGGBoxChildren();
+		if (previousChildBoxes.size() > 0) {
+			for (SVGGBox previousChildBox : previousChildBoxes) {
+				Real2 delta = previousChildBox.getOffset(this.layout);
 				totalDelta.plusEquals(delta);
 			}
 			childTransform = childTransform.concatenate(new Transform2(new Vector2(totalDelta)));
 		}
-		SVGGBox g = SVGGBox.copy(childSvg);
+		SVGGBox g = SVGGBox.copy(childBox);
 		g.setTransform(childTransform);
 		this.appendChild(g);
 	}
 	
-	public List<SVGGBox> getSVGGBoxChildren() {
+	private List<SVGGBox> getSVGGBoxChildren() {
 		// "./g"
 		Nodes gNodes = this.query("./*[local-name()='"+SVGG.TAG+"']");
 		List<SVGGBox> gList = new ArrayList<SVGGBox>(gNodes.size());
@@ -140,12 +133,12 @@ public class SVGGBox extends SVGG {
 		return gList;
 	}
 	
-	public void detachRect() {
-		SVGShape rect = getRect();
-		if (rect != null) {
-			rect.detach();
-		} else {
-			this.debug("DDDDDDDDDDDDDDDDDD");
-		}
-	}
+//	private void detachRect() {
+//		SVGShape rect = getRect();
+//		if (rect != null) {
+//			rect.detach();
+//		} else {
+//			this.debug("DDDDDDDDDDDDDDDDDD");
+//		}
+//	}
 }

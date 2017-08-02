@@ -197,7 +197,7 @@ public class TextDecorator extends AbstractDecorator {
 		arrayText.setX(xCoordinateArray);
 		arrayText.setSVGXFontWidth(widthArray);
 		arrayText.setText(textContentBuilder.toString());
-		StyleAttributeFactory.createAndAddOldStyleAttribute(arrayText);
+		StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(arrayText);
 		return arrayText;
 	}
 

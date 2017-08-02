@@ -29,7 +29,7 @@ public class StyleAttributeTest {
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" />",
 			element.toXML());
 		StyleAttributeFactory styleAttributeFactory = 
-			element.createOldStyleAttributeFactory();
+			element.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("style", "", styleAttributeFactory.getAttributeValue());
 	}
 	
@@ -54,14 +54,14 @@ public class StyleAttributeTest {
 				+ "cx=\"10.0\" cy=\"20.0\" r=\"5.0\" style=\"fill:blue;stroke:yellow;\" />",
 			circle.toXML());
 		StyleAttributeFactory styleAttributeFactory = 
-			circle.createOldStyleAttributeFactory();
+			circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("style", "", styleAttributeFactory.getAttributeValue());
 	}
 	
 	@Test
 	public void testRemove() {
 		SVGElement circle = new SVGCircle();
-		circle.createOldStyleAttributeFactory();
+		circle.createStyleAttributeFactoryFromOldStyles();
 		circle.removeOldStyleAttributes();
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" />",
 			circle.toXML());
@@ -79,7 +79,7 @@ public class StyleAttributeTest {
 		GraphicsElement circle = new SVGCircle();
 		circle.setStroke("red");
 		StyleAttributeFactory oldStyleAttributeFactory = 
-			circle.createOldStyleAttributeFactory();
+			circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"stroke:red;\" />",
 			circle.toXML());
 		Assert.assertEquals("style", "", oldStyleAttributeFactory.getAttributeValue());
@@ -92,7 +92,7 @@ public class StyleAttributeTest {
 		circle.addAttribute(new Attribute("fill", "blue"));
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" stroke=\"red\" fill=\"blue\" />",
 				circle.toXML());
-		StyleAttributeFactory oldStyleAttributeFactory = circle.createOldStyleAttributeFactory();
+		StyleAttributeFactory oldStyleAttributeFactory = circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("style", "fill:blue;stroke:red;", oldStyleAttributeFactory.getAttributeValue());
 		circle.convertOldStyleToStyle();
 	}
@@ -105,7 +105,7 @@ public class StyleAttributeTest {
 		circle.setCSSStyleAndRemoveOldStyle("stroke:red;fill:green;");
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"fill:green;stroke:red;\" />",
 				circle.toXML());
-		StyleAttributeFactory styleAttributeFactory = circle.createOldStyleAttributeFactory();
+		StyleAttributeFactory styleAttributeFactory = circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("", styleAttributeFactory.getAttributeValue());
 	}
 	
@@ -113,13 +113,13 @@ public class StyleAttributeTest {
 	public void testCSSStylePriority() {
 		GraphicsElement circle = new SVGCircle();
 		circle.setUseStyleAttribute(true);
-		circle.createOldStyleAttributeFactory();
+		circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" />", circle.toXML());
 		circle.setStroke("blue");
 		circle.setFill("yellow");
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"fill:yellow;stroke:blue;\" />",
 				circle.toXML());
-		StyleAttributeFactory.createAndAddOldStyleAttribute(circle);
+		StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(circle);
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"\" />",
 			circle.toXML());
 	}
@@ -127,14 +127,14 @@ public class StyleAttributeTest {
 	@Test
 	public void testCSSStyleConflict() {
 		GraphicsElement circle = new SVGCircle();
-		circle.createOldStyleAttributeFactory();
+		circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" />", circle.toXML());
 		circle.setStroke("blue");
 		circle.setFill("yellow");
 		circle.setCSSStyleAndRemoveOldStyle("stroke:red;fill:green;");
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"fill:green;stroke:red;\" />",
 				circle.toXML());
-		circle.createOldStyleAttributeFactory();
+		circle.createStyleAttributeFactoryFromOldStyles();
 		Assert.assertEquals("<circle xmlns=\"http://www.w3.org/2000/svg\" style=\"fill:green;stroke:red;\" />",
 			circle.toXML());
 	}

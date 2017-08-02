@@ -49,7 +49,7 @@ public class StyleBundle implements XMLConstants {
 	private static final String STROKE_LINECAP = "stroke-linecap";
 
 	// not yet @Deprecated
-    static List<String> BUNDLE_ATTRIBUTES;
+    public static List<String> BUNDLE_ATTRIBUTES;
 	static {
 		String[] bundleAttributes = {
 				CLIP_PATH,

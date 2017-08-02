@@ -31,6 +31,8 @@ import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGTitle;
 import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.graphics.svg.StyleAttributeFactory;
+import org.xmlcml.graphics.svg.StyleAttributeFactory.AttributeStrategy;
 import org.xmlcml.graphics.svg.extract.AbstractExtractor;
 import org.xmlcml.graphics.svg.extract.ImageExtractor;
 import org.xmlcml.graphics.svg.extract.PathExtractor;
@@ -40,6 +42,11 @@ import org.xmlcml.graphics.svg.linestuff.AxialLineList;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 import org.xmlcml.graphics.svg.plot.PlotBox;
 
+/** stores SVG primitives for access by analysis programs
+ * 
+ * @author pm286
+ *
+ */
 public class SVGStore {
 	private static final Logger LOG = Logger.getLogger(SVGStore.class);
 	static {
@@ -85,6 +92,8 @@ public class SVGStore {
 	private Real2Range textBox;
 	private Real2Range totalBox;
 
+	private SVGG extractedSVGElement;
+
 
 
 
@@ -110,10 +119,10 @@ public class SVGStore {
 			throw new RuntimeException("Null input stream");
 		}
 		GraphicsElement svgElement = SVGUtil.parseToSVGElement(inputStream);
-		readGraphicsElements(svgElement);
+		readGraphicsComponents(svgElement);
 	}
 
-	public void readGraphicsElements(GraphicsElement svgElement) {
+	public void readGraphicsComponents(GraphicsElement svgElement) {
 		if (svgElement != null) {
 			this.extractSVGComponents(svgElement);
 			this.createHorizontalAndVerticalLines();
@@ -130,9 +139,11 @@ public class SVGStore {
 		svgElement = (GraphicsElement) svgElem.copy();
 		SVGG g;
 		SVGG gg = new SVGG();
+		extractedSVGElement = new SVGG();
 		
 		 // is this a good idea? These are clipping boxes. 
-		 SVGDefs.removeDefs(svgElement);
+		SVGDefs.removeDefs(svgElement);
+		StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(svgElement);
 		
 		positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
 		removeEmptyTextElements();
@@ -152,24 +163,38 @@ public class SVGStore {
 		g.appendChild(new SVGTitle("image"));
 	//		gg.appendChild(g.copy());
 		
-	
-		this.textExtractor = new TextExtractor(this);
-		this.textExtractor.extractTexts(this.svgElement);
-		textBox = textExtractor.getBoundingBox();
-		g = this.textExtractor.debug(textDebug + this.fileRoot+".debug.svg");
-		g.appendChild(new SVGTitle("text"));
-		gg.appendChild(g.copy());
-		
-		totalBox = textBox == null ? pathBox : textBox.plus(pathBox);
-	
 		this.shapeExtractor = new ShapeExtractor(this);
 		List<SVGPath> currentPathList = this.pathExtractor.getCurrentPathList();
 		this.shapeExtractor.extractShapes(currentPathList, svgElement);
 		g = this.shapeExtractor.debug(shapeDebug + fileRoot+".debug.svg");
+		List<SVGShape> shapeList = shapeExtractor.getOrCreateConvertedShapeList();
+		addElementsToExtractedElement(shapeList);
 		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
+
+		this.textExtractor = new TextExtractor(this);
+		this.textExtractor.extractTexts(this.svgElement);
+		textBox = textExtractor.getBoundingBox();
+		g = this.textExtractor.debug(textDebug + this.fileRoot+".debug.svg");
+		addElementsToExtractedElement(textExtractor.getTextList());
+		
+		g.appendChild(new SVGTitle("text"));
+		gg.appendChild(g.copy());
+		
+		totalBox = textBox == null ? pathBox : textBox.plus(pathBox);
 		
 		SVGSVG.wrapAndWriteAsSVG(gg, new File(plotDebug, fileRoot+".debug.svg"));
+//		SVGSVG.wrapAndWriteAsSVG(extractedSVGElement, new File(plotDebug, fileRoot+".debug.svg"));
+	}
+
+	private void addElementsToExtractedElement(List<? extends SVGElement> elementList) {
+		for (SVGElement element : elementList) {
+			SVGElement elementCopy = (SVGElement) element.copy();
+			
+			StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(elementCopy);
+//			StyleAttributeFactory.createUpdatedStyleAttribute(elementCopy, AttributeStrategy.MERGE);
+			extractedSVGElement.appendChild(elementCopy);
+		}
 	}
 
 	/** some plots have publisher cruft outside the limits, especially negative Y.
@@ -406,6 +431,10 @@ public class SVGStore {
 
 	public void setPlotDebug(File plotDebug) {
 		this.plotDebug = plotDebug;
+	}
+
+	public SVGG getExtractedSVGElement() {
+		return extractedSVGElement;
 	}
 
 	public RealRange createRange(SVGLineList lines, Direction direction) {

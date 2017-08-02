@@ -25,6 +25,7 @@ import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.graphics.svg.StyleAttributeFactory;
 import org.xmlcml.graphics.svg.StyleBundle;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
 import org.xmlcml.graphics.svg.path.Arc;
@@ -344,12 +345,14 @@ public class Path2ShapeConverter {
 			shape = applyHeuristics((SVGPath)shape);
 		}
 		if (shape != null) {
+			shape.copyAttributesFrom(path);
+			StyleAttributeFactory.deleteOldStyleAttributes(shape);
 			// lines created from thin rects may have a different stroke-width to the original
 			Double strokeWidth = null;
 			if (shape instanceof SVGLine) {
 				strokeWidth = ((SVGLine) shape).getStrokeWidth();
 			}
-			copyAttributes(path, shape);
+//			copyAttributes(path, shape);
 			if (strokeWidth != null) {
 				shape.setStrokeWidth(strokeWidth);
 			}
@@ -889,6 +892,7 @@ public class Path2ShapeConverter {
 
 	/**
 	 * Copies fill, opacity, stroke and stroke width and dash-array attributes
+	 * probably obsolete as we are now using "style" attribute
 	 * 
 	 * @param input
 	 * @param result

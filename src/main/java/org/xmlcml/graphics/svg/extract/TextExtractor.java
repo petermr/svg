@@ -50,16 +50,16 @@ public class TextExtractor extends AbstractExtractor {
 	public SVGG debug(String outFilename) {
 		SVGG g = new SVGG();
 		// derived
-		debug(g, originalTextList,"yellow",  "black", 0.3, 10.0, "Helvetica");
-		debug(g, nonNegativeYTextList, "red", "black", 0.3, 12.0, "serif");
-		debug(g, nonNegativeNonEmptyTextList, "green", "black", 0.3, 14.0, "monospace");
+		appendDebugToG(g, originalTextList,"yellow",  "black", 0.3, 10.0, "Helvetica");
+		appendDebugToG(g, nonNegativeYTextList, "red", "black", 0.3, 12.0, "serif");
+		appendDebugToG(g, nonNegativeNonEmptyTextList, "green", "black", 0.3, 14.0, "monospace");
 		drawBox(g, "green", 2.0);
 
 		writeDebug("texts",outFilename, g);
 		return g;
 	}
 
-	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity, double fontSize, String fontFamily) {
+	private void appendDebugToG(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity, double fontSize, String fontFamily) {
 		for (GraphicsElement e : elementList) {
 			SVGText text = (SVGText) e.copy();
 			text.setCSSStyleAndRemoveOldStyle(null);
@@ -88,17 +88,21 @@ public class TextExtractor extends AbstractExtractor {
 				text.setText(String.valueOf(BLACK_VERTICAL_RECTANGLE));
 				text.setFill("cyan");
 			} else {
-				Real2Range box = text.getBoundingBox();
-				SVGRect box0 = SVGElement.createGraphicalBox(box, 0.0, 0.0);
-				box0.setStrokeWidth(0.1);
-				box0.setFill("yellow");
-				box0.setOpacity(0.2);
-				g.appendChild(box0);
+				addAnnotationRect(g, text);
 			}
 			String title = s == null || "".equals(s.trim()) ? "empty" : s;
 			text.addTitle(title);
 			g.appendChild(text);
 		}
+	}
+
+	private void addAnnotationRect(SVGG g, SVGText text) {
+		Real2Range box = text.getBoundingBox();
+		SVGRect box0 = SVGElement.createGraphicalBox(box, 0.0, 0.0);
+		box0.setStrokeWidth(0.1);
+		box0.setFill("yellow");
+		box0.setOpacity(0.2);
+		g.appendChild(box0);
 	}
 	
 	public Real2Range getBoundingBox() {

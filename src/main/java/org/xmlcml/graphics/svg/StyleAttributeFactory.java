@@ -1,6 +1,5 @@
 package org.xmlcml.graphics.svg;
 
-import java.awt.RenderingHints;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.xmlcml.graphics.svg.normalize.AttributeComparer;
 
 import nu.xom.Attribute;
+import nu.xom.Node;
 
 /** supports CSS-like style attribute list of name-value pairs
  * 
@@ -74,7 +74,7 @@ public class StyleAttributeFactory {
 	 * @return new Style attribute 
 	 */
 	public static StyleAttributeFactory createUpdatedStyleAttribute(GraphicsElement element, AttributeStrategy strategy) {
-		StyleAttributeFactory oldStyleAttributeFactory = element.createOldStyleAttributeFactory();
+		StyleAttributeFactory oldStyleAttributeFactory = element.createStyleAttributeFactoryFromOldStyles();
 		StyleAttributeFactory existingStyleAttributeFactory = element.getExistingStyleAttributeFactory();
 		StyleAttributeFactory newStyleAttributeFactory = null;
 		if (strategy == null) {
@@ -84,6 +84,8 @@ public class StyleAttributeFactory {
 			newStyleAttributeFactory = oldStyleAttributeFactory;
 		} else if (AttributeStrategy.KEEP == strategy) {
 			newStyleAttributeFactory = existingStyleAttributeFactory;
+		} else if (AttributeStrategy.REMOVE == strategy) {
+			throw new RuntimeException("REMOVE NYI");
 		} else if (AttributeStrategy.MERGE == strategy) {
 			newStyleAttributeFactory = oldStyleAttributeFactory.createMergedAttributeFactory(existingStyleAttributeFactory);
 			element.removeOldStyleAttributes();
@@ -93,17 +95,42 @@ public class StyleAttributeFactory {
 		return newStyleAttributeFactory;
 	}
 
-//	public static void createAndAddUpdatedStyleAttribute(GraphicsElement element, AttributeStrategy update) {
-//		StyleAttributeFactory styleAttribute = StyleAttributeFactory.createStyleAttributeFactoryFromOldStyle(element, update);
-//		element.addAttribute(styleAttribute.createAttribute());
-//	}
-	
-	public static void createAndAddOldStyleAttribute(GraphicsElement element) {
-		StyleAttributeFactory styleAttributeFactory = element.createOldStyleAttributeFactory();
-		addStyleAttribute(element, styleAttributeFactory);
+	public static void convertElementAndChildrenFromOldStyleAttributesToCSS(GraphicsElement element) {
+		
+		convertOldStyleAttributesToCSSAndDelete(element);
+		for (int i = 0; i < element.getChildCount(); i++) {
+			Node child = element.getChild(i);
+			if (child instanceof GraphicsElement) {
+				convertElementAndChildrenFromOldStyleAttributesToCSS((GraphicsElement)child);
+			}
+		}
 	}
 
-	
+	private static void convertOldStyleAttributesToCSSAndDelete(GraphicsElement element) {
+		StyleAttributeFactory oldStyleAttributeFactory = element.createStyleAttributeFactoryFromOldStyles();
+		String style = element.getAttributeValue(STYLE);
+		if (style != null && style.trim().length() != 0) {
+			StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory(style);
+			oldStyleAttributeFactory = styleAttributeFactory.createMergedAttributeFactory(styleAttributeFactory);
+		}
+		LOG.debug(element.toXML()+" => "+oldStyleAttributeFactory);
+		oldStyleAttributeFactory.addStyleAttribute(element);
+		oldStyleAttributeFactory.deleteOldAttributes(element);
+	}
+
+	private void deleteOldAttributes(GraphicsElement element) {
+		for (String attName : styleMap.keySet()) {
+			deleteAttribute(element, attName);
+		}
+	}
+
+	private static void deleteAttribute(GraphicsElement element, String attName) {
+		Attribute att = element.getAttribute(attName);
+		if (att != null) {		
+			att.detach();
+		}
+	}
+
 	/** adds old-style attribute to Style attribute
 	 * 
 	 * @param att
@@ -116,7 +143,8 @@ public class StyleAttributeFactory {
 
 	public void addToMap(boolean checkDuplicates, String attName, String attValue) {
 		if (checkDuplicates && styleMap.containsKey(attName)) {
-			throw new RuntimeException("Duplicate attribute name: "+attName);
+			//throw new RuntimeException("Duplicate attribute name: "+attName);
+			LOG.trace("Duplicate attribute name: "+attName);
 		}
 		styleMap.put(attName, attValue);
 	}
@@ -144,6 +172,7 @@ public class StyleAttributeFactory {
 	}
 
 	/** merges 2 SAFs.
+	 * attributes in styleAttributeFactory will overwrite 'this'
 	 * 
 	 * @param styleAttributeFactory to merge with this
 	 * @return merged SAF. 'this' is NOT Affected
@@ -158,19 +187,6 @@ public class StyleAttributeFactory {
 
 	// ===================================
 	
-	/** adds or replaces STYLE attribute by contents of factory.
-	 * 
-	 * if SAF is null or empty will DELETE existing style attribute.
-	 * 
-	 * @param element STYLE attribute will be changed
-	 * @param styleAttributeFactory attributeFactory to replace with
-	 */
-	private static void addStyleAttribute(GraphicsElement element, StyleAttributeFactory styleAttributeFactory) {
-		String value = styleAttributeFactory.getAttributeValue();
-		if (("").equals(value)) value = null;
-		element.addAttribute(new Attribute(STYLE, styleAttributeFactory.getAttributeValue()));
-	}
-
 	/** certain attributes (currently only font-size) sometimes require units
 	 * 
 	 * @param attName
@@ -256,4 +272,38 @@ public class StyleAttributeFactory {
 		return fontFamily0 != null && !fontFamilyEnd.equals(fontFamily0);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CSS: "+styleMap.toString());
+		return sb.toString();
+	}
+
+	public void addStyleToMap(Attribute attribute) {
+		if (STYLE.equals(attribute.getLocalName())) {
+			StyleAttributeFactory attributeFactory = new StyleAttributeFactory(attribute.getValue());
+			StyleAttributeFactory mergedAttributeFactory = this.createMergedAttributeFactory(attributeFactory);
+			this.styleMap = mergedAttributeFactory.styleMap;
+		}
+	}
+
+	/** adds or replaces STYLE attribute by contents of factory.
+	 * 
+	 * if SAF is null or empty will DELETE existing style attribute.
+	 * 
+	 * @param element STYLE attribute will be changed
+	 */
+	void addStyleAttribute(GraphicsElement element) {
+		String value = getAttributeValue();
+		if (("").equals(value)) value = null;
+		element.addAttribute(new Attribute(StyleAttributeFactory.STYLE, getAttributeValue()));
+	}
+
+	public static void deleteOldStyleAttributes(SVGShape shape) {
+		for (String[] ss : AttributeComparer.STYLES) {
+			for (String attName : ss) {
+				StyleAttributeFactory.deleteAttribute(shape, attName);
+			}
+		}
+	}
 }
