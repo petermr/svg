@@ -113,7 +113,6 @@ public class StyleAttributeFactory {
 			StyleAttributeFactory styleAttributeFactory = new StyleAttributeFactory(style);
 			oldStyleAttributeFactory = styleAttributeFactory.createMergedAttributeFactory(styleAttributeFactory);
 		}
-		LOG.debug(element.toXML()+" => "+oldStyleAttributeFactory);
 		oldStyleAttributeFactory.addStyleAttribute(element);
 		oldStyleAttributeFactory.deleteOldAttributes(element);
 	}

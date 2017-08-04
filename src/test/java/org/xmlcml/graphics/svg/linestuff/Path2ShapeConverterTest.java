@@ -23,6 +23,7 @@ import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.graphics.svg.store.SVGStore;
 import org.xmlcml.xml.XMLUtil;
 
 
@@ -459,6 +460,34 @@ public class Path2ShapeConverterTest {
     	SVGShape shape = new Path2ShapeConverter().convertPathToShape(path);
     	Assert.assertEquals(shape.getClass(), SVGRect.class);
     }
+
+
+	/** tests converting a thin rect into a line with width.
+	 * 
+	 */
+	@Test
+	public void testThinRect() {
+		String svgXML = "<svg xmlns:svg=\"http://www.w3.org/2000/svg\">"
+				+ " <path id=\"path1261\"	d=\"M353.537 106.51 L566.929 106.51 L566.929 106.227 L353.537 106.227 Z\""
+				+ " stroke-width=\"0.0\" fill=\"#131313\" clip-path=\"url(#clipPath1)\" stroke=\"black\" />"
+				+ "</svg>";
+		SVGElement svgElement0 = SVGElement.readAndCreateSVG(svgXML);
+		SVGStore svgStore = new SVGStore();
+		svgStore.readGraphicsComponents(svgElement0);
+		SVGElement svgElement = (SVGElement) svgStore.getExtractedSVGElement();
+		LOG.debug(svgElement.toXML());
+		List<SVGLine> lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
+		Assert.assertEquals("lines", 1, lineList.size());
+		SVGLine svgLine0 = lineList.get(0);
+		Assert.assertEquals("line0", "#131313", svgLine0.getFill());
+		Assert.assertEquals("line0", "line.0", svgLine0.getId());
+		Assert.assertTrue("line0", svgLine0.getStyle().startsWith("clip-path:url(#clipPath1);fill:#131313;stroke:black;stroke-width:0.2"));
+		Assert.assertEquals("line0", 0.283, svgLine0.getStrokeWidth(), 0.001);
+//		Real2Test.assertEquals("line0 XY0", new Real2(353.537, 106.369), svgLine0.getXY(0), 0.001);
+		Assert.assertEquals("line0", 353.537, svgLine0.getXY(0).getX(), 0.001);
+		Assert.assertEquals("line0", 106.369, svgLine0.getXY(0).getY(), 0.001);
+	}
+	
 
 
 	// =============================

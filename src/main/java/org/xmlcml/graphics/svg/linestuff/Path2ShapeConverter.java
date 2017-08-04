@@ -345,18 +345,20 @@ public class Path2ShapeConverter {
 			shape = applyHeuristics((SVGPath)shape);
 		}
 		if (shape != null) {
-			shape.copyAttributesFrom(path);
-			StyleAttributeFactory.deleteOldStyleAttributes(shape);
 			// lines created from thin rects may have a different stroke-width to the original
 			Double strokeWidth = null;
 			if (shape instanceof SVGLine) {
 				strokeWidth = ((SVGLine) shape).getStrokeWidth();
 			}
-//			copyAttributes(path, shape);
+			shape.copyAttributesFrom(path); // this will include oldStyle and CSSstyle
 			if (strokeWidth != null) {
 				shape.setStrokeWidth(strokeWidth);
 			}
+			StyleAttributeFactory.deleteOldStyleAttributes(shape);
 			shape.format(decimalPlaces);
+			// remove Path d attribute
+			shape.removeAttribute(SVGPath.D);
+			shape.removeAttribute(SVGPath.SIGNATURE);
 		}
 		return shape;
 	}

@@ -15,7 +15,7 @@ public abstract class ElementMerger {
 	protected double eps;
 
 	/** this could be messy
-	 * it is recommended to use a vistor pattern and reflection
+	 * it is recommended to use a visitor pattern and reflection
 	 * this is a quick lashup
 	 * 
 	 * @param elem to merge
@@ -35,7 +35,7 @@ public abstract class ElementMerger {
 	}
 	
 	/** this could be messy
-	 * it is recommended to use a vistor pattern and reflection
+	 * it is recommended to use a visitor pattern and reflection
 	 * this is a quick lashup
 	 * 
 	 * @param elem to merge

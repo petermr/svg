@@ -62,7 +62,7 @@ public class SVGPath extends SVGShape {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	private static final String SIGNATURE = "signature";
+	public static final String SIGNATURE = "signature";
 	private static final String MZ = "MZ";
 	private static final String ML = "ML";
 	private static final String NOT_L = "[^L]";

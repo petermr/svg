@@ -90,6 +90,15 @@ public class LineMerger extends ElementMerger {
 			} else if (MergeMethod.OVERLAP.equals(method)) {
 				newLine = createOverlappedLine(line0, line1);
 			}
+			String style0 = line0.getStyle();
+			String style1 = line1.getStyle();
+			// very crude - need a styling strategy
+			if (style0 != null) {
+				newLine.setCSSStyle(style0);
+				if (!style0.equals(style1)) {
+					LOG.warn("merging lines with different styles: " + style0 + " != " + style1);
+				}
+			}
 			LOG.trace("lines "+line0.getId()+": "+line0.getXY(0)+"/"+line0.getXY(1)+"; "+line1.getXY(0)+"/"+line1.getXY(1)+" "+line1.getId());
 			if (newLine != null) {
 				newLine.setId(line0.getId()+"x");
@@ -141,9 +150,19 @@ public class LineMerger extends ElementMerger {
 		return newLine;
 	}
 	
-	public static List<SVGLine> mergeLines(List<SVGLine> linesxx, double eps, MergeMethod method) {
-		LOG.trace("lines "+linesxx.size());
-		ElementNeighbourhoodManager enm = new ElementNeighbourhoodManager(linesxx);
+	/** merge the lines in the lits and create a new list.
+	 * 
+	 * should probably not be static, so we can add optios for merging
+	 * e.g. check styles of lines
+	 * 
+	 * @param lineList
+	 * @param eps
+	 * @param method
+	 * @return
+	 */
+	public static List<SVGLine> mergeLines(List<SVGLine> lineList, double eps, MergeMethod method) {
+		LOG.trace("lines "+lineList.size());
+		ElementNeighbourhoodManager enm = new ElementNeighbourhoodManager(lineList);
 		List<SVGElement> elems;
 		while (true) {
 			enm.createTouchingNeighbours(eps);
