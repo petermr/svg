@@ -21,6 +21,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
@@ -38,6 +39,10 @@ import nu.xom.Node;
  *
  */
 public class SVGEllipse extends SVGShape {
+	private static final Logger LOG = Logger.getLogger(SVGEllipse.class);
+	static {
+		LOG.setLevel(Level.DEBUG);
+	}
 
 	public static final String ELLIPSE_MCCCC = "MCCCC";
 	public static final String ELLIPSE_MCCCCZ = "MCCCCZ";
@@ -45,7 +50,6 @@ public class SVGEllipse extends SVGShape {
 
 
 	@SuppressWarnings("unused")
-	private final static Logger LOG = Logger.getLogger(SVGEllipse.class);
 
 	private static final String RX = "rx";
 	private static final String RY = "ry";

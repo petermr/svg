@@ -60,7 +60,7 @@ public class PathExtractor extends AbstractExtractor{
 	}
 
 	/** may wish to pass controls in a DTO
-	 * 
+	 * currently simply extracts paths without splitting, etc.
 	 * @param svgElement
 	 */
 	public void extractPaths(GraphicsElement svgElement) {

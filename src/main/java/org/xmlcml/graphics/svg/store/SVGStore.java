@@ -86,6 +86,8 @@ public class SVGStore {
 	
 	private boolean removeWhitespace = false;
 	private boolean removeDuplicatePaths = true;
+	private boolean splitAtMove = true;
+	
 	private Real2Range imageBox;
 	private Real2Range lineBbox;
 	private Real2Range pathBox;
@@ -93,6 +95,7 @@ public class SVGStore {
 	private Real2Range totalBox;
 
 	private SVGG extractedSVGElement;
+
 
 
 
@@ -503,6 +506,14 @@ public class SVGStore {
 				boundingBoxes.add(bbox2);
 			}
 		}
+	}
+
+	public void setSplitAtMove(boolean b) {
+		this.splitAtMove = b;
+	}
+
+	public boolean getSplitAtMove() {
+		return this.splitAtMove;
 	}
 
 

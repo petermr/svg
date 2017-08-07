@@ -411,7 +411,6 @@ public class SVGPath extends SVGShape {
 	public Real2Array getCoords() {
 		//if (coords == null) {
 		coords = new Real2Array();
-		String ss = getDString().trim()+S_SPACE;
 		PathPrimitiveList primitives = createPathPrimitives();
 		for (SVGPathPrimitive primitive : primitives) {
 			Real2 coord = primitive.getFirstCoord();
@@ -699,7 +698,7 @@ public class SVGPath extends SVGShape {
 		}
 		return polyline;
 	}
-	
+	/** currently a no-op */
 	public SVGShape createRoundedBox(double roundedBoxEps) {
 		return null;
 	}
@@ -907,8 +906,15 @@ public class SVGPath extends SVGShape {
 
 	public void getOrCreateSignature() {
 		if (getAttribute(SIGNATURE) == null) {
-			addAttribute(new Attribute(SIGNATURE, getSignature()));
+			createSignature();
 		}
+	}
+
+	/** force create signature
+	 * 
+	 */
+	public void createSignature() {
+		addAttribute(new Attribute(SIGNATURE, getSignature()));
 	}
 
 	/** some diagrams contain multiple copies of a primitive with different attributes. Remove all but one.

@@ -51,6 +51,12 @@ import nu.xom.ParentNode;
 public class Path2ShapeConverter {
 
 
+
+	/** tag as having created line from narrow shapes
+	 * 
+	 */
+	private static final String LINE_FROM_SHAPE = "lineFromShape";
+
 	public static final String Z_COORDINATE = "z";
 
 	private final static Logger LOG = Logger.getLogger(Path2ShapeConverter.class);
@@ -170,28 +176,21 @@ public class Path2ShapeConverter {
 		setPathList(inputPathList);
 		List<List<SVGShape>> shapeListList = new ArrayList<List<SVGShape>>();
 		int id = 0;
-		LOG.trace("cps0");
 		if (makeRelativePathsAbsolute ) {
 			makeRelativePathsAbsolute(inputPathList);
 		}
-		LOG.trace("cps1");
 		if (removeRedundantLineCommands) {
 			inputPathList = removeRedundantLineCommands(inputPathList);
 		}
-		LOG.trace("cps2");
 		if (removeRedundantMoveCommands) {
 			inputPathList = removeRedundantMoveCommands(inputPathList);
 		}
-		LOG.trace(">inputPath>"+inputPathList);
 		List<List<SVGPath>> pathListList;
 		if (splitAtMoveCommands) {
-			LOG.trace("split at moves0");
 			pathListList = splitAtMoveCommands(inputPathList);
-			LOG.trace("split at moves1");
 		} else {
 			pathListList = new ArrayList<List<SVGPath>>();
 			for (SVGPath path : inputPathList) {
-				LOG.trace("split at moves?");
 				List<SVGPath> singlePath = new ArrayList<SVGPath>();
 				singlePath.add(path);
 				pathListList.add(singlePath);
@@ -344,23 +343,32 @@ public class Path2ShapeConverter {
 		if (shape instanceof SVGPath) {
 			shape = applyHeuristics((SVGPath)shape);
 		}
+		copyAttributesIncludingSpecialCases(path, shape);
+		return shape;
+	}
+
+	private void copyAttributesIncludingSpecialCases(SVGPath path, SVGShape shape) {
 		if (shape != null) {
 			// lines created from thin rects may have a different stroke-width to the original
 			Double strokeWidth = null;
+			String fill = null;
 			if (shape instanceof SVGLine) {
-				strokeWidth = ((SVGLine) shape).getStrokeWidth();
+				SVGLine line = (SVGLine) shape;
+				strokeWidth = line.getStrokeWidth();
+				fill = line.getFill();
 			}
 			shape.copyAttributesFrom(path); // this will include oldStyle and CSSstyle
-			if (strokeWidth != null) {
+			String className = shape.getSVGClassName();
+			if (className != null && className.contains(LINE_FROM_SHAPE)) {
 				shape.setStrokeWidth(strokeWidth);
+				shape.setStroke(fill);
 			}
 			StyleAttributeFactory.deleteOldStyleAttributes(shape);
 			shape.format(decimalPlaces);
-			// remove Path d attribute
 			shape.removeAttribute(SVGPath.D);
-			shape.removeAttribute(SVGPath.SIGNATURE);
+// keep signature as part of history
+//			shape.removeAttribute(SVGPath.SIGNATURE);
 		}
-		return shape;
 	}
 
 	/** try to convert from some more complex artifacts.
@@ -468,6 +476,9 @@ public class Path2ShapeConverter {
 			SVGLine newLine1 = createNarrowLine(line0, line2);
 			SVGLine newLine2 = createNarrowLine(line1, line3);
 			line = (newLine1 == null ? newLine2 : (newLine2 == null ? newLine1 : (newLine1.getLength() > newLine2.getLength() ? newLine1 : newLine2)));
+			if (line != null) {
+				line.setClassName(LINE_FROM_SHAPE);
+			}
 		}
 		return line;
 	}
@@ -517,11 +528,6 @@ public class Path2ShapeConverter {
 	}
 
 	private SVGShape createRectOrAxialLine(SVGPath path, double eps) {
-//		String sig = path.getSignature();
-//		LOG.debug(sig);
-//		if ("MLLLZ".equals(sig)) {
-//			LOG.debug("sig: "+sig);
-//		}
 		SVGShape shape;
 		SVGRect rect = path.createRectangle(eps);
 		SVGLine line = null;
@@ -530,7 +536,12 @@ public class Path2ShapeConverter {
 		} else {
 			line = createLineFromRect(rect); 
 		}
-		shape = (line != null ? line : rect);
+		if (line != null) {
+			shape = line; 
+			line.setClassName(LINE_FROM_SHAPE);
+		} else {
+			shape = rect;
+		}
 		return shape;
 	}
 
@@ -739,6 +750,7 @@ public class Path2ShapeConverter {
 			 splitPathList.add(svgPath);
 		 } else {
 			 double dz = 0;
+			 int count = 0;
 			 for (String newDString : newDStringList) {
 				 dz += 0.001;
 				 SVGPath newPath = new SVGPath();
@@ -754,7 +766,11 @@ public class Path2ShapeConverter {
 					 }
 				 }
 				 newPath.setDString(newDString);
+				 newPath.createSignature();
+				 newPath.setId(newPath.getId()+"."+count);
 				 splitPathList.add(newPath);
+				 LOG.debug("new "+newPath.toXML());
+				 count++;
 			 }
 		 }
 		 return splitPathList;

@@ -74,6 +74,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	 */
 	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
+		path2ShapeConverter.setSplitAtMoveCommands(svgStore.getSplitAtMove());
 		convertedShapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
 		for (List<SVGShape> shapeList : convertedShapeListList) {
 			for (SVGShape shape : shapeList) {

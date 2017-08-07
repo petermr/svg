@@ -18,7 +18,9 @@ package org.xmlcml.graphics.svg;
 
 import java.awt.Graphics2D;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -137,10 +139,7 @@ public class SVGSVG extends SVGElement {
 			svgsvg.setWidth(width);
 			try {
 				LOG.debug("Writing SVG "+file.getAbsolutePath());
-				file.getParentFile().mkdirs();
-				FileOutputStream fos = new FileOutputStream(file);
-				SVGUtil.debug(svgsvg, fos, 1);
-				fos.close();
+				svgsvg.writeQuietly(file);
 			} catch (Exception e) {
 				throw new RuntimeException("cannot write svg to "+file, e);
 			}
@@ -216,6 +215,26 @@ public class SVGSVG extends SVGElement {
 
 	public void setMarker(SVGMarker marker) {
 		appendChild(new SVGMarker(marker));
+	}
+
+	public SVGDefs getOrCreateDefs() {
+		SVGDefs defs = (SVGDefs) XMLUtil.getSingleElement(this, "*[local-name()='"+SVGDefs.TAG+"']");
+		if (defs == null) {
+			defs = new SVGDefs();
+			this.insertChild(defs, 0);
+		}
+		return defs;
+	}
+
+	public void writeQuietly(File file) {
+		try {
+			file.getParentFile().mkdirs();
+			FileOutputStream fos = new FileOutputStream(file);
+			SVGUtil.debug(this, fos, 1);
+			fos.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

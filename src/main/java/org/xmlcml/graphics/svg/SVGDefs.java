@@ -109,6 +109,8 @@ public class SVGDefs extends SVGElement {
 	public Real2Range getBoundingBox() {
 		return null;
 	}
+
+	
 	
 
 

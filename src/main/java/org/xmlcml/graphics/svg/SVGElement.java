@@ -1405,6 +1405,8 @@ public class SVGElement extends GraphicsElement {
 	}
 
 	public final static Set<String> COMMON_ATT_NAMES = new HashSet<String>();
+
+	static final String URL = "url";
 	static {
 		createCommonAttNameSet();
 	}
@@ -1651,6 +1653,22 @@ public class SVGElement extends GraphicsElement {
 	}
 
 
+
+	public String createURLIdRef() {
+		String urlIdRef = null;
+		String id = this.getId();
+		if (id != null) {
+			urlIdRef = URL + "(#"+id+")";
+		}
+		return urlIdRef;
+	}
+
+	void appendStop(int percent, String cssStyle ) {
+		SVGStop insideStop = new SVGStop();
+		insideStop.setOffsetPercent(percent);
+		insideStop.setCSSStyle(cssStyle);
+		appendChild(insideStop);
+	}
 
 	public static SVGElement readAndCreateSVG(String textXml) {
 		return SVGElement.readAndCreateSVG(XMLUtil.parseXML(textXml));
