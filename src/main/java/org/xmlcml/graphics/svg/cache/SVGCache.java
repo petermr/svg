@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.store;
+package org.xmlcml.graphics.svg.cache;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,8 +47,8 @@ import org.xmlcml.graphics.svg.plot.PlotBox;
  * @author pm286
  *
  */
-public class SVGStore {
-	private static final Logger LOG = Logger.getLogger(SVGStore.class);
+public class SVGCache {
+	private static final Logger LOG = Logger.getLogger(SVGCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -104,11 +104,11 @@ public class SVGStore {
 	 * 
 	 * @param plotBox
 	 */
-	public SVGStore(PlotBox plotBox) {
+	public SVGCache(PlotBox plotBox) {
 		this.plotBox = plotBox;
 	}
 	
-	public SVGStore() {
+	public SVGCache() {
 	}
 
 	public void readGraphicsComponents(File file) throws FileNotFoundException {

@@ -9,7 +9,7 @@ import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGImage;
-import org.xmlcml.graphics.svg.store.SVGStore;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 
 /** annotates the SVGImages in a SVGElement.
  * 
@@ -30,7 +30,7 @@ public class ImageExtractor extends AbstractExtractor{
 		this.imageList = SVGImage.extractSelfAndDescendantImages(svgElement);
 	}
 
-	public ImageExtractor(SVGStore svgStore) {
+	public ImageExtractor(SVGCache svgStore) {
 		super(svgStore);
 		setDefaults();
 	}

@@ -10,7 +10,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.store.SVGStore;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 
 /** extracts texts within graphic area.
  * 
@@ -31,7 +31,7 @@ public class TextExtractor extends AbstractExtractor {
 	private List<SVGText> nonNegativeNonEmptyTextList;
 	private List<SVGText> currentTextList;
 	
-	public TextExtractor(SVGStore svgStore) {
+	public TextExtractor(SVGCache svgStore) {
 		super(svgStore);
 	}
 

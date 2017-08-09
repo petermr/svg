@@ -18,8 +18,8 @@ import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
-import org.xmlcml.graphics.svg.store.SVGStore;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -80,7 +80,7 @@ public class PathExtractor extends AbstractExtractor{
 		return;
 	}
 
-	public PathExtractor(SVGStore svgStore) {
+	public PathExtractor(SVGCache svgStore) {
 		super(svgStore);
 		setDefaults();
 	}

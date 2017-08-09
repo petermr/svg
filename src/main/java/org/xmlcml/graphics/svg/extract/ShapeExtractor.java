@@ -17,9 +17,9 @@ import org.xmlcml.graphics.svg.SVGPolygon;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGShape;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
-import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** extracts and tidies shapes read from SVG.
  * 
@@ -48,7 +48,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	private List<List<SVGShape>> convertedShapeListList;
 	private List<SVGShape> convertedShapeList;
 	
-	public ShapeExtractor(SVGStore svgStore) {
+	public ShapeExtractor(SVGCache svgStore) {
 		super(svgStore);
 		init();
 	}

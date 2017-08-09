@@ -35,7 +35,7 @@ public class SVGRadialGradient extends AbstractSVGGradient {
 	 * @return
 	 */
 	public static SVGElement getDefaultRadialGradient() {
-		SVGElement radialGradient = new SVGRadialGradient();
+		SVGRadialGradient radialGradient = new SVGRadialGradient();
 		radialGradient.setId(DEFAULT_ID);
 		radialGradient.appendStop(0, "stop-color:yellow;stop-opacity:0;");
 		radialGradient.appendStop(100, "stop-color:blue;stop-opacity:1;");

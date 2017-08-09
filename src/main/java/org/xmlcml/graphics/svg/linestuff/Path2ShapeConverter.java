@@ -1053,9 +1053,14 @@ public class Path2ShapeConverter {
 			Iterator<SVGShape> it = shapeList.iterator();
 			while (it.hasNext()) {
 				SVGShape shape = it.next();
-				if ((shape instanceof SVGPath) && "".equals(((SVGPath) shape).getDString().replaceAll(" ", ""))) {
-					shape.detach();
-					it.remove();
+				if (shape != null && shape instanceof SVGPath) {
+					String d = ((SVGPath) shape).getDString();
+					if (d != null) {
+						if ("".equals(d.trim())) {
+							shape.detach();
+							it.remove();
+						}
+					}
 				}
 			}
 		}

@@ -20,10 +20,10 @@ import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.store.SVGStore;
 
 /** creates axes from ticks, scales, titles.
  * 
@@ -107,11 +107,11 @@ public class PlotBox {
 	private File svgOutFile;
 	private String csvContent;
 	private File csvOutFile;
-	private SVGStore svgStore;
+	private SVGCache svgStore;
 	private String fileRoot;
 		
 
-	public SVGStore getSVGStore() {
+	public SVGCache getSVGStore() {
 		return svgStore;
 	}
 
@@ -166,7 +166,7 @@ public class PlotBox {
 			throw new RuntimeException("nonexistent file or isDirectory "+inputFile);
 		}
 		fileRoot = inputFile.getName();
-		svgStore = new SVGStore(this);
+		svgStore = new SVGCache(this);
 		try {
 			svgStore.readGraphicsComponents(new FileInputStream(inputFile));
 		} catch (IOException e) {
@@ -175,7 +175,7 @@ public class PlotBox {
 	}
 
 	public void readAndCreateCSVPlot(GraphicsElement svgElement) {
-		svgStore = new SVGStore(this);
+		svgStore = new SVGCache(this);
 		svgStore.setFileRoot(fileRoot);
 		svgStore.readGraphicsComponents(svgElement);
 		makeAxialTickBoxesAndPopulateContents();

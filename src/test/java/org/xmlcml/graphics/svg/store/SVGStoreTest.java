@@ -14,6 +14,7 @@ import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 
 import junit.framework.Assert;
 
@@ -26,7 +27,7 @@ public class SVGStoreTest {
 	@Test
 	public void testSingleFigure() throws IOException {
 		String fileRoot = "10.1186_s12885-016-2685-3_page7";
-		SVGStore store = new SVGStore();
+		SVGCache store = new SVGCache();
 		File inputSVGFile = new File(Fixtures.FIGURE_DIR, fileRoot+".svg");
 		LOG.debug("reading: "+inputSVGFile);
 		store.readGraphicsComponents(inputSVGFile);
@@ -39,7 +40,7 @@ public class SVGStoreTest {
 	@Ignore // too many for testing
 	public void testMultipleFigure() throws IOException {
 		String fileRoot = "fulltext-page4";
-		SVGStore store = new SVGStore();
+		SVGCache store = new SVGCache();
 		File inputSVGFile = new File(Fixtures.FIGURE_DIR, fileRoot+".svg");
 		LOG.debug("reading: "+inputSVGFile);
 //		store.setPlotDebug(new File("target/plots/", name+"/"));
@@ -56,7 +57,7 @@ public class SVGStoreTest {
 		Assert.assertNotNull("files in "+Fixtures.FIGURE_DIR, files);
 		for (File file : files) {
 			if (file.toString().endsWith(".svg")) {
-				SVGStore store = new SVGStore();
+				SVGCache store = new SVGCache();
 				LOG.debug("reading: "+file);
 				String root = FilenameUtils.getBaseName(file.toString());
 				store.readGraphicsComponents(file);
@@ -74,7 +75,7 @@ public class SVGStoreTest {
 		Assert.assertNotNull("files in "+Fixtures.IMAGE_DIR, files);
 		for (File file : files) {
 			if (file.toString().endsWith(".svg")) {
-				SVGStore store = new SVGStore();
+				SVGCache store = new SVGCache();
 				LOG.debug("reading: "+file);
 				String root = FilenameUtils.getBaseName(file.toString());
 				store.readGraphicsComponents(file);
@@ -94,7 +95,7 @@ public class SVGStoreTest {
 			for (File svgFile : svgDir.listFiles()) {
 				if (svgFile.toString().endsWith(".svg")) {
 					String root = FilenameUtils.getBaseName(svgFile.toString());
-					SVGStore store = new SVGStore();
+					SVGCache store = new SVGCache();
 					LOG.debug("reading: "+svgFile);
 					store.readGraphicsComponents(svgFile);
 					List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
@@ -109,7 +110,7 @@ public class SVGStoreTest {
 	@Test
 	public void testShadowedPaths() throws Exception {
 		File file = new File(Fixtures.PLOT_DIR, "tilburgVectors/10.1186_s13027-016-0058-9_1.svg");
-		SVGStore store = new SVGStore();
+		SVGCache store = new SVGCache();
 		LOG.debug("reading: "+file);
 		String root = FilenameUtils.getBaseName(file.toString());
 		store.readGraphicsComponents(file);
@@ -118,7 +119,7 @@ public class SVGStoreTest {
 
 	// =====================
 	
-	private void displayBoxes(File file, SVGStore store, String root, List<Real2Range> boundingBoxes, String fill) {
+	private void displayBoxes(File file, SVGCache store, String root, List<Real2Range> boundingBoxes, String fill) {
 		SVGG g = (SVGG) store.createSVGElement();
 		LOG.debug("BBOXESFINAL: "+boundingBoxes.size());
 		for (Real2Range bbox : boundingBoxes) {

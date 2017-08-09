@@ -8,7 +8,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.store.SVGStore;
+import org.xmlcml.graphics.svg.cache.SVGCache;
 
 /** superclass for extractorAnnotators.
  * 
@@ -23,13 +23,13 @@ public abstract class AbstractExtractor {
 	}
 
 	protected Real2Range boundingBox;
-	protected SVGStore svgStore;
+	protected SVGCache svgStore;
 
 	protected AbstractExtractor() {
 		
 	}
 
-	public AbstractExtractor(SVGStore svgStore) {
+	public AbstractExtractor(SVGCache svgStore) {
 		this.svgStore = svgStore;
 	}
 

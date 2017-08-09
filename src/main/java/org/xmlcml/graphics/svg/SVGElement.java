@@ -75,6 +75,10 @@ import nu.xom.canonical.Canonicalizer;
  */
 public class SVGElement extends GraphicsElement {
 
+
+
+	public static final String STROKE_DASHARRAY = "stroke-dasharray";
+
 	private static final Logger LOG = Logger.getLogger(SVGElement.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
@@ -92,7 +96,8 @@ public class SVGElement extends GraphicsElement {
 	public final static String MATRIX = "matrix";
 	public final static String ROTATE = "rotate";
 	public final static String SCALE = "scale";
-	public final static String TRANSFORM = "transform";
+	public static final String TRANSFORM = "transform";
+	public static final String WIDTH = "width";
 	public final static String TRANSLATE = "translate";
 	public final static String X = "x";
 	public final static String Y = "y";
@@ -102,6 +107,22 @@ public class SVGElement extends GraphicsElement {
 	public final static String YPLUS = "Y";
 	public final static String TITLE = "title";
 	public final static String ID = "id";
+
+
+	public final static Set<String> COMMON_ATT_NAMES = new HashSet<String>();
+
+	static final String URL = "url";
+	static {
+		createCommonAttNameSet();
+	}
+	private static void createCommonAttNameSet() {
+		COMMON_ATT_NAMES.add(StyleBundle.STROKE);
+		COMMON_ATT_NAMES.add(StyleBundle.STROKE_WIDTH);
+		COMMON_ATT_NAMES.add(StyleBundle.FILL);
+		COMMON_ATT_NAMES.add(StyleBundle.FONT_FAMILY);
+		COMMON_ATT_NAMES.add(StyleBundle.FONT_WEIGHT);
+		COMMON_ATT_NAMES.add(StyleBundle.FONT_SIZE);
+	}
 
 	protected static final String BOUNDING_BOX = "boundingBox";
 	
@@ -570,21 +591,6 @@ public class SVGElement extends GraphicsElement {
 		return t2;
 	}
 
-//	/** set properties.
-//	 * 
-//	 * @param abstractDisplay
-//	 */
-//	public void setProperties(AbstractDisplay abstractDisplay) {
-//		this.setFontStyle(abstractDisplay.getFontStyle());
-//		this.setFontWeight(abstractDisplay.getFontWeight());
-//		this.setFontFamily(abstractDisplay.getFontFamily());
-//		this.setFontSize(abstractDisplay.getFontSize());
-//		this.setFill(abstractDisplay.getFill());
-//		this.setStroke(abstractDisplay.getStroke());
-//		this.setOpacity(abstractDisplay.getOpacity());
-//		
-//	}
-//	
 	/**
 	 */
 	public void setCumulativeTransformRecursively() {
@@ -703,7 +709,7 @@ public class SVGElement extends GraphicsElement {
 	public void setAttributeFromTransform2(Transform2 transform) {
 		if (transform != null) {
 			double[] dd = transform.getMatrixAsArray();
-			String ts = "matrix"+
+			String ts = MATRIX+
 			S_LBRAK+
 			dd[0]+S_COMMA+
 			dd[1]+S_COMMA+
@@ -712,7 +718,7 @@ public class SVGElement extends GraphicsElement {
 			dd[2]+S_COMMA+
 			dd[5]+
 			S_RBRAK;
-			this.addAttribute(new Attribute("transform", ts));
+			this.addAttribute(new Attribute(TRANSFORM, ts));
 		}
 	}
 	
@@ -749,7 +755,7 @@ public class SVGElement extends GraphicsElement {
 
 	public void addDashedStyle(double bondWidth) {
 		String style = this.getAttributeValue(STYLE);
-		style += "stroke-dasharray : "+bondWidth*2+" "+bondWidth*2+";";
+		style += STROKE_DASHARRAY + " : "+bondWidth*2+" "+bondWidth*2+";";
 		this.addAttribute(new Attribute(STYLE, style));
 	}
 	
@@ -985,7 +991,7 @@ public class SVGElement extends GraphicsElement {
 	}
 	
 	public Double getWidth() {
-		String w = this.getAttributeValue("width");
+		String w = this.getAttributeValue(WIDTH);
 		w = SVGUtil.convertUnits(w);
 		return (w == null) ? null : Double.valueOf(w);
 	}
@@ -996,7 +1002,7 @@ public class SVGElement extends GraphicsElement {
 	}
 
 	public void setWidth(double w) {
-		this.addAttribute(new Attribute("width", String.valueOf(w)));
+		this.addAttribute(new Attribute(WIDTH, String.valueOf(w)));
 	}
 	
 	public void setHeight(double h) {
@@ -1078,7 +1084,7 @@ public class SVGElement extends GraphicsElement {
 	public SVGShape createGraphicalBoundingBox() {
 		Real2Range r2r = this.getBoundingBox();
 		SVGRect rect = createGraphicalBox(r2r, getBBStroke(), getBBFill(), getBBStrokeWidth(), getBBOpacity());
-		if (this.getAttribute("transform") != null) {
+		if (this.getAttribute(TRANSFORM) != null) {
 			Transform2 t2 = this.getTransform();
 			if (t2 != null) {
 				if (!t2.isUnit()) {
@@ -1182,7 +1188,7 @@ public class SVGElement extends GraphicsElement {
 	}
 
 	public static void applyTransformsWithinElementsAndFormat(GraphicsElement svgElement) {
-		List<SVGElement> elementList = generateElementList(svgElement, ".//svg:*[@transform]");
+		List<SVGElement> elementList = generateElementList(svgElement, ".//svg:*[@" + TRANSFORM + "]");
 		for (SVGElement element : elementList) {
 			element.applyTransformAttributeAndRemove();
 			element.format(2);
@@ -1404,21 +1410,6 @@ public class SVGElement extends GraphicsElement {
 		this.applyTransformAttributeAndRemove();
 	}
 
-	public final static Set<String> COMMON_ATT_NAMES = new HashSet<String>();
-
-	static final String URL = "url";
-	static {
-		createCommonAttNameSet();
-	}
-	private static void createCommonAttNameSet() {
-		COMMON_ATT_NAMES.add(StyleBundle.STROKE);
-		COMMON_ATT_NAMES.add(StyleBundle.STROKE_WIDTH);
-		COMMON_ATT_NAMES.add(StyleBundle.FILL);
-		COMMON_ATT_NAMES.add(StyleBundle.FONT_FAMILY);
-		COMMON_ATT_NAMES.add(StyleBundle.FONT_WEIGHT);
-		COMMON_ATT_NAMES.add(StyleBundle.FONT_SIZE);
-	}
-
 	public static List<SVGElement> extractSelfAndDescendantElements(GraphicsElement element) {
 		return SVGUtil.getQuerySVGElements(element, ALL_ELEMENT_XPATH);
 	}
@@ -1539,7 +1530,7 @@ public class SVGElement extends GraphicsElement {
 		this.convertOldStyleToStyle();
 		Double value = StyleBundle.getFontSize(this);
 		if (value == null) {
-			LOG.debug("missing font: "+this.getStyle());
+			LOG.debug("missing font-size: "+this.getStyle());
 			String attVal = getAttributeFromStyle(StyleBundle.FONT_SIZE);
 			if (attVal == null) {
 				attVal = this.getAttributeValue(StyleBundle.FONT_SIZE);
@@ -1627,7 +1618,7 @@ public class SVGElement extends GraphicsElement {
 				SVGText text1 = (SVGText) elementCopy;
 //				text1.rotateTextAboutPoint(centre, rotationTransform);
 				text1.applyTransform(rotationTranslationTransform);
-				text1.removeAttribute("transform");
+				text1.removeAttribute(TRANSFORM);
 				g.appendChild(text1);
 			} else {
 				Class<?> clazz = elementCopy.getClass();
@@ -1649,7 +1640,7 @@ public class SVGElement extends GraphicsElement {
 		delta.transformBy(t90);
 		Real2 textXY1 = centre.plus(delta);
 		setXY(textXY1);
-		removeAttribute("transform");
+		removeAttribute(TRANSFORM);
 	}
 
 
@@ -1663,15 +1654,14 @@ public class SVGElement extends GraphicsElement {
 		return urlIdRef;
 	}
 
-	void appendStop(int percent, String cssStyle ) {
-		SVGStop insideStop = new SVGStop();
-		insideStop.setOffsetPercent(percent);
-		insideStop.setCSSStyle(cssStyle);
-		appendChild(insideStop);
+	/** convenience method to parse SVG text.
+	 * 
+	 * @param svgXml
+	 * @return
+	 */
+	public static SVGElement readAndCreateSVG(String svgXml) {
+		return SVGElement.readAndCreateSVG(XMLUtil.parseXML(svgXml));
 	}
 
-	public static SVGElement readAndCreateSVG(String textXml) {
-		return SVGElement.readAndCreateSVG(XMLUtil.parseXML(textXml));
-	}
 
 }
