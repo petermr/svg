@@ -106,7 +106,7 @@ public class StyleAttributeFactory {
 		}
 	}
 
-	private static void convertOldStyleAttributesToCSSAndDelete(GraphicsElement element) {
+	public static void convertOldStyleAttributesToCSSAndDelete(GraphicsElement element) {
 		StyleAttributeFactory oldStyleAttributeFactory = element.createStyleAttributeFactoryFromOldStyles();
 		String style = element.getAttributeValue(STYLE);
 		if (style != null && style.trim().length() != 0) {
