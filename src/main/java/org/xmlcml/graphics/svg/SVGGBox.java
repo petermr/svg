@@ -41,7 +41,7 @@ public class SVGGBox extends SVGG {
 	}
 
 	private static SVGGBox createBox(SVGElement box0) {
-		LOG.debug("createBox NYI");
+		LOG.warn("createBox NYI");
 		return null;
 	}
 	

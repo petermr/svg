@@ -53,46 +53,36 @@ public class AxisScaleBox extends AxialBox {
 	
 	void setTexts(List<SVGText> horTexts, List<SVGText> rot90Txts) {
 		this.horizontalTexts = extractIntersectingTexts(new ArrayList<SVGText>(horTexts));
-		LOG.debug(axis.getLineDirection()+" HOR texts: "+horizontalTexts.size() /*+"; " + horizontalTexts*/);
 		this.rot90Texts = extractIntersectingTexts(new ArrayList<SVGText>(rot90Txts));
-		LOG.debug(axis.getLineDirection()+" ROT90 texts: "+rot90Texts.size());
 		extractText();
 	}
 
 
 
 	void extractText() {
-		LOG.debug("axial scales");
 		if (axis.isHorizontal()) {
 			// not a good idea as it slices through words
 			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
-			LOG.debug("HOR phrase: "+horizontalPhrase+"; "+horizontalTexts.size());
 			if (horizontalPhrase != null) {
 				horizontalPhrase = horizontalPhrase.removeWordsCompletelyOutsideRange(axis.getRange());
 			}
 			if(horizontalPhrase != null) {
 				horizontalPhrase = horizontalPhrase.normalizeMinus();
 				horizontalPhrase = horizontalPhrase.getNumericWords();
-//				horizontalPhrase = horizontalPhrase.getWordsWithLowestYValue(SVGStore.ZERO_PLACES);
-				LOG.debug("HOR phrase Y: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
 			
 		} else {
 			horizontalPhrase = SVGPhrase.createPhraseFromCharacters(horizontalTexts);
-			LOG.debug("Word Ladder?: "+horizontalPhrase+"; "+horizontalTexts.size());
 			if (horizontalPhrase != null) {
 				horizontalPhrase = removeVerticalWordsCompletelyOutsideRange(horizontalPhrase, axis.getRange());
 				horizontalPhrase = horizontalPhrase.normalizeMinus();
-				LOG.debug("Word Ladder??: "+horizontalPhrase+"; "+horizontalPhrase.getOrCreateWordList().size());
 			}
 			
 			rot90Phrase = SVGPhrase.createPhraseFromCharacters(rot90Texts, true);
-			LOG.debug("ROT90 phrase1: "+rot90Phrase+"; "+rot90Texts.size());
 			if (rot90Phrase != null) {
 				SVGPhrase rot90HighestPhrase = rot90Phrase.getWordsWithHighestXValue(0);
 				rot90HighestPhrase.reverseTextsInWords();
-				LOG.info("**************"+rot90HighestPhrase+"***************");
-//				List<SVGText> rot90Texts1 = rot90HighestPhrase.getTextList();
+				LOG.trace("**************"+rot90HighestPhrase+"***************");
 				rot90Phrase = rot90HighestPhrase;
 			} else {
 				LOG.info("NO rot90 text");
@@ -118,7 +108,6 @@ public class AxisScaleBox extends AxialBox {
 	private void extractHorizontalAxisScalesAndCoords() {
 		scalesPhrase = horizontalPhrase;
 		if (scalesPhrase != null) {
-			LOG.debug("HOR scalesPhrase: "+scalesPhrase);
 			bbox = scalesPhrase.getBoundingBox();
 			setTickNumberUserCoords(scalesPhrase.getNumericValues());
 			List<SVGWord> wordList = scalesPhrase.getOrCreateWordList();
@@ -126,8 +115,6 @@ public class AxisScaleBox extends AxialBox {
 			for (SVGWord word : wordList) {
 				tickNumberScreenCoords.addElement(word.getXY().getX());
 			}
-			LOG.debug("xCoords: "+tickNumberScreenCoords);
-			LOG.debug("x diff: "+tickNumberScreenCoords.calculateDifferences().format(decimalPlaces()));
 		}
 	}
 
@@ -169,7 +156,6 @@ public class AxisScaleBox extends AxialBox {
 	private void createVerticalNumberUserAndScreenCoords(List<SVGWord> wordList) {
 		double[] values = new double[wordList.size()];
 		tickNumberScreenCoords = new RealArray();
-		LOG.debug("wordList "+wordList);
 		bbox = new Real2Range();
 		for (int i = 0; i < wordList.size(); i++) {
 			SVGWord word0 = wordList.get(i);
@@ -177,12 +163,11 @@ public class AxisScaleBox extends AxialBox {
 			tickNumberScreenCoords.addElement(word0.getXY().getY());
 			String ss = word0.getStringValue();
 			ss = SVGWord.replaceNonStandardChars(ss, Util.S_MINUS, SVGWord.NON_STANDARD_MINUS);
-			LOG.debug("ss "+ss);
 			Double d = null;
 			try {
 				d = new Double(ss);
 			} catch (java.lang.NumberFormatException nfe) {
-				LOG.debug("NFE in ("+ss+"; "+nfe.getMessage());
+				LOG.warn("NFE in ("+ss+"; "+nfe.getMessage());
 			}
 			values[i] = (d == null || ss == null) ? Double.NaN : new Double(ss);
 		}
@@ -203,9 +188,7 @@ public class AxisScaleBox extends AxialBox {
 		String rot90Value = null;
 		if (rot90Texts != null && rot90Texts.size() > 0) {
 			rot90Value = String.valueOf(rot90Texts.get(0).getText());
-			LOG.debug("first rot90 scale value: "+rot90Value);
 			if (!"null".equals(String.valueOf(rot90Value)) && !rot90Value.trim().equals("")) {
-				LOG.debug("processing rot90 text");
 				processVerticalAxisRot90Chars();
 				processVerticalAxisWordLadderScales();
 			}
@@ -217,20 +200,15 @@ public class AxisScaleBox extends AxialBox {
 	private void processVerticalAxisWordLadderScales() {
 		// if no rot90 we use wordladder
 		if (rot90Phrase == null || rot90Phrase.getOrCreateWordList().size() == 0) {
-			LOG.debug("VERTICAL AXIS; Hor (ladder) texts "+horizontalTexts.size());
 			List<SVGWord> wordList = createWordListFromHorizontalTextsWithJoinsIfNecessary();
-			LOG.debug("VERT words0: "+wordList);
 			wordList = removeWordsNotInVerticalRange(axis.getRange(), wordList);
-			LOG.debug("VERT words1: "+wordList);
 			createVerticalNumberUserAndScreenCoords(wordList);
-			LOG.debug("vertical tickNumberUserCoords from HOR wordladder:"+tickNumberValues);
 		}
 	}
 
 	private void processVerticalAxisRot90Chars() {
 		List<SVGWord> wordList = rot90Phrase.getOrCreateWordList();
 		createVerticalNumberUserAndScreenCoords(wordList);
-		LOG.debug("vertical tickNumberUserCoords from rot90:"+tickNumberValues);
 	}
 
 	private List<SVGWord> removeWordsNotInVerticalRange(RealRange range, List<SVGWord> wordList) {
@@ -241,14 +219,12 @@ public class AxisScaleBox extends AxialBox {
 				wordList1.add(word);
 			}
 		}
-		LOG.debug("Made wordList "+wordList1);
 		return wordList1;
 	}
 
 	private List<SVGWord> createWordListFromHorizontalTextsWithJoinsIfNecessary() {
 		List<SVGWord> wordList = new ArrayList<SVGWord>();
 		if (horizontalTexts.size() > 0) {
-			LOG.debug("HORTEXTS0 " + horizontalTexts);
 			SVGWord word = new SVGWord(horizontalTexts.get(0)); // ?? why
 			wordList.add(word);
 			for (int i = 1; i < horizontalTexts.size(); i++) {
@@ -261,7 +237,6 @@ public class AxisScaleBox extends AxialBox {
 					wordList.add(word);
 				}
 			}
-			LOG.debug("HORTEXTS1 " + wordList);
 		}
 		return wordList;
 	}
@@ -273,7 +248,7 @@ public class AxisScaleBox extends AxialBox {
 	 */
 	private List<SVGText> extractIntersectingTexts(List<SVGText> texts) {
 		List<SVGText> textList = new ArrayList<SVGText>();
-		LOG.debug("******* bbox "+captureBox+"; "+texts.size());
+		LOG.info("******* bbox "+captureBox+"; "+texts.size());
 		for (SVGText text : texts) {
 			Real2Range textBBox = text.getBoundingBox();
 			Real2Range inter = textBBox.intersectionWith(this.captureBox);

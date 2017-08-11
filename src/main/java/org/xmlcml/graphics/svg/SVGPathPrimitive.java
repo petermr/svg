@@ -46,7 +46,7 @@ public abstract class SVGPathPrimitive {
 		try {
 			primitiveList = new SVGPathParser().parseDString(d);
 		} catch (RuntimeException e) {
-			LOG.debug("Cannot parse: "+d);
+			LOG.warn("Cannot parse: "+d);
 			throw e;
 		}
 		for (SVGPathPrimitive primitive : primitiveList) {

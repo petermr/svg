@@ -314,7 +314,7 @@ public class SVGText extends SVGElement {
 			} else if (node instanceof SVGTitle) {
 				// expected child
 			} else {
-				LOG.debug("unexpected child of SVGText: "+node.getClass());
+				LOG.warn("unexpected child of SVGText: "+node.getClass());
 			}
 		}
 		if (text != null) {
@@ -546,7 +546,7 @@ public class SVGText extends SVGElement {
 			rotated = (rotate1 == null || !rotate0.equals(rotate1));
 		}
 		if (rotated) {
-			LOG.debug("text orientation changed");
+			LOG.info("text orientation changed");
 			return false;
 		}
 		String newText = null;
@@ -574,12 +574,9 @@ public class SVGText extends SVGElement {
 		double spaceWidth = fontWidths[(int)C_SPACE] * maxFontSize * fontWidthFactor;
 		
 		// same size of font?
-		LOG.debug(String.valueOf(this.getText())+"]["+text1.getText()+ " ...fonts... " + fontSize0+"/"+fontSize1);
 		// has vertical changed by more than the larger font size?
 		if (!Real.isEqual(coordVert0, coordVert1, maxFontSize * fontHeightFactor)) {
-			LOG.debug("changed vertical height "+coordVert0+" => "+coordVert1+" ... "+maxFontSize);
-			LOG.trace("COORDS "+xy0+"..."+xy1);
-			LOG.trace("BASEY "+this.getCurrentBaseY()+"..."+text1.getCurrentBaseY());
+			LOG.info("changed vertical height "+coordVert0+" => "+coordVert1+" ... "+maxFontSize);
 		} else if (fontRatio0to1 > 0.95 && fontRatio0to1 < 1.05) {
 			// no change of size
 			if (Real.isEqual(coordVert0, coordVert1, eps)) {
@@ -590,7 +587,6 @@ public class SVGText extends SVGElement {
 				double gapX = (coordHoriz1 - calcEnd) *sign;
 				double nspaces = (gapX / spaceWidth);
 				if (gapXX < 0) {
-					LOG.debug("text R to L ... "+gapXX);
 					// in front of preceding (axes sometime go backwards
 					linker = null;
 				} else if (nspaces < 0.5) {
@@ -607,47 +603,41 @@ public class SVGText extends SVGElement {
 					linker = XMLConstants.S_SPACE;
 				}
 			} else {
-				LOG.debug("slight vertical change: "+coordVert0+" => "+coordVert1);
+				LOG.trace("slight vertical change: "+coordVert0+" => "+coordVert1);
 			}
 		} else if (fontRatio0to1 > 1.05) {
 			// coords down the page?
-			LOG.debug("Trying sscript "+deltaVert);
 			// sub/superScript
 			if (deltaVert > 0 && Real.isEqual(deltaVert, subVert * fontHeight, maxFontSize)) {
 				// start of subscript?
 				linker = SUB0;
-				LOG.debug("INSUB");
 				// save font as larger size
 				this.setFontSize(text1.getFontSize());
 			} else if (deltaVert < 0 && Real.isEqual(deltaVert, supVert * fontHeight, maxFontSize)) {
 				// start of superscript?
 				linker = SUP0;
-				LOG.debug("INSUP");
 				// save font as larger size
 				this.setFontSize(text1.getFontSize());
 			} else {
-				LOG.debug("ignored font change");
+				LOG.info("ignored font change");
 			}
 		} else if (fontRatio0to1 < 0.95) {
-			LOG.debug("Trying unscript "+deltaVert);
 			// end of sub/superScript
 			if (deltaVert > 0 && Real.isEqual(deltaVert, -supVert * fontHeight, maxFontSize)) {
 				// end of superscript?
 				linker = SUP1;
-				LOG.debug("OUTSUP");
 			} else if (deltaVert < 0 && Real.isEqual(deltaVert, -subVert * fontHeight, maxFontSize)) {
 				// end of subscript?
 				linker = SUB1;
-				LOG.debug("OUTSUB");
 			} else {
-				LOG.debug("ignored font change");
+				LOG.info("ignored font change");
 			}
 			if (newText != null) {
 				setCurrentBaseY(text1.getCurrentBaseY());
 			}
 			unscriptFontSize = text1.getFontSize();
 		} else {
-			LOG.debug("change of font size: "+fontSize0+"/"+fontSize1+" .... "+getText()+" ... "+text1.getText());
+			LOG.info("change of font size: "+fontSize0+"/"+fontSize1+" .... "+getText()+" ... "+text1.getText());
 		}
 		if (linker != null) {
 			newText = string0 + linker + string1;
@@ -658,11 +648,8 @@ public class SVGText extends SVGElement {
 			if (!Double.isNaN(unscriptFontSize)) {
 				setFontSize(unscriptFontSize);
 				setCurrentFontSize(unscriptFontSize);
-				LOG.debug("setting font to "+unscriptFontSize);
 			}
-			LOG.debug("merged => "+newText);
 		}
-		LOG.debug("new...."+newText);
 		return (newText != null);
 	}
 	
@@ -1104,7 +1091,6 @@ public class SVGText extends SVGElement {
 		}
 		Angle angleOrig = transform2orig.getAngleOfRotation();
 		Real2 centre = transform2orig.getCentreOfRotation();
-		LOG.debug("C "+this.getText()+"; "+this.getTransform()+"; "+this.getXY()+"; "+centre);
 		Angle newAngle = angleOrig.plus(angle);
 		// final angle is zero, so remove transform attribute
 		if (Real.isEqual(newAngle.getRadian(), 0.0, ANGLE_EPS)) {

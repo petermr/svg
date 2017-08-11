@@ -354,26 +354,6 @@ public class SVGPath extends SVGShape {
 			}
 		} else if (isClosed && allCoords.size() >= 8) {
 			// no longer useful I think
-			/*LOG.debug("CIRCLE: "+signature);
-			Real2Range r2r = this.getBoundingBox();
-			//Is it square?
-			if (Real.isEqual(r2r.getXRange().getRange(),  r2r.getYRange().getRange(), 2*epsilon)) {
-				Real2 centre = r2r.getCentroid();
-				Double sum = 0.0;
-				double[] spokeLengths = new double[firstCoords.size()];
-				for (int i = 0; i < firstCoords.size(); i++) {
-					Double spokeLength = centre.getDistance(firstCoords.get(i));
-					spokeLengths[i] = spokeLength;
-					sum += spokeLength;
-				}
-				Double rad = sum / firstCoords.size();
-				for (int i = 0; i < spokeLengths.length; i++) {
-					if (Math.abs(spokeLengths[i] - rad) > epsilon) {
-						return null;
-					}
-				}
-				circle = new SVGCircle(centre, rad);
-			}*/
 		}
 		return circle;
 	}

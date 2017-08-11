@@ -227,7 +227,7 @@ public class SVGPolylineAnalyzer {
 			array.addAttribute(new Attribute(ROLE, axisLabel));
 		}
 		if (array == null) {
-			LOG.debug("CANNOT MAKE AXIS: "+lineOrientation);
+			LOG.warn("CANNOT MAKE AXIS: "+lineOrientation);
 		}
 		return array;
 	}

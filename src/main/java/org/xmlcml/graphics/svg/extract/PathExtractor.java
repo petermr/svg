@@ -69,14 +69,10 @@ public class PathExtractor extends AbstractExtractor{
 		positiveBoxPathList = new ArrayList<SVGPath>(originalPathList);
 		SVGElement.removeElementsOutsideBox(positiveBoxPathList, positiveXBox);
 		nonNegativePathList = SVGPath.removePathsWithNegativeY(positiveBoxPathList);
-		LOG.debug("nonNegativePathList "+nonNegativePathList.size());
 		trimmedShadowedPathList = SVGPath.removeShadowedPaths(nonNegativePathList);
-		LOG.debug("trimmedShadowedPathList "+ trimmedShadowedPathList.size());
 		
 		currentPathList = originalPathList;
-		LOG.debug("currentPathList "+currentPathList.size());
 		currentPathList = SVGPath.removeShadowedPaths(currentPathList);
-		LOG.debug("currentPathList "+ currentPathList.size());
 		return;
 	}
 
@@ -106,10 +102,8 @@ public class PathExtractor extends AbstractExtractor{
 		g.appendChild(gg);
 		Iterable<Entry<String>> iterable = MultisetUtil.getEntriesSortedByCount(sigSet);
 		List<Entry<String>> list = MultisetUtil.createStringEntryList(iterable);
-		LOG.debug("> "+list);
 		SVGG ggg = annotatePathsWithSignatures();
 		g.appendChild(ggg);
-//		SVGSVG.wrapAndWriteAsSVG(g, pathsSvgFile);
 	}
 	
 	private SVGG annotatePathsWithSignatures() {
@@ -153,7 +147,6 @@ public class PathExtractor extends AbstractExtractor{
 			rect.setFill(pathBoxColor);
 			rect.setStrokeWidth(0.2);
 			rect.setOpacity(0.3);
-			LOG.debug("****************** ADD RECT ****************");
 			g.appendChild(rect);
 		}
 		return g;

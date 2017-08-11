@@ -138,7 +138,7 @@ public class SVGSVG extends SVGElement {
 			svgsvg.setHeight(height);
 			svgsvg.setWidth(width);
 			try {
-				LOG.debug("Writing SVG "+file.getAbsolutePath());
+				LOG.trace("Writing SVG "+file.getAbsolutePath());
 				svgsvg.writeQuietly(file);
 			} catch (Exception e) {
 				throw new RuntimeException("cannot write svg to "+file, e);

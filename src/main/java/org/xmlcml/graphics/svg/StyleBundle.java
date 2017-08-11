@@ -298,7 +298,7 @@ public class StyleBundle implements XMLConstants {
 		} else if (attName.equals(OPACITY)) {
 			subStyle = getOpacity();
 		} else if (attName.equals(STROKE_LINECAP)) {
-			LOG.debug("ignored style: "+attName);
+			LOG.info("ignored style: "+attName);
 		} else if (attName.equals(STROKE)) {
 			subStyle = getStroke();
 		} else if (attName.equals(STROKE_WIDTH)) {

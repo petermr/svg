@@ -49,6 +49,5 @@ public abstract class AbstractExtractor {
 	protected void writeDebug(String type, String outFilename, SVGG g) {
 		File outFile = new File(outFilename);
 		SVGSVG.wrapAndWriteAsSVG(g, outFile);
-		LOG.debug("wrote "+type+": "+outFile.getAbsolutePath());
 	}
 }

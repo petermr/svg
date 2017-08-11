@@ -146,7 +146,6 @@ public class AnnotatedAxisTest {
 		+"tickNumberScreenCoords: (79.268,82.229,102.21,122.19,142.169,162.148,182.129,202.109,222.089,244.988,262.048,282.026)\n",
 		axis0.toString());
 */	
-		LOG.debug(axis0.toString());
 		AnnotatedAxis axis1 = axisArray[1];
 		/**		
 		Assert.assertEquals("axis1", "dir: VERTICAL; range: (510.354,658.197)\n"
@@ -156,7 +155,6 @@ public class AnnotatedAxisTest {
 		+"tickNumberScreenCoords: (511.698,528.125,544.552,560.979,577.406,593.833,610.26,626.687,643.113,659.54,667.408)\n",
 		axis1.toString());
 */		
-		LOG.debug(axis1.toString());
 	}
 
 	@Test
@@ -371,7 +369,7 @@ public class AnnotatedAxisTest {
 		try {
 			plotBox.readAndCreateCSVPlot(svgElement);
 		} catch (RuntimeException e) {
-			LOG.debug(e);
+			LOG.error(e);
 		}
 		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGStore().createSVGElement(), new File(new File("target/plot/"), svgName));
 		SVGRect fullLineBbox = plotBox.getSVGStore().getFullLineBox();

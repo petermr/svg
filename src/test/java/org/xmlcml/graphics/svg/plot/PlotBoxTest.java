@@ -40,7 +40,6 @@ public class PlotBoxTest {
 //		String fileRoot = "dong";
 		PlotBox plotBox = new PlotBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+"plot.svg");
-		LOG.debug("reading: "+inputSVGFile);
 		plotBox.readAndCreateCSVPlot(inputSVGFile);
 		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
 		plotBox.writeCSV(new File(TARGET_PLOT+fileRoot+".csv"));

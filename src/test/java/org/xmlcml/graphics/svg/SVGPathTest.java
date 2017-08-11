@@ -211,12 +211,10 @@ public class SVGPathTest {
 				if (line != null) {
 					g.appendChild(line);
 				} else {
-					LOG.debug("Failed line"+i);
 					newPath.setFill("red");
 					g.appendChild(newPath.copy());
 				}
 			} else {
-				LOG.debug("Failed Caps"+i);
 				path.setFill("blue");
 				g.appendChild(path.copy());
 			}

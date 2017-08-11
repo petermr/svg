@@ -170,7 +170,6 @@ public class AnnotatedAxis {
 			// assume sorted - we'll need to add sort later
 			Real2Range tick2Range = SVGLine.getReal2Range(axisTickBox.getTickLines());
 			axisTickBox.setTickRange(lineDirection.isHorizontal() ? tick2Range.getXRange() : tick2Range.getYRange());
-			LOG.debug("tickRange: " + axisTickBox.getTickRange());
 		}
 	}
 
@@ -192,7 +191,7 @@ public class AnnotatedAxis {
 		Monotonicity tickValueCoordsMonotonicity = tickValueCoords == null ? null : tickValueCoords.getMonotonicity();
 		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
 		Monotonicity tickMonotonicity = (tickCoords == null) ? null : tickCoords.getMonotonicity();
-		LOG.debug("TICK coords\n"
+		LOG.info("TICK coords\n"
 				+ " tick coords "+tickCoords+": "+tickMonotonicity+"\n"
 				+ " tick value coords "+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"
 				+ " tickValues: "+tickValues);
@@ -201,7 +200,7 @@ public class AnnotatedAxis {
 			Multiset<Double> deltaValueSet = tickValues.createDoubleDifferenceMultiset(nplaces);
 			Multiset<Integer> deltaValueCoordSet = tickValueCoords.createIntegerDifferenceMultiset();
 			Multiset<Integer> deltaTickCoordSet = tickCoords.createIntegerDifferenceMultiset();
-			LOG.debug("DELTA coords\n"
+			LOG.info("DELTA coords\n"
 					+ " delta tick Coords "+deltaTickCoordSet+"\n"
 					+ " delta value Coords "+deltaValueCoordSet+"\n"
 					+ " delta values: "+deltaValueSet);
@@ -238,11 +237,8 @@ public class AnnotatedAxis {
 		RealArray tick2ValueDiffs = tickCoords.subtract(tickValueCoords);
 		tick2ValueDiffs.format(0);
 		Multiset<Double> tick2ValueSet = tick2ValueDiffs.createDoubleDifferenceMultiset(nplaces);
-		LOG.debug("tick2ValueCoordsDiffs "+tick2ValueSet);
-	//	this.tickValues = tickValues;
 		screenToUserScale = getOrCreateScreenToUserScale(tickValues, tickCoords);
 		screenToUserConstant = getOrCreateScreenToUserConstant(tickValues, tickCoords);
-		LOG.debug("screen2User: "+screenToUserScale+"; "+screenToUserConstant);
 	}
 
 	private Double getOrCreateScreenToUserConstant(RealArray tickValues, RealArray tickCoords) {
@@ -286,10 +282,8 @@ public class AnnotatedAxis {
 	}
 
 	private void buildTickBoxContents(AxisTickBox axisTickBox) {
-		LOG.debug("MADE axisTickBox "+axisTickBox + axisTickBox.hashCode());
 		setAxisTickBox(axisTickBox);
 		SVGLineList potentialTickLines = axisTickBox.getPotentialTickLines();
-		LOG.debug("potential tickLines: "+potentialTickLines.size());
 		axisTickBox.createMainAndTickLines(this, potentialTickLines.getLineList());
 	}
 
@@ -309,12 +303,12 @@ public class AnnotatedAxis {
 	}
 
 	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		LOG.trace("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
+		LOG.info("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
 		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);
 		} else {
-			LOG.debug("Null axisTickBox");
+			LOG.warn("Null axisTickBox");
 		}
 		return axisTickBox;
 	}

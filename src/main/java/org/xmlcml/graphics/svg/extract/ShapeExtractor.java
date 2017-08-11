@@ -157,7 +157,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	}
 
 	public void debug() {
-		LOG.debug(
+		LOG.info(
 		"paths: " + pathList.size() 
 		+ "; circles: "   + circleList.size()
 		+ "; ellipses: "  + ellipseList.size()

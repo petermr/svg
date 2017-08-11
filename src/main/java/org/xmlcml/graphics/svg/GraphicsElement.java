@@ -561,9 +561,6 @@ public class GraphicsElement extends Element implements SVGConstants {
 		// all transforms done in SVG...  ???
 		this.savedAffineTransform = g2d.getTransform();
 		Transform2 transform2 = this.getCumulativeTransform();
-//		AffineTransform currentAffineTransform = (transform2 == null) ? null : transform2.getAffineTransform();
-//		LOG.debug(String.valueOf(this.getClass().getName())+" saved "+savedAffineTransform+" CUM: "+transform2+" "+currentAffineTransform);
-//		g2d.transform(currentAffineTransform);
 	}
 	
 	private void resetAffineTransform(Graphics2D g2d) {
@@ -880,19 +877,6 @@ public class GraphicsElement extends Element implements SVGConstants {
 		if (GraphicsElement.isEmptyValue(value)) {
 			this.addAttribute(new Attribute(STYLE, styleValue));
 		}
-//		this.getOrCreateStyleAttributeFactory();
-//		String styleValue0 = styleAttributeFactory.getAttributeValue(styleName);
-//		if (GraphicsElement.isEmptyValue(styleValue0)) {
-//			styleAttributeFactory.p
-//		}
-//		String attVal = this.getAttributeValue(attName);
-//		if (attVal == null || attVal.trim().equals("")) {
-//			try {
-//				this.addAttribute(new Attribute(attName, attValue));
-//			} catch (IllegalCharacterDataException icde) {
-//				LOG.debug("Bad attribute character: "+attValue);
-//			}
-//		}
 	}
 
 	public static boolean isEmptyValue(String value) {

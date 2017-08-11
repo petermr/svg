@@ -118,7 +118,6 @@ public class SVGPhrase extends SVGG {
 
 	public static SVGPhrase createPhraseFromCharacters(List<SVGText> textList, boolean isRot90) {
 		SVGPhrase phrase = null;
-		LOG.debug("phrase: "+isRot90+": "+textList);
 		if (textList != null && textList.size() > 0) {
 			if (!isRot90) {
 				phrase = extractHorizontalPhrase(textList);

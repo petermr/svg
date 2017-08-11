@@ -474,7 +474,6 @@ public class Path2ShapeConverterTest {
 		SVGCache svgStore = new SVGCache();
 		svgStore.readGraphicsComponents(svgElement0);
 		SVGElement svgElement = (SVGElement) svgStore.getExtractedSVGElement();
-		LOG.debug(svgElement.toXML());
 		List<SVGLine> lineList = SVGLine.extractSelfAndDescendantLines(svgElement);
 		Assert.assertEquals("lines", 1, lineList.size());
 		SVGLine svgLine0 = lineList.get(0);

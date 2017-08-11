@@ -219,9 +219,6 @@ public class SVGDiagram extends SVGG {
 				LOG.trace("t "+triangle);
 			}
 			LOG.trace("lines "+lineList.size());
-			for (SVGShape line : lineList) {
-	//			LOG.debug("l "+line);
-			}
 			for (SVGTriangle triangle : triangleList) {
 				int j = 0;
 				for (; j < lineList.size(); j++) {

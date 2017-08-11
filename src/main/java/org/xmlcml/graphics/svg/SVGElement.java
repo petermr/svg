@@ -465,7 +465,10 @@ public class SVGElement extends GraphicsElement {
 	 * @param transform
 	 */
 	public void applyTransform(Transform2 transform) {
-		LOG.debug("No transform applied to: "+this.getClass());
+		if (this instanceof SVGDefs) { // maybe add others
+		} else {
+			LOG.info("No transform applied to: "+this.getClass());
+		}
 	}
 	
 	public static Transform2 createTransform2FromTransformAttribute(String transformAttributeValue) {
@@ -726,15 +729,6 @@ public class SVGElement extends GraphicsElement {
 	 */
 	@Deprecated
 	public void draw() {
-//		FileOutputStream fos = new FileOutputStream(outfile);
-//		SVGElement g = MoleculeTool.getOrCreateTool(molecule).
-//		    createSVG();
-//		int indent = 2;
-//		SVGSVG svg = new SVGSVG();
-//		svg.appendChild(g);
-//		SVGUtil.debug(svg, fos, indent);
-//		fos.close();
-//		LOG.debug("wrote SVG "+outfile);
 	}
 
 	/**
@@ -1530,7 +1524,7 @@ public class SVGElement extends GraphicsElement {
 		this.convertOldStyleToStyle();
 		Double value = StyleBundle.getFontSize(this);
 		if (value == null) {
-			LOG.debug("missing font-size: "+this.getStyle());
+			LOG.warn("missing font-size: "+this.getStyle());
 			String attVal = getAttributeFromStyle(StyleBundle.FONT_SIZE);
 			if (attVal == null) {
 				attVal = this.getAttributeValue(StyleBundle.FONT_SIZE);

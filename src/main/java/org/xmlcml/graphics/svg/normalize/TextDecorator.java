@@ -92,18 +92,14 @@ public class TextDecorator extends AbstractDecorator {
 		Set<String> attNames0Not1 = attributeComparer.getAttNames0Not1();
 		Set<String> attNames1Not0 = attributeComparer.getAttNames1Not0();
 		if (attNames0Not1.size() + attNames1Not0.size() != 0) {
-			LOG.debug("attnames change "+attNames0Not1.size() + attNames1Not0);
 			addSingleCharTextToUncompactedList(text);
 		}
 		Set<Pair<Attribute, Attribute>> unequalAttValues = attributeComparer.getUnequalTextValues();
 		if (unequalAttValues.size() != 0) {
-			LOG.debug(unequalAttValues);
 			addSingleCharTextToUncompactedList(text);
 		} else if (!this.hasEqualYCoord(textList.get(0), text, yeps)) {
-			LOG.debug("ycoord changed "+textList.get(0)+" // "+text);
 			addSingleCharTextToUncompactedList(text);
 		} else {
-			LOG.trace("adding "+text);
 			textList.add(text);
 		}
 	}
@@ -157,22 +153,11 @@ public class TextDecorator extends AbstractDecorator {
 			SVGText compactedText = createCompactText(textList);
 			g.appendChild(compactedText);
 			String style = compactedText.getStyle();
-//			String style = styleAttribute.getAttributeValue();
 			styleSet.add(style);
 		}
 		
-		LOG.debug(styleSet+"; "+styleSet.entrySet().size());
 		return g;
 	}
-
-//	private Color getNextAvailableColor(Map<String, Color> colorByStyle, String style, ColorStore colorizer) {
-//		Color color = colorByStyle.get(style);
-//		if (color == null) {
-//			color = colorizer.getNextAvailableColor(colorByStyle.size());
-//			colorByStyle.put(style, color);
-//		}
-//		return color;
-//	}
 
 	/** compacts a list of SVGTexts into a gingle SVGText.
 	 * retains current boundingBox and styleAttribute.

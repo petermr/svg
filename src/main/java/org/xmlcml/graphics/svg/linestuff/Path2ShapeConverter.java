@@ -769,7 +769,7 @@ public class Path2ShapeConverter {
 				 newPath.createSignature();
 				 newPath.setId(newPath.getId()+"."+count);
 				 splitPathList.add(newPath);
-				 LOG.debug("new "+newPath.toXML());
+//				 LOG.trace("new "+newPath.toXML());
 				 count++;
 			 }
 		 }

@@ -94,7 +94,6 @@ public class AxisTickBox extends AxialBox {
 				tickLengths.add((Double)Real.normalize(tickLineLength, 2));
 			}
 		}
-		LOG.debug(">ticks>"+tickLengths);
 		if (tickLengths.elementSet().size() == 1) {
 			setMajorTickLength(tickLengths.elementSet().iterator().next());
 			this.getTickLinesAndSignature();
@@ -176,13 +175,10 @@ public class AxisTickBox extends AxialBox {
 	 */
 	private SVGLineList extractIntersectingLines(SVGLineList lines) {
 		SVGLineList lineList = new SVGLineList();
-		LOG.debug("bbox "+axis);
 		for (SVGLine line : lines) {
 			Real2Range lineBBox = line.getBoundingBox();
 			Real2Range inter = lineBBox.intersectionWith(this.captureBox);
-			LOG.trace(lineBBox+"; inter: "+inter);
 			if (inter!= null && inter.isValid()) {
-				LOG.trace("inter1: "+inter);
 				line.format(decimalPlaces());
 				lineList.add(line);
 			}
@@ -259,7 +255,6 @@ public class AxisTickBox extends AxialBox {
 	}
 
 	int addMissingEndTicks(AnnotatedAxis annotatedAxis) {
-		LOG.debug("Adding end ticks");
 		int added = 0;
 		Double lowAxis = annotatedAxis.range.getMin();
 		Double lowTickPosition = majorTicksScreenCoords.get(0);

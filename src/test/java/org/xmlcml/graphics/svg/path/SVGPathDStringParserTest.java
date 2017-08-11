@@ -130,9 +130,6 @@ public class SVGPathDStringParserTest {
 +" m 0,0 c 0,-8 5,-15 12,-15 6,0 12,6 12,15 0,8 -5,15 -12,15 -6,0 -12,-6 -12,-15 z",
 				d);
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
-		for (SVGPathPrimitive primitive : primitives) {
-			LOG.debug(">prim>"+primitive);
-		}
 		SVGPath path1 = new SVGPath(primitives, null);
 		path1.setStroke("blue");
 		String d1 = path1.getDString();
@@ -159,17 +156,10 @@ public class SVGPathDStringParserTest {
 				+ " m 0,0 c 0,-8 5,-15 12,-15 6,0 12,6 12,15 0,8 -5,15 -12,15 -6,0 -12,-6 -12,-15 z",
 				d);
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
-		for (SVGPathPrimitive primitive : primitives) {
-			LOG.debug(">prim>"+primitive);
-		}
 		SVGPath path1 = new SVGPath(primitives, null);
 		path1.setStroke("blue");
 		path.setStrokeWidth(1.0);
 		String d1 = path1.getDString();
-//		Assert.assertEquals("d", "M400.0 180.0 L350.0 60.0 M290.0 180.0 L350.0 60.0"
-//				+ " M350.0 60.0 C350.0 52.0 355.0 45.0 362.0 45.0 C368.0 45.0 374.0 51.0 374.0 60.0 C374.0 68.0 369.0 75.0 362.0 75.0 C356.0 75.0 350.0 69.0 350.0 60.0 Z"
-//				+ "M350.0 52.0 C350.0 44.0 355.0 37.0 362.0 37.0 C368.0 37.0 374.0 43.0 374.0 52.0 C374.0 60.0 369.0 67.0 362.0 67.0 C356.0 67.0 350.0 61.0 350.0 52.0 Z",
-//				d1);
 		g.appendChild(path1);
 		SVGSVG.wrapAndWriteAsSVG(g, new File(TARGET_PATH, "relcubic1a.svg"));
 
@@ -187,9 +177,6 @@ public class SVGPathDStringParserTest {
 		+ "z"
 				;
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
-		for (SVGPathPrimitive primitive : primitives) {
-			LOG.debug(">prim>"+primitive);
-		}
 		SVGPath path = new SVGPath(primitives, null);
 		path.setStroke("red");
 		SVGSVG.wrapAndWriteAsSVG(path, new File(TARGET_PATH, "relcubic2a.svg"));
@@ -231,25 +218,15 @@ public class SVGPathDStringParserTest {
         		+ "z"
 				;
 		PathPrimitiveList primitives = new SVGPathParser().parseDString(d);
-		for (SVGPathPrimitive primitive : primitives) {
-			LOG.debug(">prim>"+primitive);
-		}
 		SVGPath path = new SVGPath(primitives, null);
 		path.setStroke("red");
 		path.setStrokeWidth(1.0);
 		g.appendChild(path);
-//		SVGSVG.wrapAndWriteAsSVG(path, new File(TARGET_PATH, "relcubic2a.svg"));
 
 		SVGPath path1 = new SVGPath(primitives);
 		path1.setStroke("blue");
-//		String d1 = path1.getDString();
-//		Assert.assertEquals("d", 
-//				"M100.0 100.0 M120.0 100.0 L120.0 130.0 L100.0 130.0 L100.0 100.0 ZC113.0 90.0 107.0 90.0 100.0 100.0 C93.0 110.0 93.0 120.0 100.0 130.0 C107.0 140.0 113.0 140.0 120.0 130.0 C127.0 120.0 127.0 110.0 120.0 100.0 Z",
-//				d1);
 		g.appendChild(path1);
 		SVGSVG.wrapAndWriteAsSVG(g, new File(TARGET_PATH, "relcubic3.svg"));
 
 	}
-	
-
 }

@@ -254,7 +254,6 @@ public static String[] FONT = {
 				String value1 = attribute1 == null ? null : attribute1.getValue();
 				if (!isEqual(value0, value1)) {
 					Pair<Attribute, Attribute> pair = new MutablePair<Attribute, Attribute>(attribute0, attribute1);
-					LOG.debug("unequal values: "+value0+" != "+value1);
 					diffSet.add(pair);
 				}
 			}

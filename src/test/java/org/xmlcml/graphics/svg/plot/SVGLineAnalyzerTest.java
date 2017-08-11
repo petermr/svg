@@ -45,6 +45,5 @@ public class SVGLineAnalyzerTest {
 		LOG.debug("====================line angles======================");
 		LOG.debug("LineAngles: \n"+lineAnalyzer.getLineAngleMap());
 		GraphPlotBox graphPlotBox = lineAnalyzer.getPlotBox();
-		LOG.debug("plot box "+graphPlotBox);
 	}
 }

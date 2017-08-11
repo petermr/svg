@@ -122,7 +122,6 @@ public class PlotBox {
 	private void setDefaults() {
 		axisArray = new AnnotatedAxis[AxisType.values().length];
 		for (AxisType axisType : AxisType.values()) {
-			LOG.debug("AxisType: "+axisType);
 			AnnotatedAxis axis = createAxis(axisType);
 			axisArray[axisType.serial] = axis;
 		}
@@ -191,7 +190,7 @@ public class PlotBox {
 
 
 	private void makeAxialTickBoxesAndPopulateContents() {
-		LOG.debug("*********  makeAxialTickBoxesAndPopulateContents *********");
+		LOG.info("*********  makeAxialTickBoxesAndPopulateContents *********");
 		for (AnnotatedAxis axis : axisArray) {
 			axis.getOrCreateSingleLine();		
 			axis.createAndFillTickBox(svgStore.getHorizontalLines(), svgStore.getVerticalLines());
@@ -199,21 +198,21 @@ public class PlotBox {
 	}
 
 	private void extractScaleTextsAndMakeScales() {
-		LOG.debug("********* extractScaleTextsAndMakeScales *********");
+		LOG.info("********* extractScaleTextsAndMakeScales *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.extractScaleTextsAndMakeScales();
 		}
 	}
 
 	private void extractTitleTextsAndMakeTitles() {
-		LOG.debug("********* extractTitleTextsAndMakeTitles *********");
+		LOG.info("********* extractTitleTextsAndMakeTitles *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.extractTitleTextsAndMakeTitles();
 		}
 	}
 
 	private void makeRangesForAxes() {
-		LOG.debug("********* makeRangesForAxes *********");
+		LOG.info("********* makeRangesForAxes *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.createAxisRanges();
 		}
@@ -229,15 +228,12 @@ public class PlotBox {
 				xAxis.getScreenToUserConstant() == null ||
 				yAxis.getScreenToUserScale() == null ||
 				yAxis.getScreenToUserConstant() == null) {
-			LOG.debug("XAXIS "+xAxis);
-			LOG.debug("YAXIS "+yAxis);
-			LOG.error("Cannot get conversion constants: abort");
+			LOG.error("XAXIS "+xAxis+"\n"+"YAXIS "+yAxis+"\n"+"Cannot get conversion constants: abort");
 			return;
 		}
 
 		if (screenXYs != null && screenXYs.size() > 0) {
 			scaledXYs = new Real2Array();
-			LOG.debug("screenXY: "+screenXYs);
 			for (int i = 0; i < screenXYs.size(); i++) {
 				Real2 screenXY = screenXYs.get(i);
 				double x = screenXY.getX();
@@ -248,7 +244,6 @@ public class PlotBox {
 				scaledXYs.add(scaledXY);
 			}
 			scaledXYs.format(ndecimal + 1);
-			LOG.trace("scaledXY: "+scaledXYs);
 		}
 	}
 
@@ -284,13 +279,11 @@ public class PlotBox {
 		}
 		if (screenXYs.size() == 0) {
 			// this is really messy
-			LOG.debug("trying short pi/4 lines");
 			for (SVGLine line : svgStore.getShapeExtractor().getLineList()) {
 				Real2 vector = line.getEuclidLine().getVector();
 				double angle = vector.getAngle();
 				double length = vector.getLength();
 				if (length < 3.0) {
-					LOG.debug(angle + " "+ length + " " +line);
 					if (Real.isEqual(angle, 2.35, 0.03)) {
 						screenXYs.add(line.getMidPoint());
 					}

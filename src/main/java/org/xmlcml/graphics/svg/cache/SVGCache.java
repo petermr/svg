@@ -113,7 +113,6 @@ public class SVGCache {
 
 	public void readGraphicsComponents(File file) throws FileNotFoundException {
 		this.fileRoot = FilenameUtils.getBaseName(file.getName());
-		LOG.debug(">fr>"+fileRoot);
 		readGraphicsComponents(new FileInputStream(file));
 	}
 	
@@ -138,7 +137,7 @@ public class SVGCache {
 	}
 
 	private void extractSVGComponents(GraphicsElement svgElem) {
-		LOG.debug("********* made SVG components *********");
+		LOG.info("********* made SVG components *********");
 		svgElement = (GraphicsElement) svgElem.copy();
 		SVGG g;
 		SVGG gg = new SVGG();
@@ -230,7 +229,7 @@ public class SVGCache {
 	}
 
 	public void createHorizontalAndVerticalLines() {
-		LOG.debug("********* make Horizontal/Vertical lines *********");
+		LOG.info("********* make Horizontal/Vertical lines *********");
 		SVGSVG.wrapAndWriteAsSVG(horizontalLines, new File(debugRoot+fileRoot+".horiz0.svg"));
 		SVGSVG.wrapAndWriteAsSVG(verticalLines, new File(debugRoot+fileRoot+".vert0.svg"));
 		SVGSVG.wrapAndWriteAsSVG(svgElement, new File(debugRoot+fileRoot+".debug0.svg"));
@@ -251,7 +250,7 @@ public class SVGCache {
 
 
 	private void removeLShapesAndReplaceByLines(List<SVGPolyline> polylineList, SVGPolyline axialLShape) {
-		LOG.debug("replacing LShapes by splitLines");
+		LOG.info("replacing LShapes by splitLines");
 		SVGSVG.wrapAndWriteAsSVG(polylineList, new File(debugRoot+fileRoot+".debug1.svg"));
 		SVGLine vLine = axialLShape.getLineList().get(0);
 		svgElement.appendChild(vLine);
@@ -265,7 +264,7 @@ public class SVGCache {
 	}
 
 	public void createHorizontalAndVerticalTexts() {
-		LOG.debug("********* make Horizontal/Vertical texts *********");
+		LOG.info("********* make Horizontal/Vertical texts *********");
 		this.horizontalTexts = SVGText.findHorizontalOrRot90Texts(this.textExtractor.getTextList(), LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
 		this.verticalTexts = SVGText.findHorizontalOrRot90Texts(this.textExtractor.getTextList(), LineDirection.VERTICAL, AnnotatedAxis.EPS);
 		
@@ -273,16 +272,14 @@ public class SVGCache {
 		for (SVGText verticalText : this.verticalTexts) {
 			sb.append("/"+verticalText.getValue());
 		}
-		LOG.debug("TEXT horiz: " + this.horizontalTexts.size()+"; vert: " + this.verticalTexts.size()+"; " /*+ "/"+sb*/);
+		LOG.info("TEXT horiz: " + this.horizontalTexts.size()+"; vert: " + this.verticalTexts.size()+"; " /*+ "/"+sb*/);
 	}
 
 	public void makeLongHorizontalAndVerticalEdges() {
-		LOG.debug("********* make Horizontal/Vertical edges *********");
+		LOG.info("********* make Horizontal/Vertical edges *********");
 		List<SVGLine> lineList = this.shapeExtractor.getLineList();
 		if (lineList != null && lineList.size() > 0) {
 			lineBbox = SVGElement.createBoundingBox(lineList);
-			LOG.debug("lineBBox: "+lineBbox);
-			LOG.debug("LINES "+lineList);
 			this.longHorizontalEdgeLines = this.getSortedLinesCloseToEdge(this.horizontalLines, LineDirection.HORIZONTAL, lineBbox);
 			this.longVerticalEdgeLines = this.getSortedLinesCloseToEdge(this.verticalLines, LineDirection.VERTICAL, lineBbox);
 			SVGSVG.wrapAndWriteAsSVG(longHorizontalEdgeLines.getLineList(), new File(debugRoot+fileRoot+".horizEdges.svg"));
@@ -293,18 +290,16 @@ public class SVGCache {
 
 	// 
 	public void makeFullLineBoxAndRanges() {
-		LOG.debug("********* make FullineBox and Ranges *********");
+		LOG.info("********* make FullineBox and Ranges *********");
 		
 		this.fullLineBox = null;
 		RealRange fullboxXRange = null;
 		RealRange fullboxYRange = null;
 		if (this.longHorizontalEdgeLines != null && this.longHorizontalEdgeLines.size() > 0) {
-			LOG.debug("longHorizontalEdgeLines "+this.longHorizontalEdgeLines.size());
 			fullboxXRange = createRange(this.longHorizontalEdgeLines, Direction.HORIZONTAL);
 			fullboxXRange = fullboxXRange == null ? null : fullboxXRange.format(PlotBox.FORMAT_NDEC);
 		}
 		if (this.longVerticalEdgeLines != null && this.longVerticalEdgeLines.size() > 0) {
-			LOG.debug("longVerticalEdgeLines "+this.longVerticalEdgeLines.size());
 			fullboxYRange = createRange(this.longVerticalEdgeLines, Direction.VERTICAL);
 			fullboxYRange = fullboxYRange == null ? null : fullboxYRange.format(PlotBox.FORMAT_NDEC);
 		}
@@ -313,34 +308,27 @@ public class SVGCache {
 			this.fullLineBox.format(PlotBox.FORMAT_NDEC);
 		}
 		if (fullLineBox == null && pathBox != null) {
-			LOG.debug("path> "+pathBox);
 			for (SVGRect rect : shapeExtractor.getRectList()) {
 				Real2Range rectRange = rect.getBoundingBox();
-				LOG.debug("rect> "+rectRange);
 				if (pathBox.isEqualTo(rectRange, axialLinePadding)) {
 					fullLineBox = rect;
 					break;
 				}
 			}
 		}
-		LOG.debug("fullbox "+this.fullLineBox);
 	}
 
 	public AxialLineList getSortedLinesCloseToEdge(List<SVGLine> lines, LineDirection direction, Real2Range bbox) {
 		RealRange.Direction rangeDirection = direction.isHorizontal() ? RealRange.Direction.HORIZONTAL : RealRange.Direction.VERTICAL;
 		RealRange parallelRange = direction.isHorizontal() ? bbox.getXRange() : bbox.getYRange();
 		RealRange perpendicularRange = direction.isHorizontal() ? bbox.getYRange() : bbox.getXRange();
-		LOG.debug("para "+parallelRange+"; perp "+perpendicularRange);
 		AxialLineList axialLineList = new AxialLineList(direction);
 		for (SVGLine line : lines) {
 			Real2 xy = line.getXY(0);
 			Double perpendicularCoord = direction.isHorizontal() ? xy.getY() : xy.getX();
 			RealRange lineRange = line.getRealRange(rangeDirection);
-			LOG.trace("line: "+line);
 			if (lineRange.isEqualTo(parallelRange, axialLinePadding)) {
-				LOG.trace("poss axis: "+line);
 				if (isCloseToBoxEdge(perpendicularRange, perpendicularCoord)) {
-					LOG.debug("close to axis: "+line);
 					axialLineList.add(line);
 					line.normalizeDirection(AnnotatedAxis.EPS);
 				}
@@ -360,7 +348,6 @@ public class SVGCache {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
 		g.appendChild(shapeExtractor.createSVGAnnotations());
-//		g.appendChild(copyAnnotatedAxes());
 		g.appendChild(pathExtractor.createSVGAnnotation().copy());
 		return g;
 	}
@@ -486,7 +473,6 @@ public class SVGCache {
 			Real2Range bbox1 = null;
 			Real2Range bbox2 = null;
 			change = false;
-//			LOG.debug("BBOXES: "+boundingBoxes.size());
 			for (int i = 0; i < boundingBoxes.size(); i++) {
 				bbox0 = boundingBoxes.get(i);
 				for (int j = i + 1; j < boundingBoxes.size(); j++) {

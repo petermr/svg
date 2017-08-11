@@ -130,7 +130,6 @@ public class AxisAnalyzer {
 					Axis vertAxis = verticalAxisList.get(j);
 					plotBox = new GraphPlotBox(horAxis, vertAxis);
 					if (plotBox != null && plotBox.areAxesTouching(eps)) {
-						LOG.debug("PLOT BOX "+plotBox);
 						plotBoxList.add(plotBox);
 					}
 				}

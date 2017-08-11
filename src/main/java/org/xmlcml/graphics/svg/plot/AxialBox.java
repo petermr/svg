@@ -106,7 +106,6 @@ public class AxialBox {
 		captureBox.extendBothEndsBy(rrDirection,
 				this.lineExtension, this.lineExtension);
 		captureBox.format(decimalPlaces());
-		LOG.debug("\n######### captureBox: "+captureBox+" "+axis.getAxisType()+" ##########");
 		return;
 	}
 

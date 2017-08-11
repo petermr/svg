@@ -847,14 +847,14 @@ public class SVGLine extends SVGShape {
 	public static Real2Range getReal2Range(List<SVGLine> lines) {
 		Real2Range bbox = null;
 		if (lines == null) {
-			LOG.debug("null lines");
+			LOG.warn("null lines");
 		} else if (lines.size() > 0) {
 			bbox = lines.get(0).getBoundingBox();
 			for (int i = 1; i < lines.size(); i++) {
 				bbox = bbox.plusEquals(lines.get(i).getBoundingBox());
 			}
 		} else {
-			LOG.debug("no lines");
+			LOG.info("no lines");
 		}
 		return bbox;
 	}
