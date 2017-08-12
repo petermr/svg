@@ -150,7 +150,7 @@ public class AnnotatedAxis {
 					LOG.error("Unknown axis type: "+axisType);
 				}
 			} else {
-				LOG.warn("no fullLineBox");
+				LOG.trace("no fullLineBox");
 			}
 		}
 		return singleLine;
@@ -162,9 +162,9 @@ public class AnnotatedAxis {
 
 	void createAxisRanges() {
 		if (singleLine == null) {
-			LOG.warn("null singleLine in :"+this);
+			LOG.trace("null singleLine in :"+this);
 		} else if (axisTickBox == null) {
-			LOG.error("null axisTickBox :"+this);
+			LOG.trace("null axisTickBox :"+this);
 		} else if (axisTickBox.getTickLines() != null && axisTickBox.getTickLines().size() > 0) {
 			Real2Range bbox = singleLine.getBoundingBox();
 			range = (lineDirection.isHorizontal()) ? bbox.getXRange() : bbox.getYRange();
@@ -181,7 +181,7 @@ public class AnnotatedAxis {
 
 	void extractScaleTextsAndMakeScales() {
 		if (axisTickBox == null) {
-			LOG.warn("no ticks so no scale texts captured");
+			LOG.trace("no ticks so no scale texts captured");
 			return;
 		}
 		this.axialScaleTextBox = new AxisScaleBox(this);
@@ -193,7 +193,7 @@ public class AnnotatedAxis {
 		Monotonicity tickValueCoordsMonotonicity = tickValueCoords == null ? null : tickValueCoords.getMonotonicity();
 		RealArray tickCoords = axisTickBox.getMajorTicksScreenCoords();
 		Monotonicity tickMonotonicity = (tickCoords == null) ? null : tickCoords.getMonotonicity();
-		LOG.info("TICK coords\n"
+		LOG.trace("TICK coords\n"
 				+ " tick coords "+tickCoords+": "+tickMonotonicity+"\n"
 				+ " tick value coords "+tickValueCoords+": "+tickValueCoordsMonotonicity+"\n"
 				+ " tickValues: "+tickValues);
@@ -202,7 +202,7 @@ public class AnnotatedAxis {
 			Multiset<Double> deltaValueSet = tickValues.createDoubleDifferenceMultiset(nplaces);
 			Multiset<Integer> deltaValueCoordSet = tickValueCoords.createIntegerDifferenceMultiset();
 			Multiset<Integer> deltaTickCoordSet = tickCoords.createIntegerDifferenceMultiset();
-			LOG.info("DELTA coords\n"
+			LOG.trace("DELTA coords\n"
 					+ " delta tick Coords "+deltaTickCoordSet+"\n"
 					+ " delta value Coords "+deltaValueCoordSet+"\n"
 					+ " delta values: "+deltaValueSet);
@@ -218,11 +218,11 @@ public class AnnotatedAxis {
 			return;
 		}
 		if (tickValueCoords.size() - tickCoords.size() == 2) { // probably missing end points
-			LOG.info("missing 2 ticks; taking axes as ends ticks"); 
+			LOG.trace("missing 2 ticks; taking axes as ends ticks"); 
 			tickCoords.addElement(range.getMax());
 			tickCoords.insertElementAt(0, range.getMin());
 		} else if (tickValueCoords.size() - tickCoords.size() == 1) { // have to work out which end point
-			LOG.warn("cannot match ticks with values; single missing tick; try to add at ends");
+			LOG.trace("cannot match ticks with values; single missing tick; try to add at ends");
 			double delta00 = Math.abs(tickCoords.get(0) - tickValueCoords.get(0));
 			double delta01 = Math.abs(tickCoords.get(0) - tickValueCoords.get(1));
 			if (delta00 < delta01) {
@@ -247,7 +247,7 @@ public class AnnotatedAxis {
 		if (tickCoords != null && tickCoords.getRange() != null && tickValues != null && tickValues.getRange() != null) {	
 			screenToUserConstant = tickCoords.getRange().getConstantTo(tickValues.getRange());
 		} else {
-			LOG.warn("No tickBox info: "+this.axisType);
+			LOG.trace("No tickBox info: "+this.axisType);
 		}
 		return screenToUserConstant;
 	}
@@ -256,7 +256,7 @@ public class AnnotatedAxis {
 		if (tickCoords != null && tickCoords.getRange() != null && tickValues != null && tickValues.getRange() != null) {	
 			screenToUserScale = tickCoords.getRange().getScaleTo(tickValues.getRange());
 		} else {
-			LOG.warn("No tickBox info: "+this.axisType);
+			LOG.trace("No tickBox info: "+this.axisType);
 		}
 		return screenToUserScale;
 	}
@@ -309,7 +309,7 @@ public class AnnotatedAxis {
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);
 		} else {
-			LOG.warn("Null axisTickBox");
+			LOG.trace("Null axisTickBox");
 		}
 		return axisTickBox;
 	}
@@ -323,7 +323,7 @@ public class AnnotatedAxis {
 				axisTickBox.extractIntersectingLines(horizontalLines, verticalLines);
 			}
 		} else {
-			AxisTickBox.LOG.warn("no single line for "+this);
+			AxisTickBox.LOG.trace("no single line for "+this);
 		}
 		return axisTickBox;
 	}

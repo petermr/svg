@@ -85,7 +85,7 @@ public class AxisScaleBox extends AxialBox {
 				LOG.trace("**************"+rot90HighestPhrase+"***************");
 				rot90Phrase = rot90HighestPhrase;
 			} else {
-				LOG.info("NO rot90 text");
+				LOG.trace("NO rot90 text");
 			}
 			LOG.trace("finished vert");
 		}
@@ -248,7 +248,6 @@ public class AxisScaleBox extends AxialBox {
 	 */
 	private List<SVGText> extractIntersectingTexts(List<SVGText> texts) {
 		List<SVGText> textList = new ArrayList<SVGText>();
-		LOG.info("******* bbox "+captureBox+"; "+texts.size());
 		for (SVGText text : texts) {
 			Real2Range textBBox = text.getBoundingBox();
 			Real2Range inter = textBBox.intersectionWith(this.captureBox);

@@ -33,8 +33,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Node;
 
-/** draws a straight line.
- * NOT TESTED
+/** creates Ellipse from MCCCC and other paths
+ * 
  * @author pm286
  *
  */
@@ -233,7 +233,7 @@ public class SVGEllipse extends SVGShape {
 					rx = Math.abs(points[0].getX() - points[2].getX()) / 2.;
 					ry = Math.abs(points[1].getY() - points[3].getY()) / 2.;
 				} else {
-					LOG.warn("Cannot form ellipse");
+					LOG.trace("Cannot form ellipse");
 				}
 				if (rx != null) {
 					if (Real.isEqual(rx,  ry, eps)) {

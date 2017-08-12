@@ -200,21 +200,18 @@ public class PlotBox {
 	}
 
 	private void extractScaleTextsAndMakeScales() {
-		LOG.info("********* extractScaleTextsAndMakeScales *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.extractScaleTextsAndMakeScales();
 		}
 	}
 
 	private void extractTitleTextsAndMakeTitles() {
-		LOG.info("********* extractTitleTextsAndMakeTitles *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.extractTitleTextsAndMakeTitles();
 		}
 	}
 
 	private void makeRangesForAxes() {
-		LOG.info("********* makeRangesForAxes *********");
 		for (AnnotatedAxis axis : this.axisArray) {
 			axis.createAxisRanges();
 		}
@@ -230,7 +227,7 @@ public class PlotBox {
 				xAxis.getScreenToUserConstant() == null ||
 				yAxis.getScreenToUserScale() == null ||
 				yAxis.getScreenToUserConstant() == null) {
-			LOG.error("XAXIS "+xAxis+"\n"+"YAXIS "+yAxis+"\n"+"Cannot get conversion constants: abort");
+			LOG.trace("XAXIS "+xAxis+"\n"+"YAXIS "+yAxis+"\n"+"Cannot get conversion constants: abort");
 			return;
 		}
 
@@ -277,7 +274,7 @@ public class PlotBox {
 			screenXYs.add(circle.getCXY());
 		}
 		if (screenXYs.size() == 0) {
-			LOG.warn("NO CIRCLES IN PLOT");
+			LOG.trace("NO CIRCLES IN PLOT");
 		}
 		if (screenXYs.size() == 0) {
 			// this is really messy

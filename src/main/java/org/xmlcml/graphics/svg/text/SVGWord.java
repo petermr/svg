@@ -176,7 +176,7 @@ public class SVGWord extends SVGG {
 			s = replaceNonStandardChars(s0, standardChar, nonStandardChars);
 			if (!s.equals(s0)) {
 				this.getSVGText().setText(s);
-				LOG.warn("nonStandardMinus: "+s0+" => "+s);
+				LOG.trace("nonStandardMinus: "+s0+" => "+s);
 			}
 		}
 	}

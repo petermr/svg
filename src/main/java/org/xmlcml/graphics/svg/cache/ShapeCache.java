@@ -93,7 +93,7 @@ public class ShapeCache extends AbstractCache {
 					triangleList.add((SVGTriangle) shape);
 				} else if (shape instanceof SVGPath) {
 					this.pathList.add((SVGPath) shape);
-					LOG.info("unprocessed shape: "+shape);
+					LOG.trace("unprocessed shape: "+shape);
 				} else {
 					LOG.warn("Unexpected shape: "+shape.getClass()); 
 					unknownShapeList.add(shape);
