@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.extract;
+package org.xmlcml.graphics.svg.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,9 +17,6 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGPath;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.cache.SVGCache;
-import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -30,9 +27,9 @@ import com.google.common.collect.Multiset.Entry;
  * @author pm286
  *
  */
-public class PathExtractor extends AbstractExtractor{
+public class PathCache extends AbstractCache{
 
-	private static final Logger LOG = Logger.getLogger(PathExtractor.class);
+	private static final Logger LOG = Logger.getLogger(PathCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -76,7 +73,7 @@ public class PathExtractor extends AbstractExtractor{
 		return;
 	}
 
-	public PathExtractor(SVGCache svgStore) {
+	public PathCache(SVGCache svgStore) {
 		super(svgStore);
 		setDefaults();
 	}

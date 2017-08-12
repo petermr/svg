@@ -14,6 +14,7 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
+import org.xmlcml.graphics.svg.cache.LineCache;
 import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
 
 import com.google.common.collect.Multiset;
@@ -132,9 +133,10 @@ public class AnnotatedAxis {
 	}
 
 	SVGLine getOrCreateSingleLine() {
+		LineCache lineCache = plotBox.getSVGCache().getOrCreateLineCache();
 		if (singleLine == null) {
-			if (plotBox.getSVGStore().getFullLineBox() != null) {
-				Real2Range bbox = plotBox.getSVGStore().getFullLineBox().getBoundingBox();
+			if (lineCache.getFullLineBox() != null) {
+				Real2Range bbox = lineCache.getFullLineBox().getBoundingBox();
 				Real2[] corners = bbox.getLLURCorners();
 				if (AxisType.TOP.equals(axisType)) {
 					singleLine = new SVGLine(corners[0], new Real2(corners[1].getX(), corners[0].getY())); 
@@ -303,7 +305,6 @@ public class AnnotatedAxis {
 	}
 
 	AxialBox createAndFillTickBox(List<SVGLine> horizontalLines, List<SVGLine> verticalLines) {
-		LOG.info("****** making tick box for "+getAxisType()+" from: hor "+horizontalLines.size()+"; vert "+verticalLines.size()+" in "+getPlotBox().getSVGStore().getFullLineBox());
 		AxisTickBox axisTickBox = createTickBoxAndAxialLines(horizontalLines, verticalLines);
 		if (axisTickBox != null) {
 			buildTickBoxContents(axisTickBox);

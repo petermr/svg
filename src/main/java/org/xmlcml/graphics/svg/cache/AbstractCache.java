@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.extract;
+package org.xmlcml.graphics.svg.cache;
 
 import java.io.File;
 
@@ -8,29 +8,28 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.cache.SVGCache;
 
 /** superclass for extractorAnnotators.
  * 
  * @author pm286
  *
  */
-public abstract class AbstractExtractor {
-	private static final Logger LOG = Logger.getLogger(AbstractExtractor.class);
+public abstract class AbstractCache {
+	private static final Logger LOG = Logger.getLogger(AbstractCache.class);
 	
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
 
 	protected Real2Range boundingBox;
-	protected SVGCache svgStore;
+	protected SVGCache svgCache;
 
-	protected AbstractExtractor() {
+	protected AbstractCache() {
 		
 	}
 
-	public AbstractExtractor(SVGCache svgStore) {
-		this.svgStore = svgStore;
+	public AbstractCache(SVGCache svgCache) {
+		this.svgCache = svgCache;
 	}
 
 	protected void drawBox(SVGG g, String col, double width) {

@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.extract;
+package org.xmlcml.graphics.svg.cache;
 
 import java.util.List;
 
@@ -9,16 +9,15 @@ import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGImage;
-import org.xmlcml.graphics.svg.cache.SVGCache;
 
 /** annotates the SVGImages in a SVGElement.
  * 
  * @author pm286
  *
  */
-public class ImageExtractor extends AbstractExtractor{
+public class ImageCache extends AbstractCache{
 
-	private static final Logger LOG = Logger.getLogger(ImageExtractor.class);
+	private static final Logger LOG = Logger.getLogger(ImageCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -30,7 +29,7 @@ public class ImageExtractor extends AbstractExtractor{
 		this.imageList = SVGImage.extractSelfAndDescendantImages(svgElement);
 	}
 
-	public ImageExtractor(SVGCache svgStore) {
+	public ImageCache(SVGCache svgStore) {
 		super(svgStore);
 		setDefaults();
 	}

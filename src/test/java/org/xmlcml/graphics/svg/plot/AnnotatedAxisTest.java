@@ -12,6 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.GraphicsElement;
+import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
@@ -39,11 +40,11 @@ public class AnnotatedAxisTest {
 	@Test
 	@Ignore // changes every time we change parameters
 	public void testFunnelXYAxis() throws FileNotFoundException {
-		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "bakker2014-page11b.svg")));
+		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "bakker2014-page11b.svg")));
 		PlotBox plotBox = new PlotBox();
 		plotBox.readAndCreateCSVPlot(svgElement);
-		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGStore().createSVGElement(), new File("target/plot/bakker.svg"));
-		SVGRect fullLineBbox = plotBox.getSVGStore().getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGCache().createSVGElement(), new File("target/plot/bakker.svg"));
+		SVGRect fullLineBbox = plotBox.getSVGCache().getOrCreateLineCache().getFullLineBox();
 		fullLineBbox.format(3);
 		Assert.assertEquals("full box",  "((140.415,426.016),(483.056,650.628))", fullLineBbox.toString());
 		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
@@ -364,15 +365,15 @@ public class AnnotatedAxisTest {
 	// ================================================
 	
 	private static AnnotatedAxis[] getAxisArrayAndTestFullBox(String svgName, String boxCoords) throws FileNotFoundException {
-		GraphicsElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, svgName)));
+		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, svgName)));
 		PlotBox plotBox = new PlotBox();
 		try {
 			plotBox.readAndCreateCSVPlot(svgElement);
 		} catch (RuntimeException e) {
 			LOG.error(e);
 		}
-		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGStore().createSVGElement(), new File(new File("target/plot/"), svgName));
-		SVGRect fullLineBbox = plotBox.getSVGStore().getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGCache().createSVGElement(), new File(new File("target/plot/"), svgName));
+		SVGRect fullLineBbox = plotBox.getSVGCache().getOrCreateLineCache().getFullLineBox();
 		AnnotatedAxis[] axisArray = null;
 		if (fullLineBbox != null) {
 			fullLineBbox.format(3);

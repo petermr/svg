@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.extract;
+package org.xmlcml.graphics.svg.cache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,6 @@ import org.xmlcml.graphics.svg.SVGPolygon;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGShape;
-import org.xmlcml.graphics.svg.cache.SVGCache;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
 
@@ -26,8 +25,8 @@ import org.xmlcml.graphics.svg.objects.SVGTriangle;
  * @author pm286
  *
  */
-public class ShapeExtractor extends AbstractExtractor {
-	private static final Logger LOG = Logger.getLogger(ShapeExtractor.class);
+public class ShapeCache extends AbstractCache {
+	private static final Logger LOG = Logger.getLogger(ShapeCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -48,7 +47,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	private List<List<SVGShape>> convertedShapeListList;
 	private List<SVGShape> convertedShapeList;
 	
-	public ShapeExtractor(SVGCache svgStore) {
+	public ShapeCache(SVGCache svgStore) {
 		super(svgStore);
 		init();
 	}
@@ -74,7 +73,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	 */
 	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		path2ShapeConverter.setSplitAtMoveCommands(svgStore.getSplitAtMove());
+		path2ShapeConverter.setSplitAtMoveCommands(svgCache.getSplitAtMove());
 		convertedShapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
 		for (List<SVGShape> shapeList : convertedShapeListList) {
 			for (SVGShape shape : shapeList) {
@@ -224,7 +223,7 @@ public class ShapeExtractor extends AbstractExtractor {
 	public void extractShapes(List<SVGPath> pathList, GraphicsElement svgElement) {
 		convertToShapes(pathList);
 		createListsOfShapes(svgElement);
-		removeElementsOutsideBox(svgStore.getPositiveXBox());
+		removeElementsOutsideBox(svgCache.getPositiveXBox());
 		
 //		debug();
 	}
