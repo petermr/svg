@@ -39,7 +39,6 @@ public class TextExtractor extends AbstractExtractor {
 		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
 		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, svgStore.isRemoveWhitespace());
-//		this.currentTextList = nonNegativeNonEmptyTextList;
 		this.currentTextList = originalTextList;
 	}
 

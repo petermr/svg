@@ -226,7 +226,7 @@ public class ShapeExtractor extends AbstractExtractor {
 		createListsOfShapes(svgElement);
 		removeElementsOutsideBox(svgStore.getPositiveXBox());
 		
-		debug();
+//		debug();
 	}
 
 	public SVGG debug(String outFilename) {
@@ -247,56 +247,6 @@ public class ShapeExtractor extends AbstractExtractor {
 		writeDebug("shapes",outFilename, g);
 		return g;
 	}
-
-//	debug(g, rectList, "black", "#ffff77", 0.2);
-//	debug(g, polygonList, "black", "orange", 0.3);
-//	debug(g, triangleList, "black", "#ffeeff", 0.3);
-//	debug(g, ellipseList, "black", "red", 0.3);
-//	debug(g, lineList, "cyan", "red", 0.3);
-//	debug(g, polylineList, "magenta", "green", 0.3);
-//	debug(g, circleList, "black", "blue", 0.3); // highest priority
-//	debug(g, pathList, "purple", "pink", 0.3);
-
-//	private void debugRects(SVGG g, List<SVGRect> rectList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugPolygons(SVGG g, List<SVGLine> polygonsList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugTriangles(SVGG g, List<SVGLine> triangleList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugEllipses(SVGG g, List<SVGLine> ellipseList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugLines(SVGG g, List<SVGLine> lineList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugPolylines(SVGG g, List<SVGLine> polylineList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugCircles(SVGG g, List<SVGLine> circleList, String stroke, String fill, double opacity) {
-//		
-//	}
-//
-//	private void debugPaths(SVGG g, List<SVGLine> debugList, String stroke, String fill, double opacity) {
-//		
-//	}
-
-//	debug(g, rectList, "black", "#ffff77", 0.2);
-//	debug(g, polygonList, "black", "orange", 0.3);
-//	debug(g, triangleList, "black", "#ffeeff", 0.3);
-//	debug(g, ellipseList, "black", "red", 0.3);
-//	debug(g, lineList, "cyan", "red", 0.3);
-//	debug(g, polylineList, "magenta", "green", 0.3);
-//	debug(g, circleList, "black", "blue", 0.3); // highest priority
-//	debug(g, pathList, "purple", "pink", 0.3);
 
 	private void debug(SVGG g, List<? extends SVGElement> elementList, String stroke, String fill, double opacity) {
 		for (GraphicsElement e : elementList) {
@@ -336,14 +286,6 @@ public class ShapeExtractor extends AbstractExtractor {
 		return boundingBox;
 	}
 
-//	debug(g, rectList, "black", "#ffff77", 0.2);
-//	debug(g, polygonList, "black", "orange", 0.3);
-//	debug(g, triangleList, "black", "#ffeeff", 0.3);
-//	debug(g, ellipseList, "black", "red", 0.3);
-//	debug(g, lineList, "cyan", "red", 0.3);
-//	debug(g, polylineList, "magenta", "green", 0.3);
-//	debug(g, circleList, "black", "blue", 0.3); // highest priority
-//	debug(g, pathList, "purple", "pink", 0.3);
 
 	public List<SVGShape> getOrCreateAllShapeList() {
 		if (allShapeList == null) {
