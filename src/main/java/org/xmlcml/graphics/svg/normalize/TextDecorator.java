@@ -71,7 +71,7 @@ public class TextDecorator extends AbstractDecorator {
 		this.yValues = new RealArray();
 	}
 
-	public SVGG compact(List<SVGText> texts) {
+	public SVGG compactTexts(List<SVGText> texts) {
 		uncompactedTextListList = new ArrayList<List<SVGText>>();
 		if (texts != null && texts.size() > 0) {
 			addSingleCharTextToUncompactedList(texts.get(0));

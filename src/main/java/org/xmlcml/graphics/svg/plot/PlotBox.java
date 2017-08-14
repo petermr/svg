@@ -25,7 +25,7 @@ import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.cache.LineCache;
-import org.xmlcml.graphics.svg.cache.SVGCache;
+import org.xmlcml.graphics.svg.cache.ComponentCache;
 
 /** creates axes from ticks, scales, titles.
  * 
@@ -109,11 +109,11 @@ public class PlotBox {
 	private File svgOutFile;
 	private String csvContent;
 	private File csvOutFile;
-	private SVGCache svgCache;
+	private ComponentCache svgCache;
 	private String fileRoot;
 		
 
-	public SVGCache getSVGCache() {
+	public ComponentCache getSVGCache() {
 		return svgCache;
 	}
 
@@ -167,7 +167,7 @@ public class PlotBox {
 			throw new RuntimeException("nonexistent file or isDirectory "+inputFile);
 		}
 		fileRoot = inputFile.getName();
-		svgCache = new SVGCache(this);
+		svgCache = new ComponentCache(this);
 		try {
 			svgCache.readGraphicsComponents(new FileInputStream(inputFile));
 		} catch (IOException e) {
@@ -176,7 +176,7 @@ public class PlotBox {
 	}
 
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
-		svgCache = new SVGCache(this);
+		svgCache = new ComponentCache(this);
 		svgCache.setFileRoot(fileRoot);
 		svgCache.readGraphicsComponents(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
@@ -195,7 +195,7 @@ public class PlotBox {
 		LineCache lineCache = svgCache.getOrCreateLineCache();
 		for (AnnotatedAxis axis : axisArray) {
 			axis.getOrCreateSingleLine();		
-			axis.createAndFillTickBox(lineCache.getHorizontalLines(), lineCache.getVerticalLines());
+			axis.createAndFillTickBox(lineCache.getOrCreateHorizontalLineList(), lineCache.getOrCreateVerticalLineList());
 		}
 	}
 
@@ -308,46 +308,6 @@ public class PlotBox {
 	// getters and setters
 	
 
-//	public List<SVGText> getTextList() {
-//		return textList;
-//	}
-//
-//	public void setTextList(List<SVGText> textList) {
-//		this.textList = textList;
-//	}
-
-//	public List<SVGLine> getLineList() {
-//		return lineList;
-//	}
-//
-//	public void setLineList(List<SVGLine> lineList) {
-//		this.lineList = lineList;
-//	}
-//
-//	public List<SVGCircle> getCircleList() {
-//		return circleList;
-//	}
-//
-//	public void setCircleList(List<SVGCircle> circleList) {
-//		this.circleList = circleList;
-//	}
-
-//	public SVGRect getFullLineBox() {
-//		return fullLineBox;
-//	}
-//
-//	public void setFullLineBox(SVGRect fullLineBox) {
-//		this.fullLineBox = fullLineBox;
-//	}
-//
-//	public SVGElement getSvgElement() {
-//		return svgElement;
-//	}
-//
-//	public void setSvgElement(SVGElement svgElement) {
-//		this.svgElement = svgElement;
-//	}
-
 	public BoxType getBoxType() {
 		return boxType;
 	}
@@ -374,11 +334,11 @@ public class PlotBox {
 	}
 
 	public List<SVGText> getHorizontalTexts() {
-		return svgCache.getOrCreateTextCache().getHorizontalTexts();
+		return svgCache.getOrCreateTextCache().getOrCreateHorizontalTexts();
 	}
 
 	public List<SVGText> getVerticalTexts() {
-		return svgCache.getOrCreateTextCache().getVerticalTexts();
+		return svgCache.getOrCreateTextCache().getOrCreateVerticalTexts();
 	}
 	
 	// static methods

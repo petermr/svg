@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.graphics.svg.Fixtures;
@@ -94,6 +95,7 @@ public class HiddenGraphicsTest {
 	/** 
 	 * 
 	 */
+	@Ignore // too long
 	public void testImage3_2() throws Exception {
 		HiddenGraphics hg = new HiddenGraphics();
 		File file = Fixtures.IMAGE_G_3_2_SVG;

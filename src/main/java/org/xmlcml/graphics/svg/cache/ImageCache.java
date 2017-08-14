@@ -25,13 +25,20 @@ public class ImageCache extends AbstractCache{
 	private List<SVGImage> imageList;
 	private String imageBoxColor;
 
-	public void extractImages(GraphicsElement svgElement) {
-		this.imageList = SVGImage.extractSelfAndDescendantImages(svgElement);
+	public List<SVGImage> getOrCreateImageList() {
+		if (imageList == null) {
+			imageList = SVGImage.extractSelfAndDescendantImages(componentCache.svgElement);
+		}
+		return imageList;
 	}
 
-	public ImageCache(SVGCache svgStore) {
+	public ImageCache(ComponentCache svgStore) {
 		super(svgStore);
 		setDefaults();
+	}
+	
+	public List<? extends SVGElement> getOrCreateElementList() {
+		return getOrCreateImageList();
 	}
 	
 	private void setDefaults() {
@@ -74,9 +81,12 @@ public class ImageCache extends AbstractCache{
 		}
 	}
 
+	/** the bounding box of the actual image components
+	 * The extent of the context (e.g. svgCache) may be larger
+	 * @return the bounding box of the contained image
+	 */
 	public Real2Range getBoundingBox() {
-		boundingBox = SVGElement.createBoundingBox(imageList);
-		return boundingBox;
+		return getOrCreateBoundingBox(imageList);
 	}
 
 

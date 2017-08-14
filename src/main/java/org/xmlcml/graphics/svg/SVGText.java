@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Angle.Units;
 import org.xmlcml.euclid.EuclidConstants;
+import org.xmlcml.euclid.EuclidRuntimeException;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
@@ -99,6 +100,9 @@ public class SVGText extends SVGElement {
 	private FontWeight fontWeight;
 	private Double widthOfFirstCharacter;
 	private Double heightOfFirstCharacter;
+
+	private RealArray xArray;
+	private RealArray yArray;
 	
 	/** 
 	 * Constructor
@@ -191,6 +195,33 @@ public class SVGText extends SVGElement {
         return new SVGText(this, TAG);
     }
     
+    /** now edited to manage compact form 
+     * x = "1.2, 3.4" etc.
+     * @return first Xcoordinate
+     */
+	public Real2 getXY() {
+		xArray = parseSingleOrArrayAttribute(SVGElement.X);
+		Double x = (xArray == null || xArray.size() == 0) ? null : xArray.elementAt(0);
+		yArray = parseSingleOrArrayAttribute(SVGElement.Y);
+		Double y = (yArray == null || yArray.size() == 0) ? null : yArray.elementAt(0);
+		return (x == null || y == null) ? null : new Real2(x, y);
+	}
+
+	private RealArray parseSingleOrArrayAttribute(String attName) {
+		String attValue = this.getAttributeValue(attName);
+		return parseRealArray(attValue);
+	}
+
+	private RealArray parseRealArray(String attValue) {
+		RealArray coordArray = null;
+		try {
+			coordArray = new RealArray(attValue.split("(\\,|\\s+)"));
+		} catch (EuclidRuntimeException ere) {
+			// bad coordArray;
+		}
+		return coordArray;
+	}
+	
 	protected void drawElement(Graphics2D g2d) {
 		saveGraphicsSettingsAndApplyTransform(g2d);
 		String text = this.getText();
@@ -370,6 +401,10 @@ public class SVGText extends SVGElement {
 				}
 			} else {
 				double fontWidthFactor = 1.0;
+				Real2 xy = getXY();
+				if (xy == null) {
+					return null;
+				}
 				width = getEstimatedHorizontalLength(fontWidthFactor);
 				if (width == null || Double.isNaN(width)) {
 					width = MIN_WIDTH;
@@ -385,8 +420,7 @@ public class SVGText extends SVGElement {
 					}
 				}
 				height = getFontSize() * fontWidthFactor;
-				Real2 xy = getXY();
-				boundingBox = new Real2Range(xy, xy.plus(new Real2(width, -height)));
+				boundingBox = (xy == null) ? null : new Real2Range(xy, xy.plus(new Real2(width, -height)));
 			}	
 			if (!boundingBox.isValid()) {
 				throw new RuntimeException("Invalid bbox: "+width+"/"+height);
@@ -424,7 +458,14 @@ public class SVGText extends SVGElement {
 	 */
 	public Double getEstimatedHorizontalLength(double fontWidthFactor) {
 		estimatedHorizontallength = Double.NaN;
-		if (getChildTSpans().size() == 0) {
+		if (xArray != null && yArray != null) {
+			String widthS = SVGUtil.getSVGXAttribute(this, WIDTH);
+			RealArray widthArray = parseRealArray(widthS);
+			String text = getText();
+			int nchar = xArray.size();
+			estimatedHorizontallength = xArray.get(nchar - 1) - xArray.get(0);
+			estimatedHorizontallength += widthArray.get(nchar - 1) * 0.001 * this.getFontSize();
+		} else if (getChildTSpans().size() == 0) {
 			String s = getText();
 			if (s != null) {
 				String family = getFontFamily();
@@ -867,8 +908,8 @@ public class SVGText extends SVGElement {
 	 * @return width (or null)
 	 */
 	public Double getSVGXFontWidth() {
-		String width = SVGUtil.getSVGXAttribute(this, WIDTH);
-		return width == null ? null : Double.valueOf(width); 
+		String widthS = SVGUtil.getSVGXAttribute(this, WIDTH);
+		return widthS == null ? null : Double.valueOf(widthS); 
 	}
 	
 	/** 
@@ -887,19 +928,11 @@ public class SVGText extends SVGElement {
 	 * @return width (or null)
 	 */
 	public void setSVGXFontWidth(Double width) {
-//		if (width != null) {
-//			Attribute widthAtt = SVGUtil.getSVGXAttributeAttribute(this, WIDTH);
-//			if (widthAtt != null) {
-//				widthAtt.detach();
-//			}
-//		}
 		SVGUtil.setSVGXAttribute(this, WIDTH, String.valueOf(width));
-//		}
 	}
 
 	public void setSVGXFontWidth(RealArray array) {
 		SVGUtil.setSVGXAttribute(this, WIDTH, array.getStringArray());
-//		}
 	}
 
 	public GlyphVector getGlyphVector() {

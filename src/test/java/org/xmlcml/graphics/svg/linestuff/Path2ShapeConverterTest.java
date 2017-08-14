@@ -23,7 +23,7 @@ import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.cache.SVGCache;
+import org.xmlcml.graphics.svg.cache.ComponentCache;
 import org.xmlcml.xml.XMLUtil;
 
 
@@ -471,7 +471,7 @@ public class Path2ShapeConverterTest {
 				+ " stroke-width=\"0.0\" fill=\"#131313\" clip-path=\"url(#clipPath1)\" stroke=\"black\" />"
 				+ "</svg>";
 		SVGElement svgElement0 = SVGElement.readAndCreateSVG(svgXML);
-		SVGCache svgStore = new SVGCache();
+		ComponentCache svgStore = new ComponentCache();
 		svgStore.readGraphicsComponents(svgElement0);
 		SVGElement svgElement = (SVGElement) svgStore.getExtractedSVGElement();
 		List<SVGLine> lineList = SVGLine.extractSelfAndDescendantLines(svgElement);

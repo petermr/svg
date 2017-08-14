@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.Transform2;
 import org.xmlcml.graphics.svg.cache.ImageCache;
-import org.xmlcml.graphics.svg.cache.SVGCache;
+import org.xmlcml.graphics.svg.cache.ComponentCache;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Attribute;
@@ -244,13 +244,13 @@ public class SVGG extends SVGElement {
 		this.addAttribute(new Attribute(FILE, filename));
 	}
 
-	public ImageCache getOrCreateImageCache(SVGCache svgCache) {
-		if (svgCache.imageCache == null) {
-			svgCache.imageCache = new ImageCache(svgCache);
-			svgCache.imageCache.extractImages(svgCache.svgElement);
-			svgCache.imageBox = svgCache.imageCache.getBoundingBox();
-		}
-		return svgCache.imageCache;
-	}
+//	public ImageCache getOrCreateImageCache(ComponentCache svgCache) {
+//		if (svgCache.imageCache == null) {
+//			svgCache.imageCache = new ImageCache(svgCache);
+//			svgCache.imageCache.getOrCreateImageList();
+//			svgCache.imageBox = svgCache.imageCache.getBoundingBox();
+//		}
+//		return svgCache.imageCache;
+//	}
 
 }

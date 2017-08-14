@@ -46,6 +46,7 @@ public class PlotBoxTest {
 	}
 	
 	@Test
+	@Ignore // too long
 	public void testConvertAllSVG2CSV() throws IOException {
 		String[] fileRoots = {
 				"bakkerplot", // OK
@@ -146,6 +147,7 @@ public class PlotBoxTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testTilburgVector0() throws IOException {
 		File TILBURG_DIR = new File(Fixtures.PLOT_DIR, "tilburgVectors");
 		String root =

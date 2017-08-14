@@ -95,6 +95,13 @@ public class Fixtures {
 	public static final File IMAGE_2_13_SVG = new File(Fixtures.MOLECULES_DIR, "image.g.2.13.svg");
 	public static final File IMAGE_2_11_NO2_SVG = new File(Fixtures.MOLECULES_DIR, "image.g.2.11.no2.svg");
 	
+	public static final File TABLE_LINE_DIR = new File(TABLE_DIR, "line");
+	public static final File TABLE_RECT_DIR = new File(TABLE_DIR, "rect");
+	public static final File TABLE_PAGE_DIR = new File(TABLE_DIR, "page");
+	
+	public static final File TARGET_TABLE_CACHE_DIR = new File("target/table/cache/");
+
+
 	public static final double EPS = 0.5;
 
 	public static void writeImageQuietly(BufferedImage image, File file) {

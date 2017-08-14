@@ -73,7 +73,7 @@ public class PathCache extends AbstractCache{
 		return;
 	}
 
-	public PathCache(SVGCache svgStore) {
+	public PathCache(ComponentCache svgStore) {
 		super(svgStore);
 		setDefaults();
 	}
@@ -193,6 +193,12 @@ public class PathCache extends AbstractCache{
 	public List<SVGPath> getCurrentPathList() {
 		return currentPathList;
 	}
+	
+	public List<? extends SVGElement> getOrCreateElementList() {
+		return getCurrentPathList();
+	}
+
+
 
 	public Collection<? extends SVGPath> getOriginalPathList() {
 		return originalPathList;
@@ -222,12 +228,12 @@ public class PathCache extends AbstractCache{
 		}
 	}
 
+	/** the bounding box of the actual path components
+	 * The extent of the context (e.g. svgCache) may be larger
+	 * @return the bounding box of the contained path
+	 */
 	public Real2Range getBoundingBox() {
-		boundingBox = SVGElement.createBoundingBox(originalPathList);
-		return boundingBox;
+		return getOrCreateBoundingBox(originalPathList);
 	}
 
-
-
-	
 }

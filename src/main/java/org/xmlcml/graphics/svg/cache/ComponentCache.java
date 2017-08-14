@@ -41,8 +41,8 @@ import org.xmlcml.graphics.svg.plot.PlotBox;
  * @author pm286
  *
  */
-public class SVGCache {
-	public static final Logger LOG = Logger.getLogger(SVGCache.class);
+public class ComponentCache extends AbstractCache {
+	public static final Logger LOG = Logger.getLogger(ComponentCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -96,20 +96,23 @@ public class SVGCache {
 			return abbreviations;
 		}
 	}
+	
+	// =======================================
+	
 	public static int ZERO_PLACES = 0;
 	
 
 	public ImageCache imageCache;
 	private PathCache pathCache;
-	ShapeCache shapeExtractor; // package since used between LineCache and RectCache
-	private TextCache textExtractor;
+	private TextCache textCache;
 	private LineCache lineCache;
 	private RectCache rectCache;
+	// shapeCache is in superclass
 	
 	private Real2Range positiveXBox;
 
 	public String fileRoot;
-	public GraphicsElement svgElement;
+	public SVGElement svgElement;
 	public String debugRoot = "target/debug/";
 	private String imageDebug = "target/images/";
 	private String pathDebug = "target/paths/";
@@ -120,7 +123,7 @@ public class SVGCache {
 	private PlotBox plotBox; // may not be required
 	
 	private boolean removeWhitespace = false;
-	private boolean removeDuplicatePaths = true;
+//	private boolean removeDuplicatePaths = true;
 	private boolean splitAtMove = true;
 	
 	public Real2Range imageBox;
@@ -129,17 +132,19 @@ public class SVGCache {
 	private Real2Range totalBox;
 
 	private SVGG extractedSVGElement;
+	List<SVGElement> allElementList;
+	List<Real2Range> boundingBoxList;
 
 	/** this may change as we decide what types of object interact with store
 	 * may need to move to GraphicsCache
 	 * 
 	 * @param plotBox
 	 */
-	public SVGCache(PlotBox plotBox) {
+	public ComponentCache(PlotBox plotBox) {
 		this.plotBox = plotBox;
 	}
 	
-	public SVGCache() {
+	public ComponentCache() {
 	}
 
 	public void readGraphicsComponents(File file) throws FileNotFoundException {
@@ -162,14 +167,13 @@ public class SVGCache {
 			lineCache.createHorizontalAndVerticalLines(svgElement);
 			lineCache.makeLongHorizontalAndVerticalEdges();
 			lineCache.makeFullLineBoxAndRanges();
-			textExtractor.createHorizontalAndVerticalTexts();
 		} else {
 			throw new RuntimeException("Null svgElement");
 		}
 	}
 
-	private void extractSVGComponents(GraphicsElement svgElem) {
-		svgElement = (GraphicsElement) svgElem.copy();
+	private void extractSVGComponents(SVGElement svgElem) {
+		svgElement = (SVGElement) svgElem.copy();
 		extractedSVGElement = new SVGG();
 		
 		 // is this a good idea? These are clipping boxes. 
@@ -180,8 +184,8 @@ public class SVGCache {
 		removeEmptyTextElements();
 		removeNegativeXorYElements();
 		
-		getOrCreatePathExtractor();
-		extractedSVGElement.getOrCreateImageCache(this);
+		getOrCreatePathCache();
+		getOrCreateImageCache();
 		getOrCreateShapeCache();
 		getOrCreateTextCache();
 		totalBox = textBox == null ? pathBox : textBox.plus(pathBox);
@@ -202,12 +206,12 @@ public class SVGCache {
 	//		gg.appendChild(g.copy());
 		
 		
-		g = this.shapeExtractor.debug(shapeDebug + fileRoot+".debug.svg");
+		g = this.shapeCache.debug(shapeDebug + fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
 
 		
-		g = this.textExtractor.debug(textDebug + this.fileRoot+".debug.svg");
+		g = this.textCache.debug(textDebug + this.fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("text"));
 		gg.appendChild(g.copy());
 		
@@ -215,7 +219,8 @@ public class SVGCache {
 		SVGSVG.wrapAndWriteAsSVG(gg, new File(plotDebug, fileRoot+".debug.svg"));
 	}
 
-	public PathCache getOrCreatePathExtractor() {
+	
+	public PathCache getOrCreatePathCache() {
 		if (pathCache == null) {
 			this.pathCache = new PathCache(this);
 			this.pathCache.extractPaths(this.svgElement);
@@ -224,25 +229,35 @@ public class SVGCache {
 		return pathCache;
 	}
 
-	public TextCache getOrCreateTextCache() {
-		if (textExtractor == null) {
-			this.textExtractor = new TextCache(this);
-			this.textExtractor.extractTexts(this.svgElement);
-			textBox = textExtractor.getBoundingBox();
-			addElementsToExtractedElement(textExtractor.getTextList());
+	public ImageCache getOrCreateImageCache() {
+		if (imageCache == null) {
+			this.imageCache = new ImageCache(this);
+			this.imageCache.getOrCreateImageList();
+			imageBox = imageCache.getBoundingBox();
 		}
-		return textExtractor;
+		return imageCache;
+	}
+
+	public TextCache getOrCreateTextCache() {
+		if (textCache == null) {
+			this.textCache = new TextCache(this);
+			this.textCache.extractTexts(this.svgElement);
+			textBox = textCache.getBoundingBox();
+			addElementsToExtractedElement(textCache.getTextList());
+			textCache.createHorizontalAndVerticalTexts();
+		}
+		return textCache;
 	}
 
 	public ShapeCache getOrCreateShapeCache() {
-		if (shapeExtractor == null) {
-			this.shapeExtractor = new ShapeCache(this);
+		if (shapeCache == null) {
+			this.shapeCache = new ShapeCache(this);
 			List<SVGPath> currentPathList = this.pathCache.getCurrentPathList();
-			this.shapeExtractor.extractShapes(currentPathList, svgElement);
-			List<SVGShape> shapeList = shapeExtractor.getOrCreateConvertedShapeList();
+			this.shapeCache.extractShapes(currentPathList, svgElement);
+			List<SVGShape> shapeList = shapeCache.getOrCreateConvertedShapeList();
 			addElementsToExtractedElement(shapeList);
 		}
-		return shapeExtractor;
+		return shapeCache;
 	}
 
 	public LineCache getOrCreateLineCache() {
@@ -303,7 +318,7 @@ public class SVGCache {
 	public GraphicsElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
-		g.appendChild(shapeExtractor.createSVGAnnotations());
+		g.appendChild(shapeCache.createSVGAnnotations());
 		g.appendChild(pathCache.createSVGAnnotation().copy());
 		return g;
 	}
@@ -311,7 +326,7 @@ public class SVGCache {
 	private SVGG copyOriginalElements() {
 		SVGG g = new SVGG();
 		ShapeCache.addList(g, new ArrayList<SVGPath>(pathCache.getOriginalPathList()));
-		ShapeCache.addList(g, new ArrayList<SVGText>(textExtractor.getTextList()));
+		ShapeCache.addList(g, new ArrayList<SVGText>(textCache.getTextList()));
 		g.setStroke("pink");
 		return g;
 	}
@@ -361,7 +376,7 @@ public class SVGCache {
 	 */
 	public List<Real2Range> getMergedBoundingBoxes(double d) {
 		List<Real2Range> boundingBoxes = new ArrayList<Real2Range>();
-		for (SVGShape shape : shapeExtractor.getOrCreateAllShapeList()) {
+		for (SVGShape shape : shapeCache.getOrCreateAllShapeList()) {
 			Real2Range bbox = shape.getBoundingBox();
 			bbox.extendBothEndsBy(Direction.HORIZONTAL, d, d);
 			bbox.extendBothEndsBy(Direction.VERTICAL, d, d);
@@ -428,44 +443,89 @@ public class SVGCache {
 		return (feature == null) ? null : getFeatureValue(feature);
 	}
 	public String getFeatureValue(Feature feature) {
-		ShapeCache shapeExtractor = getOrCreateShapeCache();
 		String value = null;
+		getOrCreateCaches();
 		if (Feature.HORIZONTAL_TEXT_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateTextCache().getHorizontalTexts().size());
+			value = String.valueOf(textCache.getOrCreateHorizontalTexts().size());
 		} else if (Feature.VERTICAL_TEXT_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateTextCache().getVerticalTexts().size());
+			value = String.valueOf(textCache.getOrCreateVerticalTexts().size());
 		} else if(Feature.PATH_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getPathList().size());
+			value = String.valueOf(shapeCache.getPathList().size());
 		} else if(Feature.CIRCLE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getCircleList().size());
+			value = String.valueOf(shapeCache.getCircleList().size());
 		} else if(Feature.ELLIPSE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getEllipseList().size());
+			value = String.valueOf(shapeCache.getEllipseList().size());
 		} else if(Feature.LINE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getLineList().size());
+			value = String.valueOf(shapeCache.getLineList().size());
 		} else if(Feature.POLYGONS_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getPolygonList().size());
+			value = String.valueOf(shapeCache.getPolygonList().size());
 		} else if(Feature.POLYLINE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getPolylineList().size());
+			value = String.valueOf(shapeCache.getPolylineList().size());
 		} else if(Feature.RECT_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getRectList().size());
+			value = String.valueOf(shapeCache.getRectList().size());
 		} else if(Feature.SHAPE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateShapeCache().getShapeList().size());
+			value = String.valueOf(shapeCache.getShapeList().size());
 		} else if(Feature.LONG_HORIZONTAL_RULE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateLineCache().getLongHorizontalLineList().size());
+			value = String.valueOf(lineCache.getOrCreateLongHorizontalLineList().size());
 		} else if(Feature.SHORT_HORIZONTAL_RULE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateLineCache().getShortHorizontalLineList().size());
+			value = String.valueOf(lineCache.getShortHorizontalLineList().size());
 		} else if(Feature.TOP_HORIZONTAL_RULE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateLineCache().getTopHorizontalLineList().size());
+			value = String.valueOf(lineCache.getTopHorizontalLineList().size());
 		} else if(Feature.BOTTOM_HORIZONTAL_RULE_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateLineCache().getBottomHorizontalLineList().size());
+			value = String.valueOf(lineCache.getBottomHorizontalLineList().size());
 		} else if(Feature.LONG_HORIZONTAL_RULE_THICKNESS_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateLineCache().getHorizontalLineStrokeWidthSet().size());
+			value = String.valueOf(lineCache.getHorizontalLineStrokeWidthSet().size());
 		} else if(Feature.HORIZONTAL_PANEL_COUNT.equals(feature)) {
-			value = String.valueOf(getOrCreateRectCache().getHorizontalPanelList().size());
+			value = String.valueOf(rectCache.getHorizontalPanelList().size());
 		} else {
-			LOG.warn("No extractor for "+feature);
+			LOG.warn("No cache for "+feature);
 		}
 		return value;
+	}
+
+	public Real2Range getBoundingBox() {
+		return totalBox;
+	}
+
+	/** aggregates all elements, include derived ones.
+	 * 
+	 * @return single list of all raw and derived SVGElements
+	 */
+	@Override
+	public List<? extends SVGElement> getOrCreateElementList() {
+		if (allElementList == null) {
+			allElementList = new ArrayList<SVGElement>();
+			getOrCreateCaches();
+			// don't add paths as we have already converted to shapes
+//			allElementList.addAll(pathCache.getOrCreateElementList());
+			allElementList.addAll(imageCache.getOrCreateElementList());
+			allElementList.addAll(shapeCache.getOrCreateElementList());
+			allElementList.addAll(rectCache.getOrCreateElementList());
+			allElementList.addAll(lineCache.getOrCreateElementList());
+			// this goes last in case it would be hidden
+			allElementList.addAll(textCache.getOrCreateElementList());
+		}
+		return allElementList;
+	}
+
+	private void getOrCreateCaches() {
+		getOrCreatePathCache();
+		getOrCreateTextCache();
+		getOrCreateImageCache();
+		getOrCreateShapeCache();
+		getOrCreateRectCache();
+		getOrCreateLineCache();
+	}
+
+	public List<Real2Range> getBoundingBoxList() {
+		if (boundingBoxList == null) {
+			boundingBoxList = new ArrayList<Real2Range>();
+			getOrCreateElementList();
+			for (SVGElement element : allElementList) {
+				boundingBoxList.add(element.getBoundingBox());
+			}
+		}
+		return boundingBoxList;
 	}
 
 }

@@ -9,6 +9,7 @@ import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
+import org.xmlcml.graphics.svg.normalize.TextDecorator;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
@@ -38,19 +39,23 @@ public class TextCache extends AbstractCache {
 	private List<SVGText> nonNegativeNonEmptyTextList;
 	private List<SVGText> currentTextList;
 	
-	public TextCache(SVGCache svgCache) {
+	public TextCache(ComponentCache svgCache) {
 		super(svgCache);
 	}
 
 	public void extractTexts(GraphicsElement svgElement) {
 		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
 		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
-		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, svgCache.isRemoveWhitespace());
+		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, componentCache.isRemoveWhitespace());
 		this.currentTextList = originalTextList;
 	}
 
 	public List<SVGText> getTextList() {
 		return currentTextList;
+	}
+	
+	public List<? extends SVGElement> getOrCreateElementList() {
+		return getTextList();
 	}
 
 	public SVGG debug(String outFilename) {
@@ -111,26 +116,31 @@ public class TextCache extends AbstractCache {
 		g.appendChild(box0);
 	}
 	
+	/** the bounding box of the actual text components
+	 * The extent of the context (e.g. svgCache) may be larger
+	 * @return the bounding box of the contained text
+	 */
 	public Real2Range getBoundingBox() {
-		boundingBox = SVGElement.createBoundingBox(originalTextList);
-		return boundingBox;
+		return getOrCreateBoundingBox(originalTextList);
 	}
 
 	public void createHorizontalAndVerticalTexts() {
-		this.horizontalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
-		this.verticalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
-		
-		StringBuilder sb = new StringBuilder();
-		for (SVGText verticalText : this.verticalTexts) {
-			sb.append("/"+verticalText.getValue());
-		}
-		LOG.trace("TEXT horiz: " + this.horizontalTexts.size()+"; vert: " + this.verticalTexts.size()+"; " /*+ "/"+sb*/);
+		getOrCreateHorizontalTexts();
+		getOrCreateVerticalTexts();
+//		this.horizontalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+//		this.verticalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
 	}
-	public List<SVGText> getHorizontalTexts() {
+	public List<SVGText> getOrCreateHorizontalTexts() {
+		if (horizontalTexts == null) {
+			horizontalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+		}
 		return horizontalTexts;
 	}
 
-	public List<SVGText> getVerticalTexts() {
+	public List<SVGText> getOrCreateVerticalTexts() {
+		if (verticalTexts == null) {
+			verticalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+		}
 		return verticalTexts;
 	}
 
@@ -231,6 +241,15 @@ public class TextCache extends AbstractCache {
 		style = style.replaceAll("fill:", "");
 		style = style.replaceAll("clip-path\\:url\\(#clipPath\\d+\\);", "");
 		return style;
+	}
+
+	public SVGG createCompactedTextsAndReplace() {
+		TextDecorator textDecorator = new TextDecorator();
+		SVGG g = textDecorator.compactTexts(originalTextList);
+		currentTextList = SVGText.extractSelfAndDescendantTexts(g);
+		componentCache.allElementList = null;
+		componentCache.boundingBoxList = null;
+		return g;
 	}
 
 

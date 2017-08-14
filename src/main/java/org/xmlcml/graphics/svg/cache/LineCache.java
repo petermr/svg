@@ -35,8 +35,8 @@ public class LineCache extends AbstractCache {
 		LOG.setLevel(Level.DEBUG);
 	}
 
-	public List<SVGLine> horizontalLines;
-	public List<SVGLine> verticalLines;
+	private List<SVGLine> horizontalLines;
+	private List<SVGLine> verticalLines;
 
 	private List<SVGLine> lineList;
 	private SVGLineList longHorizontalLineList;
@@ -48,55 +48,77 @@ public class LineCache extends AbstractCache {
 	private AxialLineList longHorizontalEdgeLines;
 	private AxialLineList longVerticalEdgeLines;
 	private SVGRect fullLineBox;
-	public Real2Range lineBbox;
+	private Real2Range lineBbox;
 	
-	public Double axialLinePadding = 10.0; // to start with
-	public Double cornerEps = 0.5; // to start with
+	private Double axialLinePadding = 10.0; // to start with
+	private Double cornerEps = 0.5; // to start with
 	private List<SVGLine> allLines;
-
-	public LineCache(SVGCache svgCache) {
+	
+	public LineCache(ComponentCache svgCache) {
 		super(svgCache);
-		lineList = svgCache.getOrCreateShapeCache().getLineList();
+		lineList = shapeCache.getLineList();
 	}
 
+	/** the bounding box of the actual line components
+	 * The extent of the context (e.g. svgCache) may be larger
+	 * @return the bounding box of the contained lines
+	 */
 	public Real2Range getBoundingBox() {
-		boundingBox = SVGElement.createBoundingBox(lineList);
-		return boundingBox;
+		return getOrCreateBoundingBox(lineList);
 	}
 
+	public List<? extends SVGElement> getOrCreateElementList() {
+		return lineList;
+	}
+
+	public List<SVGLine> getOrCreateLineList() {
+		return lineList;
+	}
+	
 	public void makeLongHorizontalAndVerticalEdges() {
+		
 		if (lineList != null && lineList.size() > 0) {
-			this.lineBbox = SVGElement.createBoundingBox(lineList);
-			this.longHorizontalEdgeLines = this.getSortedLinesCloseToEdge(this.horizontalLines, LineDirection.HORIZONTAL, this.lineBbox);
-			this.longVerticalEdgeLines = this.getSortedLinesCloseToEdge(this.verticalLines, LineDirection.VERTICAL, this.lineBbox);
-			SVGSVG.wrapAndWriteAsSVG(this.longHorizontalEdgeLines.getLineList(), new File(svgCache.debugRoot+svgCache.fileRoot+".horizEdges.svg"));
-			SVGSVG.wrapAndWriteAsSVG(this.longVerticalEdgeLines.getLineList(), new File(svgCache.debugRoot+svgCache.fileRoot+".vertEdges.svg"));
+			lineBbox = SVGElement.createBoundingBox(lineList);
+			getOrCreateLongHorizontalEdgeLines();
+			getOrCreateLongVerticalEdgeLines();
 		}
 		return;
 	}
 
+	private void getOrCreateLongVerticalEdgeLines() {
+		if (longVerticalEdgeLines == null) {
+			longVerticalEdgeLines = getSortedLinesCloseToEdge(verticalLines, LineDirection.VERTICAL, lineBbox);
+		}
+	}
+
+	private void getOrCreateLongHorizontalEdgeLines() {
+		if (longHorizontalEdgeLines == null) {
+			longHorizontalEdgeLines = getSortedLinesCloseToEdge(horizontalLines, LineDirection.HORIZONTAL, lineBbox);
+		}
+	}
+
 	public void makeFullLineBoxAndRanges() {
 		
-		this.fullLineBox = null;
+		fullLineBox = null;
 		RealRange fullboxXRange = null;
 		RealRange fullboxYRange = null;
-		if (this.longHorizontalEdgeLines != null && this.longHorizontalEdgeLines.size() > 0) {
-			fullboxXRange = this.createRange(this.longHorizontalEdgeLines, Direction.HORIZONTAL);
+		if (longHorizontalEdgeLines != null && longHorizontalEdgeLines.size() > 0) {
+			fullboxXRange = createRange(longHorizontalEdgeLines, Direction.HORIZONTAL);
 			fullboxXRange = fullboxXRange == null ? null : fullboxXRange.format(PlotBox.FORMAT_NDEC);
 		}
-		if (this.longVerticalEdgeLines != null && this.longVerticalEdgeLines.size() > 0) {
-			fullboxYRange = this.createRange(this.longVerticalEdgeLines, Direction.VERTICAL);
+		if (longVerticalEdgeLines != null && longVerticalEdgeLines.size() > 0) {
+			fullboxYRange = createRange(longVerticalEdgeLines, Direction.VERTICAL);
 			fullboxYRange = fullboxYRange == null ? null : fullboxYRange.format(PlotBox.FORMAT_NDEC);
 		}
 		if (fullboxXRange != null && fullboxYRange != null) {
-			this.fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
-			this.fullLineBox.format(PlotBox.FORMAT_NDEC);
+			fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
+			fullLineBox.format(PlotBox.FORMAT_NDEC);
 		}
-		if (this.fullLineBox == null && svgCache.pathBox != null) {
-			for (SVGRect rect : svgCache.shapeExtractor.getRectList()) {
+		if (fullLineBox == null && componentCache.pathBox != null) {
+			for (SVGRect rect : componentCache.shapeCache.getRectList()) {
 				Real2Range rectRange = rect.getBoundingBox();
-				if (svgCache.pathBox.isEqualTo(rectRange, this.axialLinePadding)) {
-					this.fullLineBox = rect;
+				if (componentCache.pathBox.isEqualTo(rectRange, axialLinePadding)) {
+					fullLineBox = rect;
 					break;
 				}
 			}
@@ -104,23 +126,31 @@ public class LineCache extends AbstractCache {
 	}
 
 	public SVGLineList getTopHorizontalLineList() {
+		if (topHorizontalLineList == null) {
+			Real2Range bbox = getOrCreateComponentCacheBoundingBox();
+			getOrCreateHorizontalLineList();
+		}
 		return topHorizontalLineList;
 	}
 
 	public SVGLineList getBottomHorizontalLineList() {
+		if (true) throw new RuntimeException("NYI");
 		return bottomHorizontalLineList;
 	}
 
-	public SVGLineList getLongHorizontalLineList() {
+	public SVGLineList getOrCreateLongHorizontalLineList() {
+		if (true) throw new RuntimeException("NYI");
 		return longHorizontalLineList;
 	}
 
 	public SVGLineList getShortHorizontalLineList() {
+		if (true) throw new RuntimeException("NYI");
 		return shortHorizontalLineList;
 	}
 
 	public Multiset<Double> getHorizontalLineStrokeWidthSet() {
 		if (horizontalLineStrokeWidthSet == null) {
+			getOrCreateHorizontalLineList();
 		}
 		return horizontalLineStrokeWidthSet;
 	}
@@ -133,16 +163,30 @@ public class LineCache extends AbstractCache {
 	 */
 	public void createHorizontalAndVerticalLines(SVGElement svgElement) {
 		
-		this.horizontalLines = SVGLine.findHorizontalOrVerticalLines(svgCache.shapeExtractor.getLineList(), LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
-		this.verticalLines = SVGLine.findHorizontalOrVerticalLines(svgCache.shapeExtractor.getLineList(), LineDirection.VERTICAL, AnnotatedAxis.EPS);
-		List<SVGPolyline> polylineList = svgCache.shapeExtractor.getPolylineList();
+		getOrCreateHorizontalLineList();
+		getOrCreateVerticalLineList();
+		List<SVGPolyline> polylineList = shapeCache.getPolylineList();
 		List<SVGPolyline> axialLShapes = SVGPolyline.findLShapes(polylineList);
 		for (int i = axialLShapes.size() - 1; i >= 0; i--) {
-			this.removeLShapesAndReplaceByLines(polylineList, axialLShapes.get(i), svgElement);
+			removeLShapesAndReplaceByLines(polylineList, axialLShapes.get(i), svgElement);
 		}
 		allLines = new ArrayList<SVGLine>();
 		allLines.addAll(this.horizontalLines);
 		allLines.addAll(this.verticalLines);
+	}
+
+	public List<SVGLine> getOrCreateVerticalLineList() {
+		if (verticalLines == null) {
+			verticalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+		}
+		return verticalLines;
+	}
+
+	public List<SVGLine> getOrCreateHorizontalLineList() {
+		if (horizontalLines == null) {
+			horizontalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+		}
+		return horizontalLines;
 	}
 
 	public RealRange createRange(SVGLineList lines, Direction direction) {
@@ -193,20 +237,14 @@ public class LineCache extends AbstractCache {
 
 
 	private static boolean isCloseToBoxEdge(RealRange parallelRange, Double parallelCoord, Double axialLinePadding) {
-		return Real.isEqual(parallelCoord, parallelRange.getMin(), axialLinePadding) || Real.isEqual(parallelCoord, parallelRange.getMax(), axialLinePadding);
-	}
-
-	public List<SVGLine> getHorizontalLines() {
-		return horizontalLines;
-	}
-
-	public List<SVGLine> getVerticalLines() {
-		return verticalLines;
+		return Real.isEqual(parallelCoord, parallelRange.getMin(), axialLinePadding) ||
+				Real.isEqual(parallelCoord, parallelRange.getMax(), axialLinePadding);
 	}
 
 	public SVGRect getFullLineBox() {
 		return fullLineBox;
 	}
+
 	
 
 }

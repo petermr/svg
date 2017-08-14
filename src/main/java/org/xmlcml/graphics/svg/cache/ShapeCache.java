@@ -47,7 +47,7 @@ public class ShapeCache extends AbstractCache {
 	private List<List<SVGShape>> convertedShapeListList;
 	private List<SVGShape> convertedShapeList;
 	
-	public ShapeCache(SVGCache svgStore) {
+	public ShapeCache(ComponentCache svgStore) {
 		super(svgStore);
 		init();
 	}
@@ -73,7 +73,7 @@ public class ShapeCache extends AbstractCache {
 	 */
 	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		path2ShapeConverter.setSplitAtMoveCommands(svgCache.getSplitAtMove());
+		path2ShapeConverter.setSplitAtMoveCommands(componentCache.getSplitAtMove());
 		convertedShapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
 		for (List<SVGShape> shapeList : convertedShapeListList) {
 			for (SVGShape shape : shapeList) {
@@ -223,7 +223,7 @@ public class ShapeCache extends AbstractCache {
 	public void extractShapes(List<SVGPath> pathList, GraphicsElement svgElement) {
 		convertToShapes(pathList);
 		createListsOfShapes(svgElement);
-		removeElementsOutsideBox(svgCache.getPositiveXBox());
+		removeElementsOutsideBox(componentCache.getPositiveXBox());
 		
 //		debug();
 	}
@@ -280,11 +280,14 @@ public class ShapeCache extends AbstractCache {
 		
 	}
 
+	/** the bounding box of the actual shape components
+	 * The extent of the context (e.g. svgCache) may be larger
+	 * @return the bounding box of the contained shape
+	 */
 	public Real2Range getBoundingBox() {
-		boundingBox = SVGElement.createBoundingBox(originalPathList);
-		return boundingBox;
+		getOrCreateAllShapeList();
+		return getOrCreateBoundingBox(allShapeList);
 	}
-
 
 	public List<SVGShape> getOrCreateAllShapeList() {
 		if (allShapeList == null) {
@@ -307,6 +310,11 @@ public class ShapeCache extends AbstractCache {
 			allShapeList.add(shape);
 		}
 	}
+
+	public List<? extends SVGElement> getOrCreateElementList() {
+		return getOrCreateConvertedShapeList();
+	}
+
 
 
 

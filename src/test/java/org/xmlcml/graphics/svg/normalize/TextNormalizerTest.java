@@ -35,7 +35,7 @@ public class TextNormalizerTest {
 		Assert.assertEquals(69,  texts.size());
 		TextDecorator textDecorator = new TextDecorator();
 		textDecorator.setAddBoxes(true);
-		textDecorator.compact(texts);
+		textDecorator.compactTexts(texts);
 		SVGG g = textDecorator.makeCompactedTextsAndAddToG();
 		SVGSVG.wrapAndWriteAsSVG(g, new File(new File("target/text/normalize"), "oneLine"+".svg"));
 	}
@@ -50,7 +50,7 @@ public class TextNormalizerTest {
 		List<SVGText> singleTexts = SVGText.extractSelfAndDescendantTexts(pageSvg);
 		Assert.assertEquals(449,  singleTexts.size());
 		TextDecorator textDecorator = new TextDecorator();
-		textDecorator.compact(singleTexts);
+		textDecorator.compactTexts(singleTexts);
 		SVGG g = textDecorator.makeCompactedTextsAndAddToG();
 		SVGSVG.wrapAndWriteAsSVG(g, new File(new File("target/text/normalize"), fileRoot+".svg"));
 	}
@@ -67,7 +67,7 @@ public class TextNormalizerTest {
 		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(pageSvg);
 		Assert.assertEquals(4783,  texts.size());
 		TextDecorator textDecorator = new TextDecorator();
-		textDecorator.compact(texts);
+		textDecorator.compactTexts(texts);
 		SVGG g = textDecorator.makeCompactedTextsAndAddToG();
 		File file2 = new File(new File("target/text/normalize"), fileRoot+".svg");
 		SVGSVG.wrapAndWriteAsSVG(g, file2);
