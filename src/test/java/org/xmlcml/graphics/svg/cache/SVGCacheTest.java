@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.store;
+package org.xmlcml.graphics.svg.cache;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +14,12 @@ import org.xmlcml.graphics.svg.Fixtures;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
-import org.xmlcml.graphics.svg.cache.SVGCache;
+import org.xmlcml.graphics.svg.cache.ComponentCache;
 
 import junit.framework.Assert;
 
-public class SVGStoreTest {
-	private static final Logger LOG = Logger.getLogger(SVGStoreTest.class);
+public class SVGCacheTest {
+	private static final Logger LOG = Logger.getLogger(SVGCacheTest.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -27,11 +27,11 @@ public class SVGStoreTest {
 	@Test
 	public void testSingleFigure() throws IOException {
 		String fileRoot = "10.1186_s12885-016-2685-3_page7";
-		SVGCache store = new SVGCache();
+		ComponentCache cache = new ComponentCache();
 		File inputSVGFile = new File(Fixtures.FIGURE_DIR, fileRoot+".svg");
-		store.readGraphicsComponents(inputSVGFile);
-		List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
-		displayBoxes(new File("target/plot/debug"), store, fileRoot, boundingBoxes, "pink");
+		cache.readGraphicsComponents(inputSVGFile);
+		List<Real2Range> boundingBoxes = cache.getMergedBoundingBoxes(2.0);
+		displayBoxes(new File("target/plot/debug"), cache, fileRoot, boundingBoxes, "pink");
 		
 	}
 
@@ -39,12 +39,12 @@ public class SVGStoreTest {
 	@Ignore // too many for testing
 	public void testMultipleFigure() throws IOException {
 		String fileRoot = "fulltext-page4";
-		SVGCache store = new SVGCache();
+		ComponentCache cache = new ComponentCache();
 		File inputSVGFile = new File(Fixtures.FIGURE_DIR, fileRoot+".svg");
 //		store.setPlotDebug(new File("target/plots/", name+"/"));
-		store.readGraphicsComponents(inputSVGFile);
-		List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
-		displayBoxes(new File("target/plot/debug"), store, fileRoot, boundingBoxes, "pink");
+		cache.readGraphicsComponents(inputSVGFile);
+		List<Real2Range> boundingBoxes = cache.getMergedBoundingBoxes(2.0);
+		displayBoxes(new File("target/plot/debug"), cache, fileRoot, boundingBoxes, "pink");
 	}
 	
 	@Test
@@ -54,11 +54,11 @@ public class SVGStoreTest {
 		Assert.assertNotNull("files in "+Fixtures.FIGURE_DIR, files);
 		for (File file : files) {
 			if (file.toString().endsWith(".svg")) {
-				SVGCache store = new SVGCache();
+				ComponentCache cache = new ComponentCache();
 				String root = FilenameUtils.getBaseName(file.toString());
-				store.readGraphicsComponents(file);
-				List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
-				displayBoxes(new File("target/plot/debug/"), store, root, boundingBoxes, "pink");
+				cache.readGraphicsComponents(file);
+				List<Real2Range> boundingBoxes = cache.getMergedBoundingBoxes(2.0);
+				displayBoxes(new File("target/plot/debug/"), cache, root, boundingBoxes, "pink");
 
 			}
 		}
@@ -71,11 +71,11 @@ public class SVGStoreTest {
 		Assert.assertNotNull("files in "+Fixtures.IMAGE_DIR, files);
 		for (File file : files) {
 			if (file.toString().endsWith(".svg")) {
-				SVGCache store = new SVGCache();
+				ComponentCache cache = new ComponentCache();
 				String root = FilenameUtils.getBaseName(file.toString());
-				store.readGraphicsComponents(file);
-				List<Real2Range> imageBoxes = store.getImageBoxes();
-				displayBoxes(new File("target/plot/debug/images/"), store, root, imageBoxes, "mauve");
+				cache.readGraphicsComponents(file);
+				List<Real2Range> imageBoxes = cache.getImageBoxes();
+				displayBoxes(new File("target/plot/debug/images/"), cache, root, imageBoxes, "mauve");
 			}
 		}
 	}
@@ -90,11 +90,11 @@ public class SVGStoreTest {
 			for (File svgFile : svgDir.listFiles()) {
 				if (svgFile.toString().endsWith(".svg")) {
 					String root = FilenameUtils.getBaseName(svgFile.toString());
-					SVGCache store = new SVGCache();
-					store.readGraphicsComponents(svgFile);
-					List<Real2Range> boundingBoxes = store.getMergedBoundingBoxes(2.0);
+					ComponentCache cache = new ComponentCache();
+					cache.readGraphicsComponents(svgFile);
+					List<Real2Range> boundingBoxes = cache.getMergedBoundingBoxes(2.0);
 					if (boundingBoxes.size() > 0) {
-						displayBoxes(new File("target/plot/debug/table/"+base+"/"), store, root, boundingBoxes, "green");
+						displayBoxes(new File("target/plot/debug/table/"+base+"/"), cache, root, boundingBoxes, "green");
 					}
 				}
 			}
@@ -104,16 +104,16 @@ public class SVGStoreTest {
 	@Test
 	public void testShadowedPaths() throws Exception {
 		File file = new File(Fixtures.PLOT_DIR, "tilburgVectors/10.1186_s13027-016-0058-9_1.svg");
-		SVGCache store = new SVGCache();
+		ComponentCache cache = new ComponentCache();
 		String root = FilenameUtils.getBaseName(file.toString());
-		store.readGraphicsComponents(file);
+		cache.readGraphicsComponents(file);
 //		displayBoxes(new File("target/plot/debug/images/"), store, root, imageBoxes, "mauve");
 	}
 
 	// =====================
 	
-	private void displayBoxes(File file, SVGCache store, String root, List<Real2Range> boundingBoxes, String fill) {
-		SVGG g = (SVGG) store.createSVGElement();
+	private void displayBoxes(File file, ComponentCache cache, String root, List<Real2Range> boundingBoxes, String fill) {
+		SVGG g = (SVGG) cache.createSVGElement();
 		for (Real2Range bbox : boundingBoxes) {
 			SVGRect rect = SVGRect.createFromReal2Range(bbox);
 			if (rect != null) {
