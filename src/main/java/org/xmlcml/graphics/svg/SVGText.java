@@ -1227,10 +1227,13 @@ public class SVGText extends SVGElement {
 		for (SVGText text : textList) {
 			String value = text.getValue();
 			if (value != null && !"".equals(value) && !"null".equals(value)) {
-				if (removeWhiteSpace && Character.isWhitespace(value.charAt(0))) {
+				if (!Character.isWhitespace(value.charAt(0))) {
+					newTexts.add(text);
+				} else if (!removeWhiteSpace) {
 					newTexts.add(text);
 				}
 			} else {
+				// empty text
 			}
 		}
 		return newTexts;
