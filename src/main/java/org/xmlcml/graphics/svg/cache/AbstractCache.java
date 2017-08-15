@@ -23,10 +23,12 @@ public abstract class AbstractCache {
 		LOG.setLevel(Level.DEBUG);
 	}
 
+	protected Double axialEps = 0.1;
 	protected Real2Range boundingBox;
 	protected ComponentCache componentCache;
 	protected Real2Range componentCacheBoundingBox;
 	protected ShapeCache shapeCache;
+	
 
 	protected AbstractCache() {
 		

@@ -1,6 +1,6 @@
 package org.xmlcml.graphics.svg.cache;
 
-import java.io.File;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,17 +11,20 @@ import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
+import org.xmlcml.euclid.util.MultisetUtil;
 import org.xmlcml.graphics.svg.SVGElement;
+import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
-import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 import org.xmlcml.graphics.svg.plot.PlotBox;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 /** extracts texts within graphic area.
@@ -53,6 +56,9 @@ public class LineCache extends AbstractCache {
 	private Double axialLinePadding = 10.0; // to start with
 	private Double cornerEps = 0.5; // to start with
 	private List<SVGLine> allLines;
+	private Double lineEps = 5.0; // to start with
+	// for display only
+	private Double STROKE_WIDTH_FACTOR = 5.0;
 	
 	public LineCache(ComponentCache svgCache) {
 		super(svgCache);
@@ -126,31 +132,61 @@ public class LineCache extends AbstractCache {
 	}
 
 	public SVGLineList getTopHorizontalLineList() {
-		if (topHorizontalLineList == null) {
-			Real2Range bbox = getOrCreateComponentCacheBoundingBox();
-			getOrCreateHorizontalLineList();
+		topHorizontalLineList = new SVGLineList();
+		getOrCreateLongHorizontalLineList();
+		for (SVGLine line : longHorizontalLineList) {
+			if (Real.isEqual(componentCache.getBoundingBox().getYMin(), line.getMidPoint().getY(), lineEps )) {
+				topHorizontalLineList.add(line);
+			}
 		}
 		return topHorizontalLineList;
 	}
 
 	public SVGLineList getBottomHorizontalLineList() {
-		if (true) throw new RuntimeException("NYI");
+		bottomHorizontalLineList = new SVGLineList();
+		getOrCreateLongHorizontalLineList();
+		for (SVGLine line : longHorizontalLineList) {
+			if (Real.isEqual(componentCache.getBoundingBox().getYMax(), line.getMidPoint().getY(), lineEps )) {
+				bottomHorizontalLineList.add(line);
+			}
+		}
 		return bottomHorizontalLineList;
 	}
 
 	public SVGLineList getOrCreateLongHorizontalLineList() {
-		if (true) throw new RuntimeException("NYI");
+		longHorizontalLineList = new SVGLineList();
+		getOrCreateHorizontalLineList();
+		RealRange xrange = getOrCreateComponentCacheBoundingBox().getRealRange(Direction.HORIZONTAL);
+		for (SVGLine line : horizontalLines) {
+			if (RealRange.isEqual(xrange, line.getRealRange(Direction.HORIZONTAL), lineEps )) {
+				longHorizontalLineList.add(line);
+			}
+		}
+
 		return longHorizontalLineList;
 	}
 
 	public SVGLineList getShortHorizontalLineList() {
-		if (true) throw new RuntimeException("NYI");
+		shortHorizontalLineList = new SVGLineList();
+		getOrCreateHorizontalLineList();
+		RealRange xrange = getOrCreateComponentCacheBoundingBox().getRealRange(Direction.HORIZONTAL);
+		for (SVGLine line : horizontalLines) {
+			if (line.getLength() < xrange.getRange() - lineEps ) {
+				shortHorizontalLineList.add(line);
+			}
+		}
 		return shortHorizontalLineList;
 	}
 
 	public Multiset<Double> getHorizontalLineStrokeWidthSet() {
 		if (horizontalLineStrokeWidthSet == null) {
+			horizontalLineStrokeWidthSet = HashMultiset.create();
 			getOrCreateHorizontalLineList();
+			for (SVGLine horizontalLine : horizontalLines) {
+				Double strokeWidth = horizontalLine.getStrokeWidth(); 
+				if (strokeWidth == null) strokeWidth = 0.0;
+				horizontalLineStrokeWidthSet.add(strokeWidth);
+			}
 		}
 		return horizontalLineStrokeWidthSet;
 	}
@@ -244,6 +280,31 @@ public class LineCache extends AbstractCache {
 	public SVGRect getFullLineBox() {
 		return fullLineBox;
 	}
+
+	public SVGG createColoredHorizontalLineStyles(String[] color) {
+		List<SVGLine> lines = getOrCreateHorizontalLineList();
+		Multiset<Double> lineWidths = getHorizontalLineStrokeWidthSet();
+		SVGG g = new SVGG();
+		if (lineWidths != null) {
+			List<Multiset.Entry<Double>> sortedLineWidths = MultisetUtil.createDoubleListSortedByCount(lineWidths);
+			for (SVGLine line : lines) {
+				Double strokeWidth = line.getStrokeWidth();
+				for (int i = 0; i < sortedLineWidths.size(); i++) {
+					Multiset.Entry<Double> entry = sortedLineWidths.get(i);
+					if (entry.getElement().equals(strokeWidth)) {
+						SVGLine line1 = (SVGLine) line.copy();
+						line1.setStrokeWidth(strokeWidth * STROKE_WIDTH_FACTOR );
+						line1.setStroke("black");
+						line1.addTitle(""+strokeWidth);
+						g.appendChild(line1);
+						break;
+					}
+				}
+			}
+		}
+		return g;
+	}
+
 
 	
 

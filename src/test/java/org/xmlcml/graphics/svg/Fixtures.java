@@ -98,9 +98,30 @@ public class Fixtures {
 	public static final File TABLE_LINE_DIR = new File(TABLE_DIR, "line");
 	public static final File TABLE_RECT_DIR = new File(TABLE_DIR, "rect");
 	public static final File TABLE_PAGE_DIR = new File(TABLE_DIR, "page");
+	public static final File TABLE_PDF_DIR = new File(TABLE_DIR, "pdf");
 	
 	public static final File TARGET_TABLE_CACHE_DIR = new File("target/table/cache/");
+	public static final File TABLE_TYPE_DIR = new File(TABLE_DIR, "types");
+	public static final File TABLE_TYPE_APA_DIR = new File(TABLE_TYPE_DIR, "apa");
+	public static final File TABLE_TYPE_APAROT_DIR = new File(TABLE_TYPE_DIR, "aparot");
+	public static final File TABLE_TYPE_AUTHOR_DIR = new File(TABLE_TYPE_DIR, "author");
+	public static final File TABLE_TYPE_BANDED_DIR = new File(TABLE_TYPE_DIR, "banded");
+	public static final File TABLE_TYPE_GRIDDED_DIR = new File(TABLE_TYPE_DIR, "gridded");
+	public static final File TABLE_TYPE_LEFTBAR_DIR = new File(TABLE_TYPE_DIR, "leftbar");
+	public static final File TABLE_TYPE_PANEL_DIR = new File(TABLE_TYPE_DIR, "panel");
+	public static final File TABLE_TYPE_RULES_DIR = new File(TABLE_TYPE_DIR, "rules");
+	public static final File[] TABLE_TYPES = { 
+			TABLE_TYPE_APA_DIR,
+			TABLE_TYPE_APAROT_DIR,
+			TABLE_TYPE_AUTHOR_DIR,
+			TABLE_TYPE_BANDED_DIR,
+			TABLE_TYPE_GRIDDED_DIR,
+			TABLE_TYPE_LEFTBAR_DIR,
+			TABLE_TYPE_PANEL_DIR,
+			TABLE_TYPE_RULES_DIR,
+		};
 
+	
 
 	public static final double EPS = 0.5;
 

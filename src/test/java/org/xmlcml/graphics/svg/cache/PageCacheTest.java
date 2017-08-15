@@ -1,19 +1,15 @@
 package org.xmlcml.graphics.svg.cache;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.euclid.RealRange;
-import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.Fixtures;
-import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
@@ -38,7 +34,8 @@ public class PageCacheTest {
 	 */
 	@Test
 	public void testPage6Rects() {
-		List<? extends SVGElement> componentList = extractAndDisplayComponents(Fixtures.TABLE_PAGE_DIR, "page6.svg", "page6.svg");
+		List<? extends SVGElement> componentList = extractAndDisplayComponents(
+				new File(Fixtures.TABLE_PAGE_DIR, "page6.svg"), new File(Fixtures.TARGET_TABLE_CACHE_DIR, "page6.svg"));
 		Assert.assertEquals("components", 3012, componentList.size());
 		RectCache rectCache = componentCache.getOrCreateRectCache();
 		Assert.assertEquals("rects", 3, rectCache.getOrCreateRectList().size());
@@ -51,7 +48,8 @@ public class PageCacheTest {
 	 */
 	@Test
 	public void testPage6Texts() {
-		List<? extends SVGElement> componentList = extractAndDisplayComponents(Fixtures.TABLE_PAGE_DIR, "page6.svg", "page6.svg");
+		List<? extends SVGElement> componentList = extractAndDisplayComponents(
+				new File(Fixtures.TABLE_PAGE_DIR, "page6.svg"), new File(Fixtures.TARGET_TABLE_CACHE_DIR, "page6.svg"));
 		Assert.assertEquals("components", 2995, componentList.size());
 		TextCache textCache = componentCache.getOrCreateTextCache();
 		List<SVGText> textList = textCache.getTextList();
@@ -70,58 +68,62 @@ public class PageCacheTest {
 	 */
 	@Test
 	public void testFindWhitespace() {
-		List<? extends SVGElement> componentList = extractAndDisplayComponents(Fixtures.TABLE_PAGE_DIR, "page6.svg", "page6.svg");
+		extractAndDisplayComponents(new File(Fixtures.TABLE_PAGE_DIR, "page6.svg"), new File(Fixtures.TARGET_TABLE_CACHE_DIR, "page6.svg"));
 		TextCache textCache = componentCache.getOrCreateTextCache();
 		SVGG g = textCache.createCompactedTextsAndReplace();
-		List<Real2Range> boundingBoxList = componentCache.getBoundingBoxList();
-		Assert.assertEquals("bounding boxes", 131, boundingBoxList.size());
+		Assert.assertEquals("bounding boxes", 131, componentCache.getBoundingBoxList().size());
 		double dx = 5;
 		double dy = 5;
-		Real2Range box = componentCache.getBoundingBox()
-				.getReal2RangeExtendedInX(dx, dy).getReal2RangeExtendedInY(dx, dy);
-		RealRange xRange = box.getRealRange(Direction.HORIZONTAL);
-		RealRange yRange = box.getRealRange(Direction.VERTICAL);
-		List<Real2> whitespaces = new ArrayList<Real2>();
-		for (double xx = xRange.getMin(); xx < xRange.getMax(); xx+=dx) {
-			for (double yy = yRange.getMin(); yy < yRange.getMax(); yy+=dy) {
-				boolean inside = false;
-				Real2[] xy = new Real2[]{
-						new Real2(xx+dx/2, yy+dx/2),
-						new Real2(xx+dx/2, yy-dx/2),
-						new Real2(xx-dx/2, yy+dx/2),
-						new Real2(xx-dx/2, yy-dx/2),
-				};
-//				Real2Range deltabox = new Real2Range(xy, xy)
-//						.getReal2RangeExtendedInX(dx/2, dy/2).getReal2RangeExtendedInY(dx/2, dy/2);
-				for (int k = 0; k < boundingBoxList.size(); k++) {
-					for (Real2 xy0 : xy) {
-						if (boundingBoxList.get(k).includes(xy0)) {
-							inside = true;
-							break;
-						}
-					}
-				}
-				if (!inside) {
-					whitespaces.add(new Real2(xx, yy));
-				}
-			}
-		}
-		SVGG gg = new SVGG();
-		for (Real2 xy : whitespaces) {
-			gg.appendChild(new SVGCircle(xy, dx/2.));
-		}
+		SVGG gg = componentCache.createWhitespaceG(dx, dy);
 		SVGSVG.wrapAndWriteAsSVG(gg, new File(Fixtures.TARGET_TABLE_CACHE_DIR, "whitespace6.svg"));
 	}
-
 	
+	@Test
+	public void testArticleWhitespace() {
+		String root = "10.1136_bmjopen-2016-011048";
+		File outDir = new File(Fixtures.TARGET_TABLE_CACHE_DIR, root);
+		File journalDir = new File(Fixtures.TABLE_DIR, root);
+		File svgDir = new File(journalDir, "svg");
+		for (File svgFile : svgDir.listFiles()) {
+			System.out.print(".");
+			String basename = FilenameUtils.getBaseName(svgFile.toString());
+			extractAndDisplayComponents(svgFile, new File(outDir, basename+".convert.svg"));
+			TextCache textCache = componentCache.getOrCreateTextCache();
+			SVGG g = textCache.createCompactedTextsAndReplace();
+			SVGG gg = componentCache.createWhitespaceG(5, 5);
+			SVGSVG.wrapAndWriteAsSVG(gg, new File(outDir, basename+".textline.svg"));
+		}
+		
+	}
+	
+	@Test
+	public void testArticlesWhitespace() {
+		File[] journalDirs = Fixtures.TABLE_DIR.listFiles();
+		for (File journalDir : journalDirs) {
+			System.out.print("*");
+			String root = journalDir.getName();
+			File outDir = new File(Fixtures.TARGET_TABLE_CACHE_DIR, root);
+			File svgDir = new File(journalDir, "svg");
+			if (svgDir.listFiles() == null) continue;
+			for (File svgFile : svgDir.listFiles()) {
+				System.out.print(".");
+				String basename = FilenameUtils.getBaseName(svgFile.toString());
+				extractAndDisplayComponents(svgFile, new File(outDir, basename+".convert.svg"));
+				TextCache textCache = componentCache.getOrCreateTextCache();
+				SVGG g = textCache.createCompactedTextsAndReplace();
+				SVGG gg = componentCache.createWhitespaceG(5, 5);
+				SVGSVG.wrapAndWriteAsSVG(gg, new File(outDir, basename+".textline.svg"));
+			}
+		}		
+	}
 
 	// ============================
 	
-	private List<? extends SVGElement> extractAndDisplayComponents(File inDir, String svgName, String outName) {
-		SVGElement svgElement = SVGElement.readAndCreateSVG(new File(inDir, svgName));
+	private List<? extends SVGElement> extractAndDisplayComponents(File infile, File outfile) {
+		SVGElement svgElement = SVGElement.readAndCreateSVG(infile);
 		componentCache = new ComponentCache();
 		componentCache.readGraphicsComponents(svgElement);
-		SVGSVG.wrapAndWriteAsSVG(componentCache.getOrCreateConvertedSVGElement(), new File(Fixtures.TARGET_TABLE_CACHE_DIR, outName));
+		SVGSVG.wrapAndWriteAsSVG(componentCache.getOrCreateConvertedSVGElement(), outfile);
 		List<? extends SVGElement> componentList = componentCache.getOrCreateElementList();
 		return componentList;
 	}

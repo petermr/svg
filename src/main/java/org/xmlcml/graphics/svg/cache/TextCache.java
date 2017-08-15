@@ -5,17 +5,19 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
+import org.xmlcml.euclid.util.MultisetUtil;
 import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
-import org.xmlcml.graphics.svg.normalize.TextDecorator;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.normalize.TextDecorator;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
 
 /** extracts texts within graphic area.
  * 
@@ -34,24 +36,34 @@ public class TextCache extends AbstractCache {
 	private List<SVGText> horizontalTexts;
 	private List<SVGText> verticalTexts;
 
-	private List<SVGText> originalTextList;
-	private List<SVGText> nonNegativeYTextList;
-	private List<SVGText> nonNegativeNonEmptyTextList;
-	private List<SVGText> currentTextList;
+	private List<SVGText> textList;
+	private Multiset<String> horizontalTextStyleMultiset;
+	private Multiset<String> verticalTextStyleMultiset;
+	private boolean useCompactOutput;
 	
 	public TextCache(ComponentCache svgCache) {
 		super(svgCache);
 	}
 
+	private void clearVariables() {
+		componentCache.allElementList = null;
+		componentCache.boundingBoxList = null;
+		this.horizontalTexts = null;
+		this.horizontalTextStyleMultiset = null;
+		this.verticalTexts = null;
+		this.verticalTextStyleMultiset = null;
+	}
+
 	public void extractTexts(GraphicsElement svgElement) {
-		originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
-		nonNegativeYTextList = SVGText.removeTextsWithNegativeY(this.originalTextList);
-		nonNegativeNonEmptyTextList = SVGText.removeTextsWithEmptyContent(nonNegativeYTextList, componentCache.isRemoveWhitespace());
-		this.currentTextList = originalTextList;
+		List<SVGText> originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
+		textList = SVGText.removeTextsWithEmptyContent(originalTextList, componentCache.isRemoveWhitespace());
+		if (useCompactOutput) {
+			createCompactedTextsAndReplace();
+		}
 	}
 
 	public List<SVGText> getTextList() {
-		return currentTextList;
+		return textList;
 	}
 	
 	public List<? extends SVGElement> getOrCreateElementList() {
@@ -60,13 +72,13 @@ public class TextCache extends AbstractCache {
 
 	public SVGG debug(String outFilename) {
 		SVGG g = new SVGG();
-		// derived
-		appendDebugToG(g, originalTextList,"yellow",  "black", 0.3, 10.0, "Helvetica");
-		appendDebugToG(g, nonNegativeYTextList, "red", "black", 0.3, 12.0, "serif");
-		appendDebugToG(g, nonNegativeNonEmptyTextList, "green", "black", 0.3, 14.0, "monospace");
-		drawBox(g, "green", 2.0);
-
-		writeDebug("texts",outFilename, g);
+//		// derived
+//		appendDebugToG(g, originalTextList,"yellow",  "black", 0.3, 10.0, "Helvetica");
+//		appendDebugToG(g, nonNegativeYTextList, "red", "black", 0.3, 12.0, "serif");
+//		appendDebugToG(g, nonNegativeNonEmptyTextList, "green", "black", 0.3, 14.0, "monospace");
+//		drawBox(g, "green", 2.0);
+//
+//		writeDebug("texts",outFilename, g);
 		return g;
 	}
 
@@ -121,36 +133,44 @@ public class TextCache extends AbstractCache {
 	 * @return the bounding box of the contained text
 	 */
 	public Real2Range getBoundingBox() {
-		return getOrCreateBoundingBox(originalTextList);
+		return getOrCreateBoundingBox(textList);
 	}
 
 	public void createHorizontalAndVerticalTexts() {
 		getOrCreateHorizontalTexts();
 		getOrCreateVerticalTexts();
-//		this.horizontalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
-//		this.verticalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
 	}
 	public List<SVGText> getOrCreateHorizontalTexts() {
 		if (horizontalTexts == null) {
-			horizontalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+			horizontalTexts = SVGText.findHorizontalOrRot90Texts(textList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
 		}
 		return horizontalTexts;
 	}
 
 	public List<SVGText> getOrCreateVerticalTexts() {
 		if (verticalTexts == null) {
-			verticalTexts = SVGText.findHorizontalOrRot90Texts(currentTextList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+			verticalTexts = SVGText.findHorizontalOrRot90Texts(textList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
 		}
 		return verticalTexts;
 	}
 
-	public Multiset<String> getHorizontalTextStyleMultiset() {
-		return getTextStyleMultiset(horizontalTexts);
+	public Multiset<String> getOrCreateHorizontalTextStyleMultiset() {
+		if (horizontalTextStyleMultiset == null) {
+			horizontalTextStyleMultiset = getTextStyleMultiset(getOrCreateHorizontalTexts());
+		}
+		return horizontalTextStyleMultiset;
 	}
-
-	public Multiset<String> getVerticalTextStyles() {
-		return getTextStyleMultiset(verticalTexts);
+	
+	public Multiset<String> getOrCreateVerticalTextStyleMultiset() {
+		if (verticalTextStyleMultiset == null) {
+			verticalTextStyleMultiset = getTextStyleMultiset(getOrCreateVerticalTexts());
+		}
+		return verticalTextStyleMultiset;
 	}
+	
+//	public Multiset<String> getVerticalTextStyles() {
+//		return getTextStyleMultiset(verticalTexts);
+//	}
 
 	private Multiset<String> getTextStyleMultiset(List<SVGText> texts) {
 		Multiset<String> styleSet = HashMultiset.create();
@@ -162,7 +182,7 @@ public class TextCache extends AbstractCache {
 		return styleSet;
 	}
 
-	/** replaces long form os style by abbreviations.
+	/** replaces long form o style by abbreviations.
 	 * remove clip-paths
 	 * Remove String values and attributes
 	 * "font-family, Helvetica, font-weight, normal,font-size, px, font-style, #fff(fff), stroke, none, fill"
@@ -184,7 +204,7 @@ public class TextCache extends AbstractCache {
 	 * @return
 	 */
 	public Multiset<String> createAbbreviatedHorizontalTextStyleMultiset() {
-		Multiset<String> styleSet = getHorizontalTextStyleMultiset();
+		Multiset<String> styleSet = getOrCreateHorizontalTextStyleMultiset();
 		Multiset<String> abbreviatedStyleSet = HashMultiset.create();
 		for (Multiset.Entry<String> entry : styleSet.entrySet()) {
 			int count = entry.getCount();
@@ -244,11 +264,38 @@ public class TextCache extends AbstractCache {
 	}
 
 	public SVGG createCompactedTextsAndReplace() {
+
 		TextDecorator textDecorator = new TextDecorator();
-		SVGG g = textDecorator.compactTexts(originalTextList);
-		currentTextList = SVGText.extractSelfAndDescendantTexts(g);
-		componentCache.allElementList = null;
-		componentCache.boundingBoxList = null;
+		SVGG g = textDecorator.compactTexts(textList);
+		textList = SVGText.extractSelfAndDescendantTexts(g);
+		clearVariables();
+		return g;
+	}
+
+	public void setUseCompactOutput(boolean b) {
+		this.useCompactOutput = b;
+	}
+
+	public SVGG createColoredTextStyles(String[] color) {
+		List<SVGText> horTexts = getTextList();
+		Multiset<String> horizontalStyleSet = getOrCreateHorizontalTextStyleMultiset();
+		List<Multiset.Entry<String>> sortedHorizontalStyles = MultisetUtil.createStringListSortedByCount(horizontalStyleSet);
+		SVGG g = new SVGG();
+		for (SVGText horText : horTexts) {
+			String style = horText.getStyle();
+			for (int i = 0; i < sortedHorizontalStyles.size(); i++) {
+				Multiset.Entry<String> entry = sortedHorizontalStyles.get(i);
+				if (entry.getElement().equals(style)) {
+					SVGText horText1 = (SVGText) horText.copy();
+					SVGRect rect = SVGRect.createFromReal2Range(horText1.getBoundingBox());
+					rect.setCSSStyle("fill:"+color[i % color.length]+";"+"opacity:0.5;");
+					rect.addTitle(style);
+					g.appendChild(rect);
+					g.appendChild(horText1);
+					break;
+				}
+			}
+		}
 		return g;
 	}
 

@@ -16,6 +16,7 @@ import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.GraphicsElement;
+import org.xmlcml.graphics.svg.SVGCircle;
 import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
@@ -48,8 +49,12 @@ public class ComponentCache extends AbstractCache {
 	}
 
 	public enum Feature {
+		// texts
 		HORIZONTAL_TEXT_COUNT("htxt"),
+		HORIZONTAL_TEXT_STYLE_COUNT("htsty"),
 		VERTICAL_TEXT_COUNT("vtxt"),
+		VERTICAL_TEXT_STYLE_COUNT("vtsty"),
+		// shapes
 		LINE_COUNT("lines"),
 		RECT_COUNT("rects"),
 		PATH_COUNT("paths"),
@@ -58,12 +63,13 @@ public class ComponentCache extends AbstractCache {
 		POLYGONS_COUNT("pgons"),
 		POLYLINE_COUNT("plines"),
 		SHAPE_COUNT("shapes"),
-		
-		LONG_HORIZONTAL_RULE_COUNT("hr"),
-		SHORT_HORIZONTAL_RULE_COUNT("shr"),
-		TOP_HORIZONTAL_RULE_COUNT("thr"),
-		BOTTOM_HORIZONTAL_RULE_COUNT("bhr"),
+		// rules
+		LONG_HORIZONTAL_RULE_COUNT("lnghr"),
+		SHORT_HORIZONTAL_RULE_COUNT("shthr"),
+		TOP_HORIZONTAL_RULE_COUNT("tophr"),
+		BOTTOM_HORIZONTAL_RULE_COUNT("bothr"),
 		LONG_HORIZONTAL_RULE_THICKNESS_COUNT("hrthick"),
+		// panels
 		HORIZONTAL_PANEL_COUNT("hpanel"),
 		;
 		
@@ -241,10 +247,12 @@ public class ComponentCache extends AbstractCache {
 	public TextCache getOrCreateTextCache() {
 		if (textCache == null) {
 			this.textCache = new TextCache(this);
-			this.textCache.extractTexts(this.svgElement);
-			textBox = textCache.getBoundingBox();
-			addElementsToExtractedElement(textCache.getTextList());
-			textCache.createHorizontalAndVerticalTexts();
+			if (this.svgElement != null) {
+				this.textCache.extractTexts(this.svgElement);
+				textBox = textCache.getBoundingBox();
+				addElementsToExtractedElement(textCache.getTextList());
+				textCache.createHorizontalAndVerticalTexts();
+			}
 		}
 		return textCache;
 	}
@@ -447,8 +455,13 @@ public class ComponentCache extends AbstractCache {
 		getOrCreateCaches();
 		if (Feature.HORIZONTAL_TEXT_COUNT.equals(feature)) {
 			value = String.valueOf(textCache.getOrCreateHorizontalTexts().size());
+		} else if (Feature.HORIZONTAL_TEXT_STYLE_COUNT.equals(feature)) {
+			value = String.valueOf(textCache.getOrCreateHorizontalTextStyleMultiset().entrySet().size());
 		} else if (Feature.VERTICAL_TEXT_COUNT.equals(feature)) {
 			value = String.valueOf(textCache.getOrCreateVerticalTexts().size());
+		} else if (Feature.VERTICAL_TEXT_STYLE_COUNT.equals(feature)) {
+			value = String.valueOf(textCache.getOrCreateVerticalTextStyleMultiset().entrySet().size());
+			
 		} else if(Feature.PATH_COUNT.equals(feature)) {
 			value = String.valueOf(shapeCache.getPathList().size());
 		} else if(Feature.CIRCLE_COUNT.equals(feature)) {
@@ -465,6 +478,7 @@ public class ComponentCache extends AbstractCache {
 			value = String.valueOf(shapeCache.getRectList().size());
 		} else if(Feature.SHAPE_COUNT.equals(feature)) {
 			value = String.valueOf(shapeCache.getShapeList().size());
+			
 		} else if(Feature.LONG_HORIZONTAL_RULE_COUNT.equals(feature)) {
 			value = String.valueOf(lineCache.getOrCreateLongHorizontalLineList().size());
 		} else if(Feature.SHORT_HORIZONTAL_RULE_COUNT.equals(feature)) {
@@ -474,9 +488,11 @@ public class ComponentCache extends AbstractCache {
 		} else if(Feature.BOTTOM_HORIZONTAL_RULE_COUNT.equals(feature)) {
 			value = String.valueOf(lineCache.getBottomHorizontalLineList().size());
 		} else if(Feature.LONG_HORIZONTAL_RULE_THICKNESS_COUNT.equals(feature)) {
-			value = String.valueOf(lineCache.getHorizontalLineStrokeWidthSet().size());
+			value = String.valueOf(lineCache.getHorizontalLineStrokeWidthSet().entrySet().size());
+			
 		} else if(Feature.HORIZONTAL_PANEL_COUNT.equals(feature)) {
 			value = String.valueOf(rectCache.getHorizontalPanelList().size());
+			
 		} else {
 			LOG.warn("No cache for "+feature);
 		}
@@ -526,6 +542,47 @@ public class ComponentCache extends AbstractCache {
 			}
 		}
 		return boundingBoxList;
+	}
+
+	public List<Real2> getWhitespaces(double dx, double dy) {
+		List<Real2Range> boundingBoxList = this.getBoundingBoxList();
+		Real2Range box = getBoundingBox()
+				.getReal2RangeExtendedInX(dx, dy).getReal2RangeExtendedInY(dx, dy);
+		RealRange xRange = box.getRealRange(Direction.HORIZONTAL);
+		RealRange yRange = box.getRealRange(Direction.VERTICAL);
+		List<Real2> whitespaces = new ArrayList<Real2>();
+		for (double xx = xRange.getMin(); xx < xRange.getMax(); xx+=dx) {
+			for (double yy = yRange.getMin(); yy < yRange.getMax(); yy+=dy) {
+				boolean inside = false;
+				Real2[] xy = new Real2[]{
+						new Real2(xx+dx/2, yy+dx/2),
+						new Real2(xx+dx/2, yy-dx/2),
+						new Real2(xx-dx/2, yy+dx/2),
+						new Real2(xx-dx/2, yy-dx/2),
+				};
+				for (int k = 0; k < boundingBoxList.size(); k++) {
+					for (Real2 xy0 : xy) {
+						if (boundingBoxList.get(k).includes(xy0)) {
+							inside = true;
+							break;
+						}
+					}
+				}
+				if (!inside) {
+					whitespaces.add(new Real2(xx, yy));
+				}
+			}
+		}
+		return whitespaces;
+	}
+
+	public SVGG createWhitespaceG(double dx, double dy) {
+		List<Real2> whitespaces = getWhitespaces(dx, dy);
+		SVGG gg = new SVGG();
+		for (Real2 xy : whitespaces) {
+			gg.appendChild(new SVGCircle(xy, dx/2.));
+		}
+		return gg;
 	}
 
 }
