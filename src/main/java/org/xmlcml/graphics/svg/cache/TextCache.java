@@ -1,5 +1,6 @@
 package org.xmlcml.graphics.svg.cache;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -12,12 +13,12 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
+import org.xmlcml.graphics.svg.StyleAttributeFactory;
 import org.xmlcml.graphics.svg.normalize.TextDecorator;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Multiset.Entry;
 
 /** extracts texts within graphic area.
  * 
@@ -40,6 +41,11 @@ public class TextCache extends AbstractCache {
 	private Multiset<String> horizontalTextStyleMultiset;
 	private Multiset<String> verticalTextStyleMultiset;
 	private boolean useCompactOutput;
+	private int maxStylesInRow = 5;
+	private List<StyleAttributeFactory> mainStyleAttributeFactoryList;
+	private List<StyleAttributeFactory> derivativeStyleAttributeFactoryList;
+	private List<Multiset.Entry<String>> sortedHorizontalStyles;
+	private List<StyleAttributeFactory> totalAttributeFactoryList;
 	
 	public TextCache(ComponentCache svgCache) {
 		super(svgCache);
@@ -204,9 +210,9 @@ public class TextCache extends AbstractCache {
 	 * @return
 	 */
 	public Multiset<String> createAbbreviatedHorizontalTextStyleMultiset() {
-		Multiset<String> styleSet = getOrCreateHorizontalTextStyleMultiset();
+		getOrCreateHorizontalTextStyleMultiset();
 		Multiset<String> abbreviatedStyleSet = HashMultiset.create();
-		for (Multiset.Entry<String> entry : styleSet.entrySet()) {
+		for (Multiset.Entry<String> entry : horizontalTextStyleMultiset.entrySet()) {
 			int count = entry.getCount();
 			String style = entry.getElement();
 			style = abbreviateStyle(style);
@@ -276,10 +282,68 @@ public class TextCache extends AbstractCache {
 		this.useCompactOutput = b;
 	}
 
+	/** defaults to ComponentCache.MAJOR_COLORS.
+	 * 
+	 * @return
+	 */
+	public SVGG createColoredTextStyles() {
+		return createColoredTextStyles(ComponentCache.MAJOR_COLORS);
+	}
+
+	/** not yet finished.
+	 * will links derivative styles (bold, italic) to main style
+	 * 
+	 * @param color
+	 * @return
+	 */
 	public SVGG createColoredTextStyles(String[] color) {
 		List<SVGText> horTexts = getTextList();
 		Multiset<String> horizontalStyleSet = getOrCreateHorizontalTextStyleMultiset();
-		List<Multiset.Entry<String>> sortedHorizontalStyles = MultisetUtil.createStringListSortedByCount(horizontalStyleSet);
+		createAttributeFactoryLists(horizontalStyleSet);
+		createMainAndDerivativeFactpryLists();
+		linkDerivativeToMainStyles(mainStyleAttributeFactoryList, derivativeStyleAttributeFactoryList);
+		SVGG g = createAnnotatedTextArea(color, horTexts, sortedHorizontalStyles);
+		return g;
+	}
+
+	private void createMainAndDerivativeFactpryLists() {
+		mainStyleAttributeFactoryList = new ArrayList<StyleAttributeFactory>();
+		derivativeStyleAttributeFactoryList = new ArrayList<StyleAttributeFactory>();
+		for (StyleAttributeFactory attributeFactory : totalAttributeFactoryList) {
+			if (!attributeFactory.isBold() && !attributeFactory.isItalic()) {
+				mainStyleAttributeFactoryList.add(attributeFactory);
+			} else {
+				derivativeStyleAttributeFactoryList.add(attributeFactory);
+			}
+		}
+	}
+
+	private void createAttributeFactoryLists(Multiset<String> horizontalStyleSet) {
+		sortedHorizontalStyles = MultisetUtil.createStringListSortedByCount(horizontalStyleSet);
+		totalAttributeFactoryList = new ArrayList<StyleAttributeFactory>();
+		for (Multiset.Entry<String> entry : sortedHorizontalStyles) {
+			String style = entry.getElement();
+			StyleAttributeFactory attributeFactory = new StyleAttributeFactory(style);
+			totalAttributeFactoryList.add(attributeFactory);
+		}
+	}
+
+	private void linkDerivativeToMainStyles(List<StyleAttributeFactory> mainStyleAttributeFactoryList,
+			List<StyleAttributeFactory> derivativeStyleAttributeFactoryList) {
+		if (derivativeStyleAttributeFactoryList.size() > 0) {
+			for (StyleAttributeFactory nonNormalAttributeFactory : derivativeStyleAttributeFactoryList) {
+				for (StyleAttributeFactory normalAttributeFactory : mainStyleAttributeFactoryList) {
+					if (nonNormalAttributeFactory.isBoldOrItalicSuperset(normalAttributeFactory)) {
+						// FIXME add code to capture this and link to main style
+						LOG.debug("Contains: "+nonNormalAttributeFactory+"; "+normalAttributeFactory);
+					}
+				}
+			}
+		}
+	}
+
+	private SVGG createAnnotatedTextArea(String[] color, List<SVGText> horTexts,
+			List<Multiset.Entry<String>> sortedHorizontalStyles) {
 		SVGG g = new SVGG();
 		for (SVGText horText : horTexts) {
 			String style = horText.getStyle();
@@ -298,6 +362,39 @@ public class TextCache extends AbstractCache {
 		}
 		return g;
 	}
+
+	public List<String> createRowOfStyles(Multiset<String> styleSet) {
+		List<Multiset.Entry<String>> entryList = MultisetUtil.createStringListSortedByCount(styleSet);
+		List<String> row = new ArrayList<String>(); 
+		// limit number of styles
+		int entryCount = entryList.size();
+		int filled = Math.min(entryCount, maxStylesInRow);
+		int empty = Math.max(0, maxStylesInRow - entryCount);
+		for (int i = 0; i < filled; i++) {
+			Multiset.Entry<String> entry = entryList.get(i);
+			row.add(entry.getElement());
+			row.add(String.valueOf(entry.getCount()));
+		}
+		// fill jagged rows
+		for (int i = 0; i < empty; i++) {
+			row.add("");
+			row.add("");
+		}
+		return row;
+	}
+
+	/** styles to output in row of styles.
+	 * 
+	 * @return
+	 */
+	public int getMaxStylesInRow() {
+		return maxStylesInRow;
+	}
+
+	public void setMaxStylesInRow(int maxStylesInRow) {
+		this.maxStylesInRow = maxStylesInRow;
+	}
+
 
 
 }
