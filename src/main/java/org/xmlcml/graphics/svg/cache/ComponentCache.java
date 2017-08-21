@@ -5,12 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.euclid.Real;
+import org.xmlcml.euclid.Int2;
+import org.xmlcml.euclid.Int2Range;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
@@ -21,21 +23,15 @@ import org.xmlcml.graphics.svg.SVGDefs;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGImage;
-import org.xmlcml.graphics.svg.SVGLine;
-import org.xmlcml.graphics.svg.SVGLine.LineDirection;
-import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPath;
-import org.xmlcml.graphics.svg.SVGPolyline;
-import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGTitle;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.StyleAttributeFactory;
-import org.xmlcml.graphics.svg.linestuff.AxialLineList;
-import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.util.SuperPixelArray;
 
 /** stores SVG primitives for access by analysis programs
  * 
@@ -101,8 +97,52 @@ public class ComponentCache extends AbstractCache {
 			}
 			return abbreviations;
 		}
+		
+		public final static List<Feature> TEXT_SHAPE_FEATURES = Arrays.asList(new Feature[] {
+				Feature.HORIZONTAL_TEXT_COUNT,
+				Feature.HORIZONTAL_TEXT_STYLE_COUNT,
+				Feature.VERTICAL_TEXT_COUNT,
+				Feature.VERTICAL_TEXT_STYLE_COUNT,
+				
+				Feature.LINE_COUNT,
+				Feature.RECT_COUNT,
+				Feature.PATH_COUNT,
+				Feature.CIRCLE_COUNT,
+				Feature.ELLIPSE_COUNT,
+				Feature.POLYGONS_COUNT,
+				Feature.POLYLINE_COUNT,
+				Feature.SHAPE_COUNT,
+			}
+			);
+
+		public final static List<Feature> RECT_LINE_FEATURES = Arrays.asList(new Feature[] {
+				Feature.LONG_HORIZONTAL_RULE_COUNT,
+				Feature.SHORT_HORIZONTAL_RULE_COUNT,
+				Feature.TOP_HORIZONTAL_RULE_COUNT,
+				Feature.BOTTOM_HORIZONTAL_RULE_COUNT,
+				Feature.LONG_HORIZONTAL_RULE_THICKNESS_COUNT,
+				Feature.HORIZONTAL_PANEL_COUNT,
+			}
+			);
+
 	}
-	
+
+	public static final String FILE = "file";
+
+	public final static String MAJOR_COLORS[] = {
+			"red",
+			"green",
+			"blue",
+			"cyan",
+			"magenta",
+			"yellow",
+			"pink",
+			"gray",
+			"purple",
+		};
+
+
+
 	// =======================================
 	
 	public static int ZERO_PLACES = 0;
@@ -140,6 +180,8 @@ public class ComponentCache extends AbstractCache {
 	private SVGG extractedSVGElement;
 	List<SVGElement> allElementList;
 	List<Real2Range> boundingBoxList;
+
+	private List<Real2> whitespaceSpixels;
 
 	/** this may change as we decide what types of object interact with store
 	 * may need to move to GraphicsCache
@@ -576,10 +618,27 @@ public class ComponentCache extends AbstractCache {
 		return whitespaces;
 	}
 
-	public SVGG createWhitespaceG(double dx, double dy) {
+	public SuperPixelArray getWhitespaceSuperPixelArray(double dx, double dy) {
 		List<Real2> whitespaces = getWhitespaces(dx, dy);
+		SuperPixelArray superPixelArray = new SuperPixelArray(new Int2Range(this.getBoundingBox()));
+		for (Real2 whitespace : whitespaces) {
+			superPixelArray.setPixel(1, Int2.getInt2(whitespace));
+		}
+		return superPixelArray;
+	}
+
+	public SuperPixelArray getWhitespaceSuperPixelArray(List<Real2Range> boundingBoxLists) {
+		SuperPixelArray superPixelArray = new SuperPixelArray(new Int2Range(this.getBoundingBox()));
+		for (Real2Range boundingBox : boundingBoxLists) {
+			superPixelArray.setPixels(1, new Int2Range(boundingBox));
+		}
+		return superPixelArray;
+	}
+
+	public SVGG createWhitespaceG(double dx, double dy) {
+		whitespaceSpixels = getWhitespaces(dx, dy);
 		SVGG gg = new SVGG();
-		for (Real2 xy : whitespaces) {
+		for (Real2 xy : whitespaceSpixels) {
 			gg.appendChild(new SVGCircle(xy, dx/2.));
 		}
 		return gg;
