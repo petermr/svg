@@ -1,10 +1,12 @@
 package org.xmlcml.graphics.svg;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -61,6 +63,10 @@ public class StyleAttributeFactory {
 	public StyleAttributeFactory(String cssValue) {
 		this();
 		splitAndAddAttributeToMap(cssValue);
+	}
+
+	public StyleAttributeFactory(StyleAttributeFactory styleAttributeFactory) {
+		this(styleAttributeFactory.getAttributeValue());
 	}
 
 	/**
@@ -305,4 +311,59 @@ public class StyleAttributeFactory {
 			}
 		}
 	}
+
+	public boolean isBold() {
+		String fontWeight = styleMap.get(StyleBundle.FONT_WEIGHT);
+		return StyleBundle.BOLD.equals(fontWeight);
+	}
+
+	public boolean isItalic() {
+		return StyleBundle.ITALIC.equals(styleMap.get(StyleBundle.FONT_STYLE));
+	}
+
+	/** compares this with another factory.
+	 * if this contains a fontWeight of bold and normal does not and
+	 * all other attribute values are equal return true
+	 * similarly for fontStyle
+	 * 
+	 * Effectively this returns true if this style is the same as normal except for
+	 * fontWeight or style.
+	 * 
+	 * @param normalAttributeFactory
+	 * @return
+	 */
+	public boolean isBoldOrItalicSuperset(StyleAttributeFactory normalAttributeFactory) {
+//		LOG.debug("\n"+this+"\n"+normalAttributeFactory+"\n");
+		StyleAttributeFactory thisCopy = new StyleAttributeFactory(this);
+		StyleAttributeFactory normalCopy = new StyleAttributeFactory(normalAttributeFactory);
+		Set<String> thisKeySet = thisCopy.styleMap.keySet();
+		Set<String> normalKeySet = normalCopy.styleMap.keySet();
+		// remove all nonWeight/Style
+		List<String> thisKeyList = new ArrayList<String>(thisKeySet);
+		boolean bold = false;
+		boolean italic = false;
+		for (String key : thisKeyList) {
+			// remove all non-weightStyle attribute
+			if (key.equals(StyleBundle.FONT_WEIGHT)) {
+				String thisWeight = thisCopy.styleMap.get(StyleBundle.FONT_WEIGHT);
+				String normalWeight = normalCopy.styleMap.get(StyleBundle.FONT_WEIGHT);
+				bold = StyleBundle.BOLD.equals(thisWeight) && !(StyleBundle.BOLD.equals(normalWeight));
+			} else if (key.equals(StyleBundle.FONT_STYLE)) {
+				String thisStyle = thisCopy.styleMap.get(StyleBundle.FONT_STYLE);
+				String normalStyle = normalCopy.styleMap.get(StyleBundle.FONT_STYLE);
+				italic = StyleBundle.ITALIC.equals(thisStyle) && !(StyleBundle.ITALIC.equals(normalStyle));
+			}
+			thisKeySet.remove(key);
+			normalKeySet.remove(key);
+		}
+		
+		if (thisKeySet.size() == 0 && normalKeySet.size() ==  0) {
+			if (bold || italic) {
+//				LOG.debug("TRUE");
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
