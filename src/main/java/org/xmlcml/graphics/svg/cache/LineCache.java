@@ -281,6 +281,16 @@ public class LineCache extends AbstractCache {
 		return fullLineBox;
 	}
 
+	
+	public SVGG createColoredHorizontalLineStyles() {
+		return createColoredHorizontalLineStyles(ComponentCache.MAJOR_COLORS);
+	}
+
+	/** we are now emphasing lines by width and blackness, not color, 
+	 * so this arg is 
+	 * @param color
+	 * @return
+	 */
 	public SVGG createColoredHorizontalLineStyles(String[] color) {
 		List<SVGLine> lines = getOrCreateHorizontalLineList();
 		Multiset<Double> lineWidths = getHorizontalLineStrokeWidthSet();
