@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.Int2Range;
 import org.xmlcml.euclid.IntMatrix;
@@ -25,6 +26,7 @@ import org.xmlcml.graphics.svg.util.SuperPixelArray;
  * @author pm286
  *
  */
+@Ignore // too long
 public class PageCacheTest {
 	private static final Logger LOG = Logger.getLogger(PageCacheTest.class);
 	static {
@@ -83,6 +85,7 @@ public class PageCacheTest {
 	}
 	
 	@Test
+	@Ignore // too long
 	public void testArticleWhitespace() {
 		String root = "10.1136_bmjopen-2016-011048";
 		File outDir = new File(Fixtures.TARGET_TABLE_CACHE_DIR, root);

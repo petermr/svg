@@ -3,12 +3,12 @@ package org.xmlcml.graphics.svg.cache;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xmlcml.euclid.util.CSVUtil;
 import org.xmlcml.graphics.svg.Fixtures;
@@ -27,6 +27,7 @@ import com.google.common.collect.Multiset;
  * @author pm286
  *
  */
+@Ignore // too long
 public class ComponentCacheTest {
 	private static final Logger LOG = Logger.getLogger(ComponentCacheTest.class);
 	static {

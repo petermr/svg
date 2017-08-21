@@ -212,10 +212,13 @@ public class SVGText extends SVGElement {
 		return parseRealArray(attValue);
 	}
 
-	private RealArray parseRealArray(String attValue) {
+	private RealArray parseRealArray(String value) {
 		RealArray coordArray = null;
+		if (value == null) {
+			return coordArray;
+		}
 		try {
-			coordArray = new RealArray(attValue.split("(\\,|\\s+)"));
+			coordArray = new RealArray(value.split("(\\,|\\s+)"));
 		} catch (EuclidRuntimeException ere) {
 			// bad coordArray;
 		}
@@ -409,14 +412,14 @@ public class SVGText extends SVGElement {
 				if (width == null || Double.isNaN(width)) {
 					width = MIN_WIDTH;
 					String text = getText();
-					if (text == null) {
+					if (text == null || "null".equals(text)) {
 						setText("");
 					} else if (text.length() == 0) {
 						throw new RuntimeException("found empty text ");
 					} else if (text.contains("\n")) {
 						throw new RuntimeException("found LF "+String.valueOf(((int) text.charAt(0))));
 					} else {
-						throw new RuntimeException("found strange Null text "+String.valueOf(((int) text.charAt(0))));
+						throw new RuntimeException("found strange Null text "+text+"/"+String.valueOf(((int) text.charAt(0))));
 					}
 				}
 				height = getFontSize() * fontWidthFactor;
@@ -460,6 +463,9 @@ public class SVGText extends SVGElement {
 		estimatedHorizontallength = Double.NaN;
 		if (xArray != null && yArray != null) {
 			String widthS = SVGUtil.getSVGXAttribute(this, WIDTH);
+			if (widthS == null) {
+				return null;
+			}
 			RealArray widthArray = parseRealArray(widthS);
 			String text = getText();
 			int nchar = xArray.size();
