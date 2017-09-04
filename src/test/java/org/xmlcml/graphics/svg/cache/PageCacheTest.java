@@ -26,7 +26,7 @@ import org.xmlcml.graphics.svg.util.SuperPixelArray;
  * @author pm286
  *
  */
-@Ignore // too long
+// @Ignore // too long
 public class PageCacheTest {
 	private static final Logger LOG = Logger.getLogger(PageCacheTest.class);
 	static {
@@ -42,10 +42,10 @@ public class PageCacheTest {
 	public void testPage6Rects() {
 		List<? extends SVGElement> componentList = extractAndDisplayComponents(
 				new File(Fixtures.TABLE_PAGE_DIR, "page6.svg"), new File(Fixtures.TARGET_TABLE_CACHE_DIR, "page6.svg"));
-		Assert.assertEquals("components", 3012, componentList.size());
+		Assert.assertEquals("components", 2995, componentList.size());
 		RectCache rectCache = componentCache.getOrCreateRectCache();
 		Assert.assertEquals("rects", 3, rectCache.getOrCreateRectList().size());
-		List<SVGRect> spanningRectList = rectCache.getHorizontalPanelList();
+		List<SVGRect> spanningRectList = rectCache.getOrCreateHorizontalPanelList();
 		Assert.assertEquals("panels", 3, spanningRectList.size());
 	}
 	/** a page with a page header, two tables and some text
@@ -104,6 +104,7 @@ public class PageCacheTest {
 	}
 	
 	@Test
+	@Ignore // DEVELOP// too long
 	public void testSuperPixelArray() {
 		String root = "10.1136_bmjopen-2016-011048";
 		File outDir = new File(Fixtures.TARGET_TABLE_CACHE_DIR, root);
@@ -145,6 +146,7 @@ public class PageCacheTest {
 	 * 
 	 */
 	@Test
+	@Ignore // DEVELOP// too long
 	public void testArticlesWhitespace() {
 		File[] journalDirs = Fixtures.TABLE_DIR.listFiles();
 		for (File journalDir : journalDirs) {
@@ -169,6 +171,7 @@ public class PageCacheTest {
 	 * 
 	 */
 	@Test
+	@Ignore // DEVELOP// too long
 	public void testSuperPixelArrayForArticles() {
 		File[] journalDirs = Fixtures.TABLE_DIR.listFiles();
 		for (File journalDir : journalDirs) {

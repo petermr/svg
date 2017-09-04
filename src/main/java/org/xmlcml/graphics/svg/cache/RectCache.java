@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealRange;
 import org.xmlcml.euclid.RealRange.Direction;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGRect;
 
-/** extracts texts within graphic area.
+/** extracts rects within graphic area.
  * 
  * @author pm286
  *
@@ -26,14 +27,21 @@ public class RectCache extends AbstractCache {
 	private List<SVGRect> rectList;
 	private List<SVGRect> horizontalPanelList;
 	private double DEFAULT_PANEL_EPS;
-	
-	public RectCache(ComponentCache svgCache) {
-		super(svgCache);
+	private ShapeCache siblingShapeCache;
+
+	private RectCache() {
+		
 	}
 	
+	public RectCache(ComponentCache containingComponentCache) {
+		super(containingComponentCache);
+		siblingShapeCache = containingComponentCache.getOrCreateShapeCache();
+		rectList = siblingShapeCache.getRectList();
+	}
+
 	public List<SVGRect> getOrCreateRectList() {
 		if (rectList == null) {
-			rectList = shapeCache.getRectList();
+			rectList = siblingShapeCache == null ? null : siblingShapeCache.getRectList();
 			if (rectList == null) {
 				rectList = new ArrayList<SVGRect>();
 			}
@@ -45,7 +53,7 @@ public class RectCache extends AbstractCache {
 		return getOrCreateRectList();
 	}
 
-	public List<SVGRect> getHorizontalPanelList() {
+	public List<SVGRect> getOrCreateHorizontalPanelList() {
 		if (horizontalPanelList == null) {
 			horizontalPanelList = new ArrayList<SVGRect>();
 			getOrCreateRectList();
@@ -57,6 +65,17 @@ public class RectCache extends AbstractCache {
 			}
 		}
 		return horizontalPanelList;
+	}
+
+	@Override
+	public String toString() {
+		getOrCreateRectList();
+		getOrCreateHorizontalPanelList();
+		String s = ""
+			+ "rects: "+rectList.size()+"; "
+			+ "horPanels: "+horizontalPanelList.size()+"; ";
+		return s;
+
 	}
 
 }

@@ -73,7 +73,7 @@ public class ShapeCache extends AbstractCache {
 	 */
 	public void convertToShapes(List<SVGPath> paths) {
 		Path2ShapeConverter path2ShapeConverter = new Path2ShapeConverter();
-		path2ShapeConverter.setSplitAtMoveCommands(componentCache.getSplitAtMove());
+		path2ShapeConverter.setSplitAtMoveCommands(ownerComponentCache.getSplitAtMove());
 		convertedShapeListList = path2ShapeConverter.convertPathsToShapesAndSplitAtMoves(paths);
 		for (List<SVGShape> shapeList : convertedShapeListList) {
 			for (SVGShape shape : shapeList) {
@@ -155,17 +155,16 @@ public class ShapeCache extends AbstractCache {
 		return convertedShapeList;
 	}
 
-	public void debug() {
-		LOG.info(
-		"paths: " + pathList.size() 
+	@Override
+	public String toString() {
+		return "paths: " + pathList.size() 
 		+ "; circles: "   + circleList.size()
 		+ "; ellipses: "  + ellipseList.size()
 		+ "; lines: "     + lineList.size() 
 		+ "; polygons: "  + polygonList.size() 
 		+ "; polylines: " + polylineList.size() 
 		+ "; rects: "     + rectList.size() 
-		+ "; shapes: "    + unknownShapeList.size() 
-		);
+		+ "; shapes: "    + unknownShapeList.size();
 	}
 
 	public SVGG createSVGAnnotations() {
@@ -223,12 +222,12 @@ public class ShapeCache extends AbstractCache {
 	public void extractShapes(List<SVGPath> pathList, GraphicsElement svgElement) {
 		convertToShapes(pathList);
 		createListsOfShapes(svgElement);
-		removeElementsOutsideBox(componentCache.getPositiveXBox());
+		removeElementsOutsideBox(ownerComponentCache.getPositiveXBox());
 		
 //		debug();
 	}
 
-	public SVGG debug(String outFilename) {
+	public SVGG debugToSVG(String outFilename) {
 		SVGG g = new SVGG();
 //		debug(g, originalPathList, "black", "yellow", 0.3);
 //		private List<SVGPath> pathList;
@@ -243,7 +242,7 @@ public class ShapeCache extends AbstractCache {
 		debug(g, pathList, "purple", "pink", 0.3);
 		debug(g, unknownShapeList, "cyan", "orange", 0.3);
 		
-		writeDebug("shapes",outFilename, g);
+		writeDebug("shapes", outFilename, g);
 		return g;
 	}
 

@@ -27,7 +27,7 @@ public class ImageCache extends AbstractCache{
 
 	public List<SVGImage> getOrCreateImageList() {
 		if (imageList == null) {
-			imageList = SVGImage.extractSelfAndDescendantImages(componentCache.svgElement);
+			imageList = SVGImage.extractSelfAndDescendantImages(ownerComponentCache.svgElement);
 		}
 		return imageList;
 	}
@@ -61,10 +61,9 @@ public class ImageCache extends AbstractCache{
 		return imageList;
 	}
 
-	public SVGG debug(String outFilename) {
+	public SVGG debugToSVG(String outFilename) {
 		SVGG g = new SVGG();
 		debug(g, imageList, "blue", "pink", 0.3);
-		
 		writeDebug("images",outFilename, g);
 		return g;
 	}
@@ -87,6 +86,12 @@ public class ImageCache extends AbstractCache{
 	 */
 	public Real2Range getBoundingBox() {
 		return getOrCreateBoundingBox(imageList);
+	}
+
+	@Override
+	public String toString() {
+		String s = "images: "+getOrCreateImageList().size();
+		return s;
 	}
 
 

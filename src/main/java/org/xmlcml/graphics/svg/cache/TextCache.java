@@ -52,8 +52,8 @@ public class TextCache extends AbstractCache {
 	}
 
 	private void clearVariables() {
-		componentCache.allElementList = null;
-		componentCache.boundingBoxList = null;
+		ownerComponentCache.allElementList = null;
+		ownerComponentCache.boundingBoxList = null;
 		this.horizontalTexts = null;
 		this.horizontalTextStyleMultiset = null;
 		this.verticalTexts = null;
@@ -62,7 +62,7 @@ public class TextCache extends AbstractCache {
 
 	public void extractTexts(GraphicsElement svgElement) {
 		List<SVGText> originalTextList = SVGText.extractSelfAndDescendantTexts(svgElement);
-		textList = SVGText.removeTextsWithEmptyContent(originalTextList, componentCache.isRemoveWhitespace());
+		textList = SVGText.removeTextsWithEmptyContent(originalTextList, ownerComponentCache.isRemoveWhitespace());
 		if (useCompactOutput) {
 			createCompactedTextsAndReplace();
 		}
@@ -393,6 +393,16 @@ public class TextCache extends AbstractCache {
 
 	public void setMaxStylesInRow(int maxStylesInRow) {
 		this.maxStylesInRow = maxStylesInRow;
+	}
+
+	@Override
+	public String toString() {
+		String s = ""
+			+ "hor: "+horizontalTexts.size()+"; "
+			+ "vert: "+verticalTexts.size()+"; "
+			+ "textList "+textList.size();
+		return s;
+
 	}
 
 

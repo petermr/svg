@@ -10,6 +10,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
+import org.xmlcml.graphics.svg.plot.SVGMediaBox;
 
 /** superclass for caches.
  * 
@@ -17,27 +18,32 @@ import org.xmlcml.graphics.svg.SVGSVG;
  *
  */
 public abstract class AbstractCache {
-	private static final Logger LOG = Logger.getLogger(AbstractCache.class);
 	
+	private static final Logger LOG = Logger.getLogger(AbstractCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
 
+	public static final double MARGIN = 1.0;
+	
 	protected Double axialEps = 0.1;
 	protected Real2Range boundingBox;
-	protected ComponentCache componentCache;
-	protected Real2Range componentCacheBoundingBox;
-	protected ShapeCache shapeCache;
+	protected ComponentCache ownerComponentCache;
+	protected Real2Range ownwerComponentCacheBoundingBox;
+	private SVGMediaBox svgMediaBox;
 	
 
 	protected AbstractCache() {
 		
 	}
 
-	public AbstractCache(ComponentCache componentCache) {
-		this.componentCache = componentCache;
-		this.shapeCache = componentCache.shapeCache; // used in lineCache and rectCache at least
+	public AbstractCache(ComponentCache ownerComponentCache) {
+		this.ownerComponentCache = ownerComponentCache;
 		getOrCreateElementList();
+	}
+
+	public AbstractCache(SVGMediaBox svgMediaBox) {
+		this.svgMediaBox = svgMediaBox;
 	}
 
 	protected void drawBox(SVGG g, String col, double width) {
@@ -50,23 +56,21 @@ public abstract class AbstractCache {
 			g.appendChild(boxRect);
 		}
 	}
-	
-//	protected abstract Real2Range getBoundingBox();
 
 	protected void writeDebug(String type, String outFilename, SVGG g) {
 		File outFile = new File(outFilename);
 		SVGSVG.wrapAndWriteAsSVG(g, outFile);
 	}
-
+	
 	/** the bounding box of the cache
 	 * 
 	 * @return the bounding box of the containing svgCache (or null if none)
 	 */
 	public Real2Range getOrCreateComponentCacheBoundingBox() {
-		if (componentCacheBoundingBox == null) {
-			componentCacheBoundingBox = componentCache == null ? null : componentCache.getBoundingBox();
+		if (ownwerComponentCacheBoundingBox == null) {
+			ownwerComponentCacheBoundingBox = ownerComponentCache == null ? null : ownerComponentCache.getBoundingBox();
 		}
-		return componentCacheBoundingBox;
+		return ownwerComponentCacheBoundingBox;
 	}
 
 	protected Real2Range getOrCreateBoundingBox(List<? extends SVGElement> elementList) {
@@ -86,7 +90,11 @@ public abstract class AbstractCache {
 	}
 	
 	public abstract List<? extends SVGElement> getOrCreateElementList();
-	
+
+	/** SVGG containing (copies of) all elements after processing.
+	 * 
+	 * @return
+	 */
 	public SVGG getOrCreateConvertedSVGElement() {
 		SVGG svgg = new SVGG();
 		List<? extends SVGElement> elementList = getOrCreateElementList();
@@ -94,5 +102,9 @@ public abstract class AbstractCache {
 			svgg.appendChild(component.copy());
 		}
 		return svgg;
+	}
+
+	public ComponentCache getOwnerComponentCache() {
+		return ownerComponentCache;
 	}
 }

@@ -204,7 +204,7 @@ public class PathCache extends AbstractCache{
 		return originalPathList;
 	}
 
-	public SVGG debug(String outFilename) {
+	public SVGG debugToSVG(String outFilename) {
 		SVGG g = new SVGG();
 		debug(g, originalPathList, "black", "yellow", 0.3);
 		debug(g, positiveBoxPathList, "black", "red", 0.3);
@@ -212,7 +212,7 @@ public class PathCache extends AbstractCache{
 		debug(g, currentPathList, "black", "blue", 0.3);
 		debug(g, trimmedShadowedPathList, "black", "cyan", 0.3);
 		
-		writeDebug("paths",outFilename, g);
+		writeDebug("paths", outFilename, g);
 		return g;
 	}
 
@@ -234,6 +234,11 @@ public class PathCache extends AbstractCache{
 	 */
 	public Real2Range getBoundingBox() {
 		return getOrCreateBoundingBox(originalPathList);
+	}
+	
+	public String toString() {
+		return ""
+				+ "paths: "+(pathList == null ? "0" : pathList.size());
 	}
 
 }

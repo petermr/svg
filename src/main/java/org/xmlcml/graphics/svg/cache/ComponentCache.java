@@ -30,7 +30,7 @@ import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.SVGTitle;
 import org.xmlcml.graphics.svg.SVGUtil;
 import org.xmlcml.graphics.svg.StyleAttributeFactory;
-import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.plot.SVGMediaBox;
 import org.xmlcml.graphics.svg.util.SuperPixelArray;
 
 /** stores SVG primitives for access by analysis programs
@@ -148,12 +148,15 @@ public class ComponentCache extends AbstractCache {
 	public static int ZERO_PLACES = 0;
 	
 
-	public ImageCache imageCache;
+	private ImageCache imageCache;
 	private PathCache pathCache;
 	private TextCache textCache;
 	private LineCache lineCache;
 	private RectCache rectCache;
-	// shapeCache is in superclass
+	private ShapeCache shapeCache;
+//	private ContentBoxCache contextBoxCache;
+	// other caches as they are developed
+	private List<AbstractCache> abstractCacheList;
 	
 	private Real2Range positiveXBox;
 
@@ -166,7 +169,7 @@ public class ComponentCache extends AbstractCache {
 	private String textDebug = "target/texts/";
 	private File plotDebug = new File("target/plots/");
 
-	private PlotBox plotBox; // may not be required
+//	private PlotBox plotBox; // may not be required
 	
 	private boolean removeWhitespace = false;
 //	private boolean removeDuplicatePaths = true;
@@ -183,13 +186,14 @@ public class ComponentCache extends AbstractCache {
 
 	private List<Real2> whitespaceSpixels;
 
+
 	/** this may change as we decide what types of object interact with store
-	 * may need to move to GraphicsCache
+	 * may need to move to AbstractCache
 	 * 
 	 * @param plotBox
 	 */
-	public ComponentCache(PlotBox plotBox) {
-		this.plotBox = plotBox;
+	public ComponentCache(SVGMediaBox plotBox) {
+		super(plotBox);
 	}
 	
 	public ComponentCache() {
@@ -244,17 +248,17 @@ public class ComponentCache extends AbstractCache {
 	private void debugComponents() {
 		SVGG g;
 		SVGG gg = new SVGG();
-		g = this.pathCache.debug(pathDebug+this.fileRoot+".debug.svg");
+		g = this.pathCache.debugToSVG(pathDebug+this.fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("path"));
 	//		gg.appendChild(g.copy());
 		
 		
-		g = this.imageCache.debug(imageDebug+this.fileRoot+".debug.svg");
+		g = this.imageCache.debugToSVG(imageDebug+this.fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("image"));
 	//		gg.appendChild(g.copy());
 		
 		
-		g = this.shapeCache.debug(shapeDebug + fileRoot+".debug.svg");
+		g = this.getOrCreateShapeCache().debugToSVG(shapeDebug + fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
 
@@ -292,7 +296,11 @@ public class ComponentCache extends AbstractCache {
 			if (this.svgElement != null) {
 				this.textCache.extractTexts(this.svgElement);
 				textBox = textCache.getBoundingBox();
+				// FIXME add me in later
+//				boolean normalized = TextUtil.normalize(svgElement, NORMALIZE_FORM);
+
 				addElementsToExtractedElement(textCache.getTextList());
+				
 				textCache.createHorizontalAndVerticalTexts();
 			}
 		}
@@ -301,10 +309,10 @@ public class ComponentCache extends AbstractCache {
 
 	public ShapeCache getOrCreateShapeCache() {
 		if (shapeCache == null) {
-			this.shapeCache = new ShapeCache(this);
+			shapeCache = new ShapeCache(this);
 			List<SVGPath> currentPathList = this.pathCache.getCurrentPathList();
-			this.shapeCache.extractShapes(currentPathList, svgElement);
-			List<SVGShape> shapeList = shapeCache.getOrCreateConvertedShapeList();
+			this.getOrCreateShapeCache().extractShapes(currentPathList, svgElement);
+			List<SVGShape> shapeList = getOrCreateShapeCache().getOrCreateConvertedShapeList();
 			addElementsToExtractedElement(shapeList);
 		}
 		return shapeCache;
@@ -368,7 +376,7 @@ public class ComponentCache extends AbstractCache {
 	public GraphicsElement createSVGElement() {
 		SVGG g = new SVGG();
 		g.appendChild(copyOriginalElements());
-		g.appendChild(shapeCache.createSVGAnnotations());
+		g.appendChild(getOrCreateShapeCache().createSVGAnnotations());
 		g.appendChild(pathCache.createSVGAnnotation().copy());
 		return g;
 	}
@@ -426,7 +434,7 @@ public class ComponentCache extends AbstractCache {
 	 */
 	public List<Real2Range> getMergedBoundingBoxes(double d) {
 		List<Real2Range> boundingBoxes = new ArrayList<Real2Range>();
-		for (SVGShape shape : shapeCache.getOrCreateAllShapeList()) {
+		for (SVGShape shape : getOrCreateShapeCache().getOrCreateAllShapeList()) {
 			Real2Range bbox = shape.getBoundingBox();
 			bbox.extendBothEndsBy(Direction.HORIZONTAL, d, d);
 			bbox.extendBothEndsBy(Direction.VERTICAL, d, d);
@@ -505,21 +513,21 @@ public class ComponentCache extends AbstractCache {
 			value = String.valueOf(textCache.getOrCreateVerticalTextStyleMultiset().entrySet().size());
 			
 		} else if(Feature.PATH_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getPathList().size());
+			value = String.valueOf(getOrCreateShapeCache().getPathList().size());
 		} else if(Feature.CIRCLE_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getCircleList().size());
+			value = String.valueOf(getOrCreateShapeCache().getCircleList().size());
 		} else if(Feature.ELLIPSE_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getEllipseList().size());
+			value = String.valueOf(getOrCreateShapeCache().getEllipseList().size());
 		} else if(Feature.LINE_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getLineList().size());
+			value = String.valueOf(getOrCreateShapeCache().getLineList().size());
 		} else if(Feature.POLYGONS_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getPolygonList().size());
+			value = String.valueOf(getOrCreateShapeCache().getPolygonList().size());
 		} else if(Feature.POLYLINE_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getPolylineList().size());
+			value = String.valueOf(getOrCreateShapeCache().getPolylineList().size());
 		} else if(Feature.RECT_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getRectList().size());
+			value = String.valueOf(getOrCreateShapeCache().getRectList().size());
 		} else if(Feature.SHAPE_COUNT.equals(feature)) {
-			value = String.valueOf(shapeCache.getShapeList().size());
+			value = String.valueOf(getOrCreateShapeCache().getShapeList().size());
 			
 		} else if(Feature.LONG_HORIZONTAL_RULE_COUNT.equals(feature)) {
 			value = String.valueOf(lineCache.getOrCreateLongHorizontalLineList().size());
@@ -533,7 +541,7 @@ public class ComponentCache extends AbstractCache {
 			value = String.valueOf(lineCache.getHorizontalLineStrokeWidthSet().entrySet().size());
 			
 		} else if(Feature.HORIZONTAL_PANEL_COUNT.equals(feature)) {
-			value = String.valueOf(rectCache.getHorizontalPanelList().size());
+			value = String.valueOf(rectCache.getOrCreateHorizontalPanelList().size());
 			
 		} else {
 			LOG.warn("No cache for "+feature);
@@ -557,7 +565,7 @@ public class ComponentCache extends AbstractCache {
 			// don't add paths as we have already converted to shapes
 //			allElementList.addAll(pathCache.getOrCreateElementList());
 			allElementList.addAll(imageCache.getOrCreateElementList());
-			allElementList.addAll(shapeCache.getOrCreateElementList());
+			allElementList.addAll(getOrCreateShapeCache().getOrCreateElementList());
 			allElementList.addAll(rectCache.getOrCreateElementList());
 			allElementList.addAll(lineCache.getOrCreateElementList());
 			// this goes last in case it would be hidden
@@ -642,6 +650,37 @@ public class ComponentCache extends AbstractCache {
 			gg.appendChild(new SVGCircle(xy, dx/2.));
 		}
 		return gg;
+	}
+
+	@Override
+	public String toString() {
+		String s = ""
+		+"image: "+String.valueOf(imageCache)+"\n"
+		+"path: "+String.valueOf(pathCache)+"\n"
+		+"text: "+String.valueOf(textCache)+"\n"
+		+"line: "+String.valueOf(lineCache)+"\n"
+		+"rect: "+String.valueOf(rectCache)+"\n"
+		+"shape: "+String.valueOf(getOrCreateShapeCache()+"\n");
+		if (abstractCacheList != null) {
+			for (AbstractCache abstractCache : abstractCacheList) {
+				s += abstractCache.getClass().getSimpleName()+": "+String.valueOf(abstractCache)+"\n";
+			}
+		}
+		return s;
+	}
+
+	// because it's in svg2xml
+//	public void setContentBoxCache(ContentBoxCache contentBoxCache) {
+//	}
+	
+	public void addCache(AbstractCache abstractCache) {
+		if (abstractCacheList == null) {
+			abstractCacheList = new ArrayList<AbstractCache>();
+		}
+		if (!abstractCacheList.contains(abstractCache)) {
+			abstractCacheList.add(abstractCache);
+		}
+		
 	}
 
 }
