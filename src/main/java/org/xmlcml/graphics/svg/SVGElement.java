@@ -1071,8 +1071,22 @@ public class SVGElement extends GraphicsElement {
 		return boundingBox == null || !boundingBoxCached;
 	}
 	
+	/**  recalculation of bounding box.
+	 *  calculation of BBox can be time consuming. This asserts that the bbox 
+	 *  will not change and the box can be re-used without recalculating.
+	 *  A crude form of memo-isation. Up to the caller to recalculate when the objects
+	 *  are likely to change.
+	 *  
+	 * @param boundingBoxCached 
+	 */
 	public void setBoundingBoxCached(boolean boundingBoxCached) {
 		this.boundingBoxCached = boundingBoxCached;
+	}
+	
+	public static void setBoundingBoxCached(List<? extends SVGElement> elementList, boolean boundingBoxCached) {
+		for (SVGElement element : elementList) {
+			element.setBoundingBoxCached(boundingBoxCached);
+		}
 	}
 
 	public SVGShape createGraphicalBoundingBox() {
@@ -1175,6 +1189,15 @@ public class SVGElement extends GraphicsElement {
 			svgParent.appendChild(svgBox);
 		}
 		return svgBox;
+	}
+	
+	public static List<Real2Range> createBoundingBoxList(List<? extends SVGElement> elements) {
+		List<Real2Range> boxes = new ArrayList<Real2Range>();
+		for (SVGElement elem : elements) {
+			Real2Range bbox = elem.getBoundingBox();
+			boxes.add(bbox);
+		}
+		return boxes;
 	}
 
 	public SVGRect drawBox(String stroke, String fill, double strokeWidth, double opacity) {

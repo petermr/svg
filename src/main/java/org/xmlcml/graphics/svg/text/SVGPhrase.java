@@ -211,7 +211,7 @@ public class SVGPhrase extends SVGG {
 			LOG.trace("SV "+value);
 			Real2Range wordBox = word.getBoundingBox();
 			RealRange wordXRange = wordBox.getXRange();
-			if (wordXRange.intersectsWith(range)) {
+			if (wordXRange.intersects(range)) {
 				filteredPhrase.addTrailingWord(word);
 			}
 		}

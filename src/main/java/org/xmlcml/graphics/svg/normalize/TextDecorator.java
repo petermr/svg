@@ -1,10 +1,7 @@
 package org.xmlcml.graphics.svg.normalize;
 
-import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,12 +11,8 @@ import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2Range;
 import org.xmlcml.euclid.RealArray;
 import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 import org.xmlcml.graphics.svg.StyleAttributeFactory;
-import org.xmlcml.graphics.svg.StyleAttributeFactory.AttributeStrategy;
-import org.xmlcml.graphics.svg.util.ColorStore;
-import org.xmlcml.graphics.svg.util.ColorStore.ColorizerType;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;

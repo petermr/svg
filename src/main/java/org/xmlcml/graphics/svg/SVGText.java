@@ -418,8 +418,10 @@ public class SVGText extends SVGElement {
 						throw new RuntimeException("found empty text ");
 					} else if (text.contains("\n")) {
 						throw new RuntimeException("found LF "+String.valueOf(((int) text.charAt(0))));
+					} else if (text.equals(" ")) {
+						// space without width
 					} else {
-						throw new RuntimeException("found strange Null text "+text+"/"+String.valueOf(((int) text.charAt(0))));
+						LOG.info("Missing svgx:width? found strange Null text "+text+"/"+String.valueOf(((int) text.charAt(0))));
 					}
 				}
 				height = getFontSize() * fontWidthFactor;
@@ -1198,7 +1200,7 @@ public class SVGText extends SVGElement {
 	public static List<SVGText> removeStringsCompletelyOutsideRange(List<SVGText> texts, RealRange range) {
 		List<SVGText> textList = new ArrayList<SVGText>();
 		for (SVGText text : texts) {
-			if (text.getBoundingBox().getXRange().intersectsWith(range)) {
+			if (text.getBoundingBox().getXRange().intersects(range)) {
 				textList.add(text);
 			}
 		}

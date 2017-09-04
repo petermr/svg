@@ -32,9 +32,9 @@ import org.xmlcml.graphics.svg.cache.ComponentCache;
  * @author pm286
  *
  */
-public class PlotBox {
+public class SVGMediaBox {
 	
-	public static final Logger LOG = Logger.getLogger(PlotBox.class);
+	public static final Logger LOG = Logger.getLogger(SVGMediaBox.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
@@ -109,15 +109,15 @@ public class PlotBox {
 	private File svgOutFile;
 	private String csvContent;
 	private File csvOutFile;
-	private ComponentCache svgCache;
+	private ComponentCache componentCache;
 	private String fileRoot;
 		
 
-	public ComponentCache getSVGCache() {
-		return svgCache;
+	public ComponentCache getComponentCache() {
+		return componentCache;
 	}
 
-	public PlotBox() {
+	public SVGMediaBox() {
 		setDefaults();
 	}
 	
@@ -167,18 +167,18 @@ public class PlotBox {
 			throw new RuntimeException("nonexistent file or isDirectory "+inputFile);
 		}
 		fileRoot = inputFile.getName();
-		svgCache = new ComponentCache(this);
+		componentCache = new ComponentCache(this);
 		try {
-			svgCache.readGraphicsComponents(new FileInputStream(inputFile));
+			componentCache.readGraphicsComponents(new FileInputStream(inputFile));
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot read inputFile", e);
 		}
 	}
 
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
-		svgCache = new ComponentCache(this);
-		svgCache.setFileRoot(fileRoot);
-		svgCache.readGraphicsComponents(svgElement);
+		componentCache = new ComponentCache(this);
+		componentCache.setFileRoot(fileRoot);
+		componentCache.readGraphicsComponents(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
 		extractScaleTextsAndMakeScales();
@@ -192,7 +192,7 @@ public class PlotBox {
 
 
 	private void makeAxialTickBoxesAndPopulateContents() {
-		LineCache lineCache = svgCache.getOrCreateLineCache();
+		LineCache lineCache = componentCache.getOrCreateLineCache();
 		for (AnnotatedAxis axis : axisArray) {
 			axis.getOrCreateSingleLine();		
 			axis.createAndFillTickBox(lineCache.getOrCreateHorizontalLineList(), lineCache.getOrCreateVerticalLineList());
@@ -270,7 +270,7 @@ public class PlotBox {
 
 	private void extractDataScreenPoints() {
 		screenXYs = new Real2Array();
-		for (SVGCircle circle : svgCache.getOrCreateShapeCache().getCircleList()) {
+		for (SVGCircle circle : componentCache.getOrCreateShapeCache().getCircleList()) {
 			screenXYs.add(circle.getCXY());
 		}
 		if (screenXYs.size() == 0) {
@@ -278,7 +278,7 @@ public class PlotBox {
 		}
 		if (screenXYs.size() == 0) {
 			// this is really messy
-			for (SVGLine line : svgCache.getOrCreateShapeCache().getLineList()) {
+			for (SVGLine line : componentCache.getOrCreateShapeCache().getLineList()) {
 				Real2 vector = line.getEuclidLine().getVector();
 				double angle = vector.getAngle();
 				double length = vector.getLength();
@@ -334,18 +334,18 @@ public class PlotBox {
 	}
 
 	public List<SVGText> getHorizontalTexts() {
-		return svgCache.getOrCreateTextCache().getOrCreateHorizontalTexts();
+		return componentCache.getOrCreateTextCache().getOrCreateHorizontalTexts();
 	}
 
 	public List<SVGText> getVerticalTexts() {
-		return svgCache.getOrCreateTextCache().getOrCreateVerticalTexts();
+		return componentCache.getOrCreateTextCache().getOrCreateVerticalTexts();
 	}
 	
 	// static methods
 	
 	public void writeProcessedSVG(File file) {
 		if (file != null) {
-			GraphicsElement processedSVGElement = svgCache.createSVGElement();
+			GraphicsElement processedSVGElement = componentCache.createSVGElement();
 			processedSVGElement.appendChild(copyAnnotatedAxes());
 			SVGSVG.wrapAndWriteAsSVG(processedSVGElement, file);
 		}

@@ -44,8 +44,11 @@ import nu.xom.Nodes;
 
 /** 
  * Base class for lightweight generic SVG element.
- * <p>
+ * manages attributes (I think)
+ * 
  * No checking - i.e. can take any name or attributes.
+ * 
+ * Note sure whether there is any real distinction between GraphicsElement and SVGElement
  * 
  * @author pm286
  */

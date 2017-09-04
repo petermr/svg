@@ -13,6 +13,13 @@ import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGText;
 
+/**
+ * box with text.
+ * May be better to use ContentBox
+ * 
+ * @author pm286
+ *
+ */
 public class SVGTextBox extends SVGG {
 
 	public static final String TEXT_BOX = "textBox";
@@ -42,6 +49,7 @@ public class SVGTextBox extends SVGG {
 		this.textList = textList;
 	}
 
+	// this probably should be boxes/Rects not textBoxes
 	public static SVGTextBox getTouchingBox(Real2 point, List<SVGTextBox> textBoxList, double delta) {
 		for (SVGTextBox textBox : textBoxList) {
 			if (textBox.touches(point, delta)) {

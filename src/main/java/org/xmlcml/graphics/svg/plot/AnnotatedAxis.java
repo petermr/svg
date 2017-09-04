@@ -15,7 +15,7 @@ import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.cache.LineCache;
-import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
+import org.xmlcml.graphics.svg.plot.SVGMediaBox.AxisType;
 
 import com.google.common.collect.Multiset;
 
@@ -44,17 +44,17 @@ public class AnnotatedAxis {
 	private AxisTickBox axisTickBox;
 	private AxisScaleBox axialScaleTextBox;
 	private AxisScaleBox axialTitleTextBox;
-	private PlotBox plotBox;
+	private SVGMediaBox plotBox;
 	private AxisType axisType;
 	private Double screenToUserScale;
 	private Double screenToUserConstant;
 
 
-	protected AnnotatedAxis(PlotBox plotBox) {
+	protected AnnotatedAxis(SVGMediaBox plotBox) {
 		this.plotBox = plotBox;
 	}
 	
-	public AnnotatedAxis(PlotBox plotBox, AxisType axisType) {
+	public AnnotatedAxis(SVGMediaBox plotBox, AxisType axisType) {
 		this(plotBox);
 		this.axisType = axisType;
 		this.lineDirection = axisType == null ? null : axisType.getLineDirection();		
@@ -120,7 +120,7 @@ public class AnnotatedAxis {
 	}
 
 
-	public PlotBox getPlotBox() {
+	public SVGMediaBox getPlotBox() {
 		return plotBox;
 	}
 
@@ -133,7 +133,7 @@ public class AnnotatedAxis {
 	}
 
 	SVGLine getOrCreateSingleLine() {
-		LineCache lineCache = plotBox.getSVGCache().getOrCreateLineCache();
+		LineCache lineCache = plotBox.getComponentCache().getOrCreateLineCache();
 		if (singleLine == null) {
 			if (lineCache.getFullLineBox() != null) {
 				Real2Range bbox = lineCache.getFullLineBox().getBoundingBox();

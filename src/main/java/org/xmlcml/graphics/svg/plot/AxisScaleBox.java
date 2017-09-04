@@ -98,7 +98,7 @@ public class AxisScaleBox extends AxialBox {
 		for (SVGWord word : wordList) {
 			Real2Range wordBox = word.getBoundingBox();
 			RealRange wordYRange = wordBox.getYRange();
-			if (wordYRange.intersectsWith(range)) {
+			if (wordYRange.intersects(range)) {
 				filteredPhrase.addTrailingWord(word);
 			}
 		}
@@ -215,7 +215,7 @@ public class AxisScaleBox extends AxialBox {
 		List<SVGWord> wordList1 = new ArrayList<SVGWord>();
 		for (SVGWord word : wordList) {
 			Real2Range bbox = word.getBoundingBox();
-			if (range.intersectsWith(bbox.getYRange())) {
+			if (range.intersects(bbox.getYRange())) {
 				wordList1.add(word);
 			}
 		}

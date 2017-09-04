@@ -12,7 +12,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine.LineDirection;
 import org.xmlcml.graphics.svg.SVGRect;
-import org.xmlcml.graphics.svg.plot.PlotBox.AxisType;
+import org.xmlcml.graphics.svg.plot.SVGMediaBox.AxisType;
 
 /** managaes the contents of a region associated with an axis.
  * Generally an AnnotatedAxis contains some or all of:
