@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xmlcml.graphics.svg.Fixtures;
-import org.xmlcml.graphics.svg.plot.PlotBox;
+import org.xmlcml.graphics.svg.plot.SVGMediaBox;
 
 public class BarTest {
 	private static final Logger LOG = Logger.getLogger(BarTest.class);
@@ -19,7 +19,7 @@ public class BarTest {
 	@Test
 	public void testBar1() throws IOException {
 		String fileRoot = "../bar/art%3A10.1186%2Fs13148-016-0230-5/svg/fig3";
-		PlotBox plotBox = new PlotBox();
+		SVGMediaBox plotBox = new SVGMediaBox();
 		File inputSVGFile = new File(Fixtures.PLOT_DIR, fileRoot+".svg");
 		plotBox.readGraphicsComponents(inputSVGFile);
 		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
@@ -32,7 +32,7 @@ public class BarTest {
 	 */
 	public void testBarPlot() throws IOException {
 		String fileRoot = "barchart1.10";
-		PlotBox plotBox = new PlotBox();
+		SVGMediaBox plotBox = new SVGMediaBox();
 		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
 		try {
 			plotBox.readAndCreateCSVPlot(inputSVGFile);
@@ -49,13 +49,13 @@ public class BarTest {
 	 */
 	public void testBarPlot1() throws IOException {
 		String fileRoot = "figure4.2";
-		PlotBox plotBox = new PlotBox();
+		SVGMediaBox plotBox = new SVGMediaBox();
 		File inputSVGFile = new File(Fixtures.BAR_DIR, fileRoot+".svg");
 		try {
 			plotBox.readAndCreateCSVPlot(inputSVGFile);
 		} catch (RuntimeException e) {
-			Assert.assertNull(e.getMessage());
-//			Assert.assertEquals("No axial tickbox: BOTTOM", e.getMessage());
+//			Assert.assertNull(""+e, e.getMessage());
+			Assert.assertEquals("No axial tickbox: BOTTOM", e.getMessage());
 		}
 		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
 	}

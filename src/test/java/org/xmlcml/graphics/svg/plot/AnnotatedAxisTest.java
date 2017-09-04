@@ -41,10 +41,10 @@ public class AnnotatedAxisTest {
 	@Ignore // changes every time we change parameters
 	public void testFunnelXYAxis() throws FileNotFoundException {
 		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, "bakker2014-page11b.svg")));
-		PlotBox plotBox = new PlotBox();
+		SVGMediaBox plotBox = new SVGMediaBox();
 		plotBox.readAndCreateCSVPlot(svgElement);
-		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGCache().createSVGElement(), new File("target/plot/bakker.svg"));
-		SVGRect fullLineBbox = plotBox.getSVGCache().getOrCreateLineCache().getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getComponentCache().createSVGElement(), new File("target/plot/bakker.svg"));
+		SVGRect fullLineBbox = plotBox.getComponentCache().getOrCreateLineCache().getFullLineBox();
 		fullLineBbox.format(3);
 		Assert.assertEquals("full box",  "((140.415,426.016),(483.056,650.628))", fullLineBbox.toString());
 		AnnotatedAxis[] axisArray = plotBox.getAxisArray();
@@ -380,14 +380,14 @@ public class AnnotatedAxisTest {
 	
 	private static AnnotatedAxis[] getAxisArrayAndTestFullBox(String svgName, String boxCoords) throws FileNotFoundException {
 		SVGElement svgElement = SVGUtil.parseToSVGElement(new FileInputStream(new File(Fixtures.PLOT_DIR, svgName)));
-		PlotBox plotBox = new PlotBox();
+		SVGMediaBox plotBox = new SVGMediaBox();
 		try {
 			plotBox.readAndCreateCSVPlot(svgElement);
 		} catch (RuntimeException e) {
 			LOG.error(e);
 		}
-		SVGSVG.wrapAndWriteAsSVG(plotBox.getSVGCache().createSVGElement(), new File(new File("target/plot/"), svgName));
-		SVGRect fullLineBbox = plotBox.getSVGCache().getOrCreateLineCache().getFullLineBox();
+		SVGSVG.wrapAndWriteAsSVG(plotBox.getComponentCache().createSVGElement(), new File(new File("target/plot/"), svgName));
+		SVGRect fullLineBbox = plotBox.getComponentCache().getOrCreateLineCache().getFullLineBox();
 		AnnotatedAxis[] axisArray = null;
 		if (fullLineBbox != null) {
 			fullLineBbox.format(3);
