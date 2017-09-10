@@ -132,7 +132,7 @@ public class SVGMediaBox {
 
 	/** MAIN ENTRY METHOD for processing plots.
 	 * 
-	 * @param svgElement
+	 * @param originalSvgElement
 	 * @throws FileNotFoundException 
 	 */
 	public void readAndCreateCSVPlot(File file) throws FileNotFoundException {
@@ -157,7 +157,7 @@ public class SVGMediaBox {
 
 	/** ENTRY METHOD for processing figures.
 	 * 
-	 * @param svgElement
+	 * @param originalSvgElement
 	 */
 	public void readGraphicsComponents(File inputFile) {
 		if (inputFile == null) {
@@ -178,7 +178,7 @@ public class SVGMediaBox {
 	public void readAndCreateCSVPlot(SVGElement svgElement) {
 		componentCache = new ComponentCache(this);
 		componentCache.setFileRoot(fileRoot);
-		componentCache.readGraphicsComponents(svgElement);
+		componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 		makeAxialTickBoxesAndPopulateContents();
 		makeRangesForAxes();
 		extractScaleTextsAndMakeScales();
