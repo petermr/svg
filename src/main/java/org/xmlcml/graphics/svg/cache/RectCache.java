@@ -78,4 +78,11 @@ public class RectCache extends AbstractCache {
 
 	}
 
+	@Override
+	public void clearAll() {
+		superClearAll();
+		rectList = null;
+		horizontalPanelList = null;
+	}
+
 }

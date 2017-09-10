@@ -121,7 +121,7 @@ public class PageCacheTest {
 			String basename = FilenameUtils.getBaseName(svgFile.toString());
 			SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 			componentCache = new ComponentCache();
-			componentCache.readGraphicsComponents(svgElement);
+			componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 			TextCache textCache = componentCache.getOrCreateTextCache();
 			textCache.createCompactedTextsAndReplace();
 			Real2Range bbox = Real2Range.createTotalBox(componentCache.getBoundingBoxList());
@@ -192,7 +192,7 @@ public class PageCacheTest {
 				String basename = FilenameUtils.getBaseName(svgFile.toString());
 				SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 				componentCache = new ComponentCache();
-				componentCache.readGraphicsComponents(svgElement);
+				componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 				TextCache textCache = componentCache.getOrCreateTextCache();
 				textCache.createCompactedTextsAndReplace();
 				Real2Range bbox = Real2Range.createTotalBox(componentCache.getBoundingBoxList());
@@ -221,7 +221,7 @@ public class PageCacheTest {
 	private List<? extends SVGElement> extractAndDisplayComponents(File infile, File outfile) {
 		SVGElement svgElement = SVGElement.readAndCreateSVG(infile);
 		componentCache = new ComponentCache();
-		componentCache.readGraphicsComponents(svgElement);
+		componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 		SVGSVG.wrapAndWriteAsSVG(componentCache.getOrCreateConvertedSVGElement(), outfile);
 		List<? extends SVGElement> componentList = componentCache.getOrCreateElementList();
 		return componentList;

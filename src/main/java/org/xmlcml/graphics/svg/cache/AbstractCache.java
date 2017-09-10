@@ -29,7 +29,7 @@ public abstract class AbstractCache {
 	protected Double axialEps = 0.1;
 	protected Real2Range boundingBox;
 	protected ComponentCache ownerComponentCache;
-	protected Real2Range ownwerComponentCacheBoundingBox;
+	protected Real2Range ownerComponentCacheBoundingBox;
 	private SVGMediaBox svgMediaBox;
 	
 
@@ -67,10 +67,10 @@ public abstract class AbstractCache {
 	 * @return the bounding box of the containing svgCache (or null if none)
 	 */
 	public Real2Range getOrCreateComponentCacheBoundingBox() {
-		if (ownwerComponentCacheBoundingBox == null) {
-			ownwerComponentCacheBoundingBox = ownerComponentCache == null ? null : ownerComponentCache.getBoundingBox();
+		if (ownerComponentCacheBoundingBox == null) {
+			ownerComponentCacheBoundingBox = ownerComponentCache == null ? null : ownerComponentCache.getBoundingBox();
 		}
-		return ownwerComponentCacheBoundingBox;
+		return ownerComponentCacheBoundingBox;
 	}
 
 	protected Real2Range getOrCreateBoundingBox(List<? extends SVGElement> elementList) {
@@ -107,4 +107,28 @@ public abstract class AbstractCache {
 	public ComponentCache getOwnerComponentCache() {
 		return ownerComponentCache;
 	}
+
+	public boolean remove(SVGElement element) {
+		List<? extends SVGElement> elementList = this.getOrCreateElementList();
+		boolean remove = elementList.remove(element);
+		if (remove) {
+			this.clearBoundingBoxToNull();
+			ownerComponentCache.clearBoundingBoxToNull();
+		}
+		return remove;
+	}
+	
+	/** clears bounding box to null.
+	 * required after changes to contentCaches
+	 */
+	public void clearBoundingBoxToNull() {
+		this.boundingBox = null;
+	}
+
+	public void superClearAll() {
+		boundingBox = null;
+		ownerComponentCacheBoundingBox = null;
+	}
+	
+	public abstract void clearAll();
 }

@@ -41,11 +41,13 @@ public class TextCache extends AbstractCache {
 	private Multiset<String> horizontalTextStyleMultiset;
 	private Multiset<String> verticalTextStyleMultiset;
 	private boolean useCompactOutput;
-	private int maxStylesInRow = 5;
 	private List<StyleAttributeFactory> mainStyleAttributeFactoryList;
 	private List<StyleAttributeFactory> derivativeStyleAttributeFactoryList;
 	private List<Multiset.Entry<String>> sortedHorizontalStyles;
 	private List<StyleAttributeFactory> totalAttributeFactoryList;
+	// parameters
+	private int maxStylesInRow = 5;
+
 	
 	public TextCache(ComponentCache svgCache) {
 		super(svgCache);
@@ -405,6 +407,20 @@ public class TextCache extends AbstractCache {
 
 	}
 
+	@Override
+	public void clearAll() {
+		superClearAll();
+		horizontalTexts = null;
+		verticalTexts = null;
 
+		textList = null;
+		horizontalTextStyleMultiset = null;
+		verticalTextStyleMultiset = null;
+		useCompactOutput = false;
+		mainStyleAttributeFactoryList = null;
+		derivativeStyleAttributeFactoryList = null;
+		sortedHorizontalStyles = null;
+		totalAttributeFactoryList = null;
+	}
 
 }

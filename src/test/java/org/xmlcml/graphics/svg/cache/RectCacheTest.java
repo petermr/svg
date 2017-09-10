@@ -44,7 +44,7 @@ public class RectCacheTest {
 	private List<SVGRect> extractAndDisplayRects(String svgName, String outName) {
 		SVGElement svgElement = SVGElement.readAndCreateSVG(new File(Fixtures.TABLE_RECT_DIR, svgName));
 		ComponentCache componentCache = new ComponentCache();
-		componentCache.readGraphicsComponents(svgElement);
+		componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 		RectCache rectCache = componentCache.getOrCreateRectCache();
 		SVGSVG.wrapAndWriteAsSVG(rectCache.getOrCreateConvertedSVGElement(), new File("target/table/cache/" + outName));
 		List<SVGRect> rectList = rectCache.getOrCreateRectList();

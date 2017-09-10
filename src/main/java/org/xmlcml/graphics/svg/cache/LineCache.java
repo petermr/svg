@@ -1,6 +1,7 @@
 package org.xmlcml.graphics.svg.cache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -19,6 +20,7 @@ import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGPolyline;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.linestuff.AxialLineList;
+import org.xmlcml.graphics.svg.linestuff.HorizontalLineComparator;
 import org.xmlcml.graphics.svg.plot.AnnotatedAxis;
 import org.xmlcml.graphics.svg.plot.SVGMediaBox;
 
@@ -31,34 +33,40 @@ import com.google.common.collect.Multiset;
  *
  */
 public class LineCache extends AbstractCache {
+	private static final String BLACK = "black";
 	static final Logger LOG = Logger.getLogger(LineCache.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
+	private static Double STROKE_WIDTH_FACTOR = 5.0;
 
 	private List<SVGLine> horizontalLines;
 	private List<SVGLine> verticalLines;
 
 	private List<SVGLine> lineList;
 	private SVGLineList longHorizontalLineList;
+	// where possible short horizontal lines will be contained within sibling tuples
 	private SVGLineList shortHorizontalLineList;
+	private List<SVGLineList> horizontalSiblingsList;
 	private SVGLineList topHorizontalLineList;
 	private SVGLineList bottomHorizontalLineList;
 	private Multiset<Double> horizontalLineStrokeWidthSet;
+	private List<SVGLine> allLines;
 
 	private AxialLineList longHorizontalEdgeLines;
 	private AxialLineList longVerticalEdgeLines;
 	private SVGRect fullLineBox;
 	private Real2Range lineBbox;
-	
+
+	// parameters 
 	private Double axialLinePadding = 10.0; // to start with
 	private Double cornerEps = 0.5; // to start with
-	private List<SVGLine> allLines;
 	private Double lineEps = 5.0; // to start with
 	// for display only
-	private Double STROKE_WIDTH_FACTOR = 5.0;
+	private double joinEps = 1.0; // tolerance for joining lines 
+	// structure
 	private ShapeCache siblingShapeCache;
-	
+
 	public LineCache(ComponentCache containingComponentCache) {
 		super(containingComponentCache);
 		siblingShapeCache = containingComponentCache.getOrCreateShapeCache();
@@ -67,9 +75,7 @@ public class LineCache extends AbstractCache {
 	}
 	
 	private void init() {
-		longHorizontalLineList = new SVGLineList();
-		shortHorizontalLineList = new SVGLineList();
-		longHorizontalEdgeLines = new AxialLineList(LineDirection.HORIZONTAL);
+		// leave lists as null untill needed
 	}
 
 	/** the bounding box of the actual line components
@@ -127,10 +133,11 @@ public class LineCache extends AbstractCache {
 			fullLineBox = SVGRect.createFromRealRanges(fullboxXRange, fullboxYRange);
 			fullLineBox.format(SVGMediaBox.FORMAT_NDEC);
 		}
-		if (fullLineBox == null && ownerComponentCache.pathBox != null) {
+		if (fullLineBox == null) {
+			Real2Range pathBox = ownerComponentCache.getOrCreatePathCache().getBoundingBox();
 			for (SVGRect rect : ownerComponentCache.getOrCreateShapeCache().getRectList()) {
 				Real2Range rectRange = rect.getBoundingBox();
-				if (ownerComponentCache.pathBox.isEqualTo(rectRange, axialLinePadding)) {
+				if (pathBox.isEqualTo(rectRange, axialLinePadding)) {
 					fullLineBox = rect;
 					break;
 				}
@@ -160,29 +167,58 @@ public class LineCache extends AbstractCache {
 		return bottomHorizontalLineList;
 	}
 
+	/** get lines which are "almost" the same length as the width of the owner cache bbox.
+	 * 
+	 * @return
+	 */
 	public SVGLineList getOrCreateLongHorizontalLineList() {
-		longHorizontalLineList = new SVGLineList();
-		getOrCreateHorizontalLineList();
-		RealRange xrange = getOrCreateComponentCacheBoundingBox().getRealRange(Direction.HORIZONTAL);
-		for (SVGLine line : horizontalLines) {
-			if (RealRange.isEqual(xrange, line.getRealRange(Direction.HORIZONTAL), lineEps )) {
-				longHorizontalLineList.add(line);
+		if (longHorizontalLineList == null) {
+			longHorizontalLineList = new SVGLineList();
+			getOrCreateHorizontalLineList();
+			Real2Range ownerBBox = getOrCreateComponentCacheBoundingBox();
+			RealRange xrange = ownerBBox.getRealRange(Direction.HORIZONTAL);
+			for (SVGLine line : horizontalLines) {
+				RealRange lineRange = line.getRealRange(Direction.HORIZONTAL);
+				if (RealRange.isEqual(xrange, lineRange, lineEps )) {
+					longHorizontalLineList.add(line);
+				}
 			}
 		}
-
 		return longHorizontalLineList;
 	}
 
-	public SVGLineList getShortHorizontalLineList() {
-		shortHorizontalLineList = new SVGLineList();
-		getOrCreateHorizontalLineList();
-		RealRange xrange = getOrCreateComponentCacheBoundingBox().getRealRange(Direction.HORIZONTAL);
-		for (SVGLine line : horizontalLines) {
-			if (line.getLength() < xrange.getRange() - lineEps ) {
-				shortHorizontalLineList.add(line);
+	public SVGLineList getOrCreateShortHorizontalLineList() {
+		if (shortHorizontalLineList == null) {
+			shortHorizontalLineList = new SVGLineList();
+			getOrCreateHorizontalLineList();
+			RealRange xrange = getOrCreateComponentCacheBoundingBox().getRealRange(Direction.HORIZONTAL);
+			for (SVGLine line : horizontalLines) {
+				if (line.getLength() < xrange.getRange() - lineEps ) {
+					shortHorizontalLineList.add(line);
+				}
 			}
+			transferShortHorizontalLinesToSiblingLineLists();
+			
 		}
 		return shortHorizontalLineList;
+	}
+
+	private void transferShortHorizontalLinesToSiblingLineLists() {
+		double lastY = -Double.MAX_VALUE;
+		horizontalSiblingsList = new ArrayList<SVGLineList>();
+		SVGLineList horizontalSiblings = null;
+		for (int i = shortHorizontalLineList.size() - 1; i >= 0; i--) {
+			SVGLine shortHorizontal = shortHorizontalLineList.get(i);
+			double y = shortHorizontal.getMidPoint().getY();
+			if (!Real.isEqual(lastY, y)) {
+				horizontalSiblings = new SVGLineList();
+				horizontalSiblingsList.add(horizontalSiblings);
+			}
+			lastY = y;
+			horizontalSiblings.add(shortHorizontal);
+			shortHorizontalLineList.remove(i);
+		}
+		Collections.reverse(horizontalSiblingsList);
 	}
 
 	public Multiset<Double> getHorizontalLineStrokeWidthSet() {
@@ -202,16 +238,16 @@ public class LineCache extends AbstractCache {
 	 * splits "L"-shaped polylines into two lines
 	 * this may or may not be a good idea.
 	 * 
-	 * @param svgElement modified
+	 * @param originalSvgElement modified
 	 */
-	public void createHorizontalAndVerticalLines(SVGElement svgElement) {
+	public void createHorizontalAndVerticalLines() {
 		
 		getOrCreateHorizontalLineList();
 		getOrCreateVerticalLineList();
 		List<SVGPolyline> polylineList = siblingShapeCache.getPolylineList();
 		List<SVGPolyline> axialLShapes = SVGPolyline.findLShapes(polylineList);
 		for (int i = axialLShapes.size() - 1; i >= 0; i--) {
-			removeLShapesAndReplaceByLines(polylineList, axialLShapes.get(i), svgElement);
+			removeLShapesAndReplaceByLines(polylineList, axialLShapes.get(i), ownerComponentCache.getOriginalSVGElement());
 		}
 		allLines = new ArrayList<SVGLine>();
 		allLines.addAll(this.horizontalLines);
@@ -221,13 +257,21 @@ public class LineCache extends AbstractCache {
 	public List<SVGLine> getOrCreateVerticalLineList() {
 		if (verticalLines == null) {
 			verticalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.VERTICAL, AnnotatedAxis.EPS);
+			verticalLines = SVGLine.mergeParallelLines(verticalLines, joinEps);
 		}
 		return verticalLines;
 	}
 
 	public List<SVGLine> getOrCreateHorizontalLineList() {
 		if (horizontalLines == null) {
-			horizontalLines = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+			List<SVGLine> horizontalLines0 = SVGLine.findHorizontalOrVerticalLines(lineList, LineDirection.HORIZONTAL, AnnotatedAxis.EPS);
+			horizontalLines = SVGLine.mergeParallelLines(horizontalLines0, joinEps );
+			if (horizontalLines0.size() != horizontalLines.size()) {
+				LOG.info("merged horizontal lines: ");
+			}
+			Collections.sort(horizontalLines, new HorizontalLineComparator());
+			getOrCreateLongHorizontalLineList();
+			getOrCreateShortHorizontalLineList();
 		}
 		return horizontalLines;
 	}
@@ -311,7 +355,7 @@ public class LineCache extends AbstractCache {
 					if (entry.getElement().equals(strokeWidth)) {
 						SVGLine line1 = (SVGLine) line.copy();
 						line1.setStrokeWidth(strokeWidth * STROKE_WIDTH_FACTOR );
-						line1.setStroke("black");
+						line1.setStroke(BLACK);
 						line1.addTitle(""+strokeWidth);
 						g.appendChild(line1);
 						break;
@@ -329,10 +373,43 @@ public class LineCache extends AbstractCache {
 			+ "vert: "+verticalLines.size()+"; "
 			+ "line: "+lineList.size()+"; "
 			+ "longH: "+longHorizontalLineList.size()+"; "
-			+ "shortH: "+shortHorizontalLineList.size()+"; ";
+			+ "shortH: "+shortHorizontalLineList.size()+"; "
+			+ "siblingsH: "+horizontalSiblingsList.size()+"; ";
 		return s;
 
 	}
+
+	public List<SVGLineList> getHorizontalSiblingsList() {
+		return horizontalSiblingsList;
+	}
+
+	public void createSpecializedLines() {
+		createHorizontalAndVerticalLines();
+		makeLongHorizontalAndVerticalEdges();
+		makeFullLineBoxAndRanges();
+	}
+
+	@Override
+	public void clearAll() {
+		superClearAll();
+		horizontalLines = null;
+		verticalLines = null;
+
+		lineList = null;
+		longHorizontalLineList = null;
+		shortHorizontalLineList = null;
+		horizontalSiblingsList = null;
+		topHorizontalLineList = null;
+		bottomHorizontalLineList = null;
+		horizontalLineStrokeWidthSet = null;
+		allLines = null;
+
+		longHorizontalEdgeLines = null;
+		longVerticalEdgeLines = null;
+		fullLineBox = null;
+		lineBbox = null;
+	}
+
 
 
 	

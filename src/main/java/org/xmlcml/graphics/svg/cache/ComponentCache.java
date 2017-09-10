@@ -24,6 +24,7 @@ import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGImage;
 import org.xmlcml.graphics.svg.SVGPath;
+import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGSVG;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.SVGText;
@@ -154,14 +155,13 @@ public class ComponentCache extends AbstractCache {
 	private LineCache lineCache;
 	private RectCache rectCache;
 	private ShapeCache shapeCache;
-//	private ContentBoxCache contextBoxCache;
 	// other caches as they are developed
 	private List<AbstractCache> abstractCacheList;
 	
 	private Real2Range positiveXBox;
 
 	public String fileRoot;
-	public SVGElement svgElement;
+	public SVGElement originalSvgElement;
 	public String debugRoot = "target/debug/";
 	private String imageDebug = "target/images/";
 	private String pathDebug = "target/paths/";
@@ -169,22 +169,16 @@ public class ComponentCache extends AbstractCache {
 	private String textDebug = "target/texts/";
 	private File plotDebug = new File("target/plots/");
 
-//	private PlotBox plotBox; // may not be required
-	
 	private boolean removeWhitespace = false;
-//	private boolean removeDuplicatePaths = true;
 	private boolean splitAtMove = true;
 	
-	public Real2Range imageBox;
-	public Real2Range pathBox;
-	private Real2Range textBox;
-	private Real2Range totalBox;
-
 	private SVGG extractedSVGElement;
 	List<SVGElement> allElementList;
 	List<Real2Range> boundingBoxList;
 
 	private List<Real2> whitespaceSpixels;
+
+	private double outerBoxEps = 3.0; // outer bbox error
 
 
 	/** this may change as we decide what types of object interact with store
@@ -209,46 +203,39 @@ public class ComponentCache extends AbstractCache {
 			throw new RuntimeException("Null input stream");
 		}
 		SVGElement svgElement = SVGUtil.parseToSVGElement(inputStream);
-		readGraphicsComponents(svgElement);
+		readGraphicsComponentsAndMakeCaches(svgElement);
 	}
 
-	public void readGraphicsComponents(SVGElement svgElement) {
+	public void readGraphicsComponentsAndMakeCaches(SVGElement svgElement) {
 		if (svgElement != null) {
-			this.extractSVGComponents(svgElement);
-			lineCache = new LineCache(this);
-			lineCache.createHorizontalAndVerticalLines(svgElement);
-			lineCache.makeLongHorizontalAndVerticalEdges();
-			lineCache.makeFullLineBoxAndRanges();
+			this.extractSVGComponentsAndMakeCaches(svgElement);
 		} else {
 			throw new RuntimeException("Null svgElement");
 		}
 	}
 
-	private void extractSVGComponents(SVGElement svgElem) {
-		svgElement = (SVGElement) svgElem.copy();
+	private void extractSVGComponentsAndMakeCaches(SVGElement svgElem) {
+		originalSvgElement = (SVGElement) svgElem.copy();
 		extractedSVGElement = new SVGG();
 		
 		 // is this a good idea? These are clipping boxes. 
-		SVGDefs.removeDefs(svgElement);
-		StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(svgElement);
+		SVGDefs.removeDefs(originalSvgElement);
+		StyleAttributeFactory.convertElementAndChildrenFromOldStyleAttributesToCSS(originalSvgElement);
 		
 		positiveXBox = new Real2Range(new RealRange(-100., 10000), new RealRange(-10., 10000));
 		removeEmptyTextElements();
 		removeNegativeXorYElements();
 		
-		getOrCreatePathCache();
-		getOrCreateImageCache();
-		getOrCreateShapeCache();
-		getOrCreateTextCache();
-		totalBox = textBox == null ? pathBox : textBox.plus(pathBox);
-		
+		getOrCreateCascadingCaches();
+		lineCache.createSpecializedLines();
+
 		debugComponents();
 	}
 
 	private void debugComponents() {
 		SVGG g;
 		SVGG gg = new SVGG();
-		g = this.pathCache.debugToSVG(pathDebug+this.fileRoot+".debug.svg");
+		g = this.getOrCreatePathCache().debugToSVG(pathDebug+this.fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("path"));
 	//		gg.appendChild(g.copy());
 		
@@ -275,8 +262,7 @@ public class ComponentCache extends AbstractCache {
 	public PathCache getOrCreatePathCache() {
 		if (pathCache == null) {
 			this.pathCache = new PathCache(this);
-			this.pathCache.extractPaths(this.svgElement);
-			pathBox = pathCache.getBoundingBox();
+			this.pathCache.extractPaths(this.originalSvgElement);
 		}
 		return pathCache;
 	}
@@ -285,7 +271,6 @@ public class ComponentCache extends AbstractCache {
 		if (imageCache == null) {
 			this.imageCache = new ImageCache(this);
 			this.imageCache.getOrCreateImageList();
-			imageBox = imageCache.getBoundingBox();
 		}
 		return imageCache;
 	}
@@ -293,14 +278,9 @@ public class ComponentCache extends AbstractCache {
 	public TextCache getOrCreateTextCache() {
 		if (textCache == null) {
 			this.textCache = new TextCache(this);
-			if (this.svgElement != null) {
-				this.textCache.extractTexts(this.svgElement);
-				textBox = textCache.getBoundingBox();
-				// FIXME add me in later
-//				boolean normalized = TextUtil.normalize(svgElement, NORMALIZE_FORM);
-
+			if (this.originalSvgElement != null) {
+				this.textCache.extractTexts(this.originalSvgElement);
 				addElementsToExtractedElement(textCache.getTextList());
-				
 				textCache.createHorizontalAndVerticalTexts();
 			}
 		}
@@ -311,8 +291,8 @@ public class ComponentCache extends AbstractCache {
 		if (shapeCache == null) {
 			shapeCache = new ShapeCache(this);
 			List<SVGPath> currentPathList = this.pathCache.getCurrentPathList();
-			this.getOrCreateShapeCache().extractShapes(currentPathList, svgElement);
-			List<SVGShape> shapeList = getOrCreateShapeCache().getOrCreateConvertedShapeList();
+			this.getOrCreateShapeCache().extractShapes(currentPathList, originalSvgElement);
+			List<SVGShape> shapeList = /*getOrCreateShapeCache()*/shapeCache.getOrCreateConvertedShapeList();
 			addElementsToExtractedElement(shapeList);
 		}
 		return shapeCache;
@@ -348,7 +328,7 @@ public class ComponentCache extends AbstractCache {
 	 * 
 	 */
 	public void removeNegativeXorYElements() {
-		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(svgElement);
+		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(originalSvgElement);
 		for (int i = texts.size() - 1; i >= 0; i--) {
 			SVGText text = texts.get(i);
 			Real2 xy = text.getXY();
@@ -360,7 +340,7 @@ public class ComponentCache extends AbstractCache {
 	}
 
 	public void removeEmptyTextElements() {
-		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(this.svgElement);
+		List<SVGText> texts = SVGText.extractSelfAndDescendantTexts(this.originalSvgElement);
 		for (int i = texts.size() - 1; i >= 0; i--) {
 			SVGText text = texts.get(i);
 			String s = text.getValue();
@@ -502,7 +482,7 @@ public class ComponentCache extends AbstractCache {
 	}
 	public String getFeatureValue(Feature feature) {
 		String value = null;
-		getOrCreateCaches();
+		getOrCreateCascadingCaches();
 		if (Feature.HORIZONTAL_TEXT_COUNT.equals(feature)) {
 			value = String.valueOf(textCache.getOrCreateHorizontalTexts().size());
 		} else if (Feature.HORIZONTAL_TEXT_STYLE_COUNT.equals(feature)) {
@@ -532,7 +512,7 @@ public class ComponentCache extends AbstractCache {
 		} else if(Feature.LONG_HORIZONTAL_RULE_COUNT.equals(feature)) {
 			value = String.valueOf(lineCache.getOrCreateLongHorizontalLineList().size());
 		} else if(Feature.SHORT_HORIZONTAL_RULE_COUNT.equals(feature)) {
-			value = String.valueOf(lineCache.getShortHorizontalLineList().size());
+			value = String.valueOf(lineCache.getOrCreateShortHorizontalLineList().size());
 		} else if(Feature.TOP_HORIZONTAL_RULE_COUNT.equals(feature)) {
 			value = String.valueOf(lineCache.getTopHorizontalLineList().size());
 		} else if(Feature.BOTTOM_HORIZONTAL_RULE_COUNT.equals(feature)) {
@@ -549,8 +529,28 @@ public class ComponentCache extends AbstractCache {
 		return value;
 	}
 
+	/* cached boundingBox.
+	 * The bbox may be reset 
+	 * 
+	 */
 	public Real2Range getBoundingBox() {
-		return totalBox;
+		if (boundingBox == null) {
+			Real2Range imageBox = getOrCreateImageCache().getBoundingBox();
+			Real2Range textBox = getOrCreateTextCache().getBoundingBox();
+			Real2Range pathBox = getOrCreatePathCache().getBoundingBox();
+			addBoxToTotalBox(textBox);
+			addBoxToTotalBox(pathBox);
+			addBoxToTotalBox(imageBox);
+		}
+		return boundingBox;
+	}
+
+	private void addBoxToTotalBox(Real2Range box) {
+		if (boundingBox == null) {
+			boundingBox = new Real2Range(box);
+		} else if (box != null) {
+			boundingBox = boundingBox.plus(box);
+		}
 	}
 
 	/** aggregates all elements, include derived ones.
@@ -561,7 +561,7 @@ public class ComponentCache extends AbstractCache {
 	public List<? extends SVGElement> getOrCreateElementList() {
 		if (allElementList == null) {
 			allElementList = new ArrayList<SVGElement>();
-			getOrCreateCaches();
+			getOrCreateCascadingCaches();
 			// don't add paths as we have already converted to shapes
 //			allElementList.addAll(pathCache.getOrCreateElementList());
 			allElementList.addAll(imageCache.getOrCreateElementList());
@@ -574,13 +574,28 @@ public class ComponentCache extends AbstractCache {
 		return allElementList;
 	}
 
-	private void getOrCreateCaches() {
+	/** creates caches in order
+	 * path, text , image are primitives
+	 * then path->shape->line->rect
+	 * 
+	 * each subsequent cache removes the elemnts from any earlier one it uses.
+	 * the original SVG element is NOT altered.
+	 * 
+	 * There is some backtracking required. For example later elements (e.g. borderingRect)
+	 * may be removed and this will affect not only the rect list but also the bounding boxes.
+	 * These in turn affect the judgment of axial lines and long lines.
+	 * 
+	 * 
+	 */
+	public void getOrCreateCascadingCaches() {
 		getOrCreatePathCache();
 		getOrCreateTextCache();
 		getOrCreateImageCache();
+		
+		// first pass creates raw caches which may be elaborated later
 		getOrCreateShapeCache();
-		getOrCreateRectCache();
 		getOrCreateLineCache();
+		getOrCreateRectCache();
 	}
 
 	public List<Real2Range> getBoundingBoxList() {
@@ -683,4 +698,52 @@ public class ComponentCache extends AbstractCache {
 		
 	}
 
+	public void removeBorderingRects() {
+		Real2Range outerBbox = this.getBoundingBox();
+		List<SVGRect> rectList = rectCache.getOrCreateRectList();
+		LOG.debug("pre removal rect bbox "+outerBbox + "; "+rectCache.getOrCreateRectList().size());
+		boolean removed = false;
+		for (int i = rectList.size() - 1; i >= 0; i--) {
+			SVGRect rect = rectList.get(i);
+			Real2Range bbox = rect.getBoundingBox();
+			if (outerBbox.isEqualTo(bbox, outerBoxEps)) {
+				removed = rectCache.remove(rect);
+				LOG.info("removed outer rect "+rect.toXML());
+			}
+		}
+		if (removed) {
+			rectCache.clearAll();
+			outerBbox = rectCache.getBoundingBox();
+			LOG.debug("post removal rect bbox "+outerBbox + "; "+rectCache.getOrCreateRectList().size());
+		}
+		
+	}
+	
+	public SVGElement getOriginalSVGElement() {
+		return originalSvgElement;
+	}
+	
+	@Override
+	public void clearAll() {
+		superClearAll();
+		imageCache = null;
+		pathCache = null;
+		textCache = null;
+		lineCache = null;
+		rectCache = null;
+		shapeCache = null;
+		abstractCacheList = null;
+		
+		positiveXBox = null;
+
+		fileRoot = null;
+		originalSvgElement = null;
+
+		extractedSVGElement = null;
+		allElementList = null;
+		boundingBoxList = null;
+
+		whitespaceSpixels = null;
+
+	}
 }

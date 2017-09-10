@@ -36,7 +36,7 @@ public class LineCacheTest {
 	private List<SVGLine> extractAndDisplayLines(File inDir, String svgName, String outName) {
 		SVGElement svgElement = SVGElement.readAndCreateSVG(new File(inDir, svgName));
 		ComponentCache componentCache = new ComponentCache();
-		componentCache.readGraphicsComponents(svgElement);
+		componentCache.readGraphicsComponentsAndMakeCaches(svgElement);
 		LineCache lineCache = componentCache.getOrCreateLineCache();
 		SVGSVG.wrapAndWriteAsSVG(lineCache.getOrCreateConvertedSVGElement(), new File("target/table/cache/" + outName));
 		List<SVGLine> lineList = lineCache.getOrCreateLineList();

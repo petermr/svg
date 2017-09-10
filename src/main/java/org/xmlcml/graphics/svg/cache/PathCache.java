@@ -240,5 +240,24 @@ public class PathCache extends AbstractCache{
 		return ""
 				+ "paths: "+(pathList == null ? "0" : pathList.size());
 	}
+	
+	@Override
+	public void clearAll() {
+		superClearAll();
+		pathList = null;
+		sigSet = null;
+		pathBySig = null;
+		charBySig = null;
+
+		positiveXBox = null;
+		originalPathList = null;
+		nonNegativePathList = null;
+		unconvertedPathList = null;
+		trimmedShadowedPathList = null;
+		currentPathList = null;
+		positiveBoxPathList = null;
+		
+	}
+
 
 }

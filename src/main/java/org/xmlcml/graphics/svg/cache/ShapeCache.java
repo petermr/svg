@@ -2,6 +2,7 @@ package org.xmlcml.graphics.svg.cache;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -19,6 +20,8 @@ import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGShape;
 import org.xmlcml.graphics.svg.linestuff.Path2ShapeConverter;
 import org.xmlcml.graphics.svg.objects.SVGTriangle;
+
+import com.google.common.collect.Multiset;
 
 /** extracts and tidies shapes read from SVG.
  * 
@@ -47,8 +50,8 @@ public class ShapeCache extends AbstractCache {
 	private List<List<SVGShape>> convertedShapeListList;
 	private List<SVGShape> convertedShapeList;
 	
-	public ShapeCache(ComponentCache svgStore) {
-		super(svgStore);
+	public ShapeCache(ComponentCache ownerCache) {
+		super(ownerCache);
 		init();
 	}
 	
@@ -314,7 +317,22 @@ public class ShapeCache extends AbstractCache {
 		return getOrCreateConvertedShapeList();
 	}
 
-
-
+	@Override
+	public void clearAll() {
+		superClearAll();
+		originalPathList = null;
+		pathList = null;
+		circleList = null;
+		ellipseList = null;
+		lineList = null;
+		polygonList = null;
+		polylineList = null;
+		rectList = null;
+		triangleList = null;
+		unknownShapeList = null;
+		allShapeList = null;
+		convertedShapeListList = null;
+		convertedShapeList = null;
+	}
 
 }

@@ -55,7 +55,7 @@ public class ComponentCacheTest {
 					row.add(filename);
 					SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 					ComponentCache cache = new ComponentCache();
-					cache.readGraphicsComponents(svgElement);
+					cache.readGraphicsComponentsAndMakeCaches(svgElement);
 					List<String> featureValues = cache.getFeatureValues(Feature.TEXT_SHAPE_FEATURES);
 					row.addAll(featureValues);
 					bodyList.add(row);
@@ -89,7 +89,7 @@ public class ComponentCacheTest {
 					row.add(filename);
 					SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 					ComponentCache cache = new ComponentCache();
-					cache.readGraphicsComponents(svgElement);
+					cache.readGraphicsComponentsAndMakeCaches(svgElement);
 					textCache = cache.getOrCreateTextCache();
 					Multiset<String> styleSet = textCache.createAbbreviatedHorizontalTextStyleMultiset();
 					row.addAll(textCache.createRowOfStyles( styleSet));
@@ -211,7 +211,7 @@ public class ComponentCacheTest {
 		rowx.add(filename);
 		SVGElement svgElement = SVGElement.readAndCreateSVG(svgFile);
 		ComponentCache cache = new ComponentCache();
-		cache.readGraphicsComponents(svgElement);
+		cache.readGraphicsComponentsAndMakeCaches(svgElement);
 		List<String> featureValues = cache.getFeatureValues(features);
 		rowx.addAll(featureValues);
 		return rowx;

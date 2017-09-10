@@ -27,7 +27,7 @@ public class ImageCache extends AbstractCache{
 
 	public List<SVGImage> getOrCreateImageList() {
 		if (imageList == null) {
-			imageList = SVGImage.extractSelfAndDescendantImages(ownerComponentCache.svgElement);
+			imageList = SVGImage.extractSelfAndDescendantImages(ownerComponentCache.originalSvgElement);
 		}
 		return imageList;
 	}
@@ -94,7 +94,9 @@ public class ImageCache extends AbstractCache{
 		return s;
 	}
 
-
-
-	
+	@Override
+	public void clearAll() {
+		superClearAll();
+		imageList = null;
+	}
 }
