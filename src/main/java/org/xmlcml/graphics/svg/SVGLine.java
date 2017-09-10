@@ -662,7 +662,7 @@ public class SVGLine extends SVGShape {
 	 * 
 	 * modifies list and lines
 	 * 
-	 * @param lineList
+	 * @param lineList merged horizontal and merged vertical lines 
 	 * @param eps
 	 * @return
 	 */
@@ -815,13 +815,6 @@ public class SVGLine extends SVGShape {
 		return Real.isEqual(x0, x1, eps) || x0 > x1;
 	}
 
-//	private static boolean canBeJoined(SVGLine line0, SVGLine line1, double eps, Angle angleEps) {
-//		return line0.isParallelTo(line1, angleEps) && 
-//			(
-//			Real.isEqual(line0.getXY(1), line1.getXY(0).getX(), eps) ||
-//			Real.isEqual(line0.getY(), first1.getY(), eps));
-//	}
-
 	/** some visually "joined" lines are actually overlapping.
 	 * 
 	 * @param last0
@@ -829,7 +822,7 @@ public class SVGLine extends SVGShape {
 	 * @param eps
 	 * @return
 	 */
-	public static boolean overlaps(Real2 last0, Real2 first1, double eps) {
+	private static boolean overlaps(Real2 last0, Real2 first1, double eps) {
 		boolean joined = false;
 		if (Real.isEqual(last0.getY(), first1.getY(), eps) && last0.getX() > first1.getX()) {
 			joined = true;

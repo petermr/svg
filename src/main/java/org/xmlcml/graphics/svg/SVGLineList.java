@@ -6,15 +6,24 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Real;
+import org.xmlcml.euclid.Real2Range;
 
 public class SVGLineList extends SVGG implements Iterable<SVGLine> {
+	
+	public enum SiblingType {
+		HORIZONTAL_SIBLINGS, // with common Y
+		VERTICAL_SIBLINGS, // with common X
+	}
 	
 	private static Logger LOG = Logger.getLogger(SVGLineList.class);
 	static {
 		LOG.setLevel(Level.DEBUG);
 	}
 
+	private double siblingEps = 0.2; // difference in common coordinate
 	protected ArrayList<SVGLine> lineList;
+	private SiblingType type;
 
 	public SVGLineList() {
 		super();
@@ -31,12 +40,49 @@ public class SVGLineList extends SVGG implements Iterable<SVGLine> {
 	 */
 	public static SVGLineList createLineList(List<SVGElement> elements) {
 		SVGLineList lineList = new SVGLineList();
-		for (GraphicsElement element : elements) {
+		for (SVGElement element : elements) {
 			if (element instanceof SVGLine) {
 				lineList.add((SVGLine) element);
 			}
 		}
 		return lineList;
+	}
+
+	public void setType(SiblingType type) {
+		ensureLines();
+		if (checkLines(type)) {
+			this.type = type;
+		}
+	}
+	
+	/** maybe create a SiblingLines class.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public boolean checkLines(SiblingType type) {
+		if (lineList == null || lineList.size() == 0) return false;
+		Double commonCoord = null;
+		for (SVGLine line : lineList) {
+			Double coord = null;
+			if (type.equals(SiblingType.HORIZONTAL_SIBLINGS)) {
+				if (!line.isHorizontal(siblingEps)) {
+					throw new RuntimeException("Lines do not obey type: "+type);
+				}
+				coord = line.getMidPoint().getY();
+			} else if (type.equals(SiblingType.VERTICAL_SIBLINGS)) {
+				if (! line.isVertical(siblingEps)) {
+					throw new RuntimeException("Lines do not obey type: "+type);
+				}
+			}
+			coord = line.getMidPoint().getY();
+			if (commonCoord == null) {
+				commonCoord = coord;
+			} else if (!Real.isEqual(commonCoord, coord, siblingEps)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public List<SVGLine> getLineList() {
@@ -85,4 +131,16 @@ public class SVGLineList extends SVGG implements Iterable<SVGLine> {
 		return lineList.add(line);
 	}
 
+	public Real2Range getBoundingBox() {
+		Real2Range bbox = null;
+		for (SVGLine line : lineList) {
+			Real2Range bbox0 = line.getBoundingBox();
+			if (bbox == null) {
+				bbox = bbox0;
+			} else {
+				bbox = bbox.plus(bbox0);
+			}
+		}
+		return bbox;
+	}
 }
