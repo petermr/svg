@@ -546,10 +546,12 @@ public class ComponentCache extends AbstractCache {
 	}
 
 	private void addBoxToTotalBox(Real2Range box) {
-		if (boundingBox == null) {
+		if (boundingBox == null && box != null) {
 			boundingBox = new Real2Range(box);
 		} else if (box != null) {
 			boundingBox = boundingBox.plus(box);
+		} else {
+			// leave bounding box as is
 		}
 	}
 
