@@ -47,6 +47,7 @@ public class SVGDiagram extends SVGG {
 	}
 
 	protected void createShapes() {
+		LOG.warn("SUGGEST moving createShapes to Caches");
 		triangleList = new ArrayList<SVGTriangle>();
 		lineList = new ArrayList<SVGLine>();
 		polylineList = new ArrayList<SVGPolyline>();

@@ -40,13 +40,7 @@ public class SVGPlot extends SVGDiagram {
 				lineList, eps, LineDirection.VERTICAL);
 		if (rectList.size() == 1) {
 			mainRect = rectList.get(0);
-//			addTickMarks(mainRect);
 		}
 	}
-
-//	private List<SVGAxis> addTickMarks(SVGRect rect, List<SVGLine> horizontalList, List<SVGLine> verticalList) {
-//		SVGAxis leftAxis = addTickMarks(rect, horizontalList, );
-//		addTickMarks(rect, verticalList);
-//	}
 
 }
