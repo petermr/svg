@@ -64,6 +64,8 @@ public class GraphicsElement extends Element implements SVGConstants {
 	public static final String STYLE = "style";
 	public static final String PX = "px";
 
+	protected static final String MIXED_STYLE = "mixedStyle";
+
 	public enum FontWeight {
 		BOLD,
 		NORMAL
@@ -800,6 +802,7 @@ public class GraphicsElement extends Element implements SVGConstants {
 		this.removeOldStyleAttributes();
 		this.setCSSStyle(cssStyle);
 	}
+	
 	
 	/** create SAF for an element.
 	 * 

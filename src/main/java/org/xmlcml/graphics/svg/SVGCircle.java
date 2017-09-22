@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.xmlcml.euclid.Angle;
 import org.xmlcml.euclid.Real;
 import org.xmlcml.euclid.Real2;
 import org.xmlcml.euclid.Real2Range;
@@ -311,6 +312,22 @@ public class SVGCircle extends SVGShape {
 	@Override
 	public Double getY() {
 		return getCY();
+	}
+	
+	/** draws a circular arc as a series of beziers.
+	 * 
+	 * @param centre
+	 * @param radius
+	 * @param start
+	 * @param end
+	 * @param nsteps
+	 * @return
+	 */
+	public static SVGG createCircleArc(Real2 centre, double radius, Angle start, Angle end/*, int nsteps*/) {
+		double PI4 = Math.PI / 4.0;
+		SVGG arc = new SVGG();
+		return arc;
+		
 	}
 	
 }

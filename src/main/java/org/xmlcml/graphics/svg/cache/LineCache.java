@@ -135,9 +135,13 @@ public class LineCache extends AbstractCache {
 		}
 		if (fullLineBox == null) {
 			Real2Range pathBox = ownerComponentCache.getOrCreatePathCache().getBoundingBox();
+			// not sure why we are comparing to pathBox; may be null
 			for (SVGRect rect : ownerComponentCache.getOrCreateShapeCache().getRectList()) {
 				Real2Range rectRange = rect.getBoundingBox();
-				if (pathBox.isEqualTo(rectRange, axialLinePadding)) {
+				if (rectRange == null) {
+					throw new RuntimeException("null range: "+rect.toXML());
+				}
+				if (pathBox != null && pathBox.isEqualTo(rectRange, axialLinePadding)) {
 					fullLineBox = rect;
 					break;
 				}

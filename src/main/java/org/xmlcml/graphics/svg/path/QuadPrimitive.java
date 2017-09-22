@@ -18,7 +18,7 @@ public class QuadPrimitive extends SVGPathPrimitive {
 	
 	public QuadPrimitive(Real2Array coordArray) {
 		if (coordArray == null || coordArray.size() != 2) {
-			throw new RuntimeException("Bad coordArray: "+coordArray);
+			throw new RuntimeException("Bad coordArray (must be 2 points): "+coordArray);
 		}
 		this.coordArray = coordArray;
 	}
