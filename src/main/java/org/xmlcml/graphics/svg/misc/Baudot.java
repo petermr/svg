@@ -1,6 +1,7 @@
 package org.xmlcml.graphics.svg.misc;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -125,6 +126,20 @@ public class Baudot {
 		ss =  new String[]{"J", "U", "D", "I", "T", "H", " ", "P", "E", "T", "E", "R", " ", "2", "0", "1", "7"};
 		g = baudot.getSVGElement(Arrays.asList(ss));
 		SVGSVG.wrapAndWriteAsSVG(g, new File("target/baudot/jp.svg"));
+		ss =  new String[]{"C", "A", "R", "O", "L", " ", "7", "0", "T", "H", " ", "2", "0", "1", "7"};
+		g = baudot.getSVGElement(Arrays.asList(ss));
+		SVGSVG.wrapAndWriteAsSVG(g, new File("target/baudot/carol2.svg"));
+		String s =  "DAVE 40TH 2017";
+		g = baudot.getSVGElement(s);
+		SVGSVG.wrapAndWriteAsSVG(g, new File("target/baudot/david.svg"));
+	}
+
+	private SVGG getSVGElement(String s) {
+		List<String> ss = new ArrayList<String>();
+		for (int i = 0; i < s.length(); i++) {
+			ss.add(String.valueOf(s.charAt(i)));
+		}
+		return getSVGElement(ss);
 	}
 	
 	
@@ -158,9 +173,10 @@ class Code {
 			}
 		}
 		x += deltax*0.3;
+		String font = "Arial";
 		if (character.equals("I")) x += deltax*0.2;
 		SVGText t = new SVGText(new Real2(x+(deltax*0.3), y+deltax*0.85), character);
-		t.setCSSStyle("font-family:helvetica;font-size:"+(deltax*0.85)+";fill:black;stroke:none;");
+		t.setCSSStyle("font-family:" + font + ";font-size:"+(deltax*0.85)+";fill:black;stroke:none;");
 		g.appendChild(t);
 		return g;
 	}
@@ -174,4 +190,59 @@ class Code {
 	public String toString() {
 		return character+":"+holes;
 	}
+}
+class Hole8 {
+	// https://www.staff.ncl.ac.uk/roger.broughton/museum/iomedia/pt1.htm
+	
+	/**
+	 * 
+58  _ _   654. 2 	The first column is the numerical value of the holes punched.
+46  - *   6 4.32 	The second column is NORMAL shift character printed.
+60  ; ;   654.3  	The third column is the SHIFT case character printed.
+15  / :     4.321
+63  . ,   654.321   The first eight characters are special characters.
+43  £ 10  6 4. 21   It looks as though the 5th hole is punched
+125 ->   7654.3 1   to make an even number of holes.
+
+48  0 ^   65 .      The next ten are the numeric characters 0 - 9.
+33  1 [   6  .  1   
+34  2 ]   6  . 2    There are no 8 or 7 holes.
+51  3 <   65 . 21   There is a 6 hole.
+36  4 >   6  .3     The last four positions is binary from 0 - 9.
+53  5 =   65 .3 1   The 5th hole is punched to make even parity.
+54  6 x   65 .32 
+39  7 :-  6  .321
+40  8 (   6 4.   
+57  9 )   654.  1
+
+65  A a  7   .  1   The next 26 are the characters A - Z.
+66  B b  7   . 2    
+83  C c  7 5 . 21   The first fifteen are the characters A - O.
+68  D d  7   .3     The last four are binary 1 - 15.
+85  E e  7 5 .3 1   Once again the 5th is punched to make even parity.
+86  F f  7 5 .32 
+71  G g  7   .321
+72  H h  7  4.   
+89  I i  7 54.  1
+90  J j  7 54. 2 
+75  K k  7  4. 21
+92  L l  7 54.3  
+77  M m  7  4.3 1
+78  N n  7  4.32 
+95  O o  7 54.321
+96  P p  76  .      The last eleven are characters P - Z.
+113 Q q  765 .  1   They have a 7 and 6 punch.
+114 R r  765 . 2    The last 4 positions are binary 0 - 10.
+99  S s  76  . 21   Once again the 5th is punched to make even parity.
+116 T t  765 .3  
+101 U u  76  .3 1
+102 V v  76  .32 
+119 W w  765 .321
+120 X x  7654.   
+105 Y y  76 4.  1
+106 Z z  76 4. 2 
+*/
+	
+	
+	
 }
