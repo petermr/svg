@@ -1,10 +1,10 @@
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;
 
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.graphics.svg.text.horizontal.LineChunk;
+import org.xmlcml.graphics.svg.rule.horizontal.LineChunk;
 
 import nu.xom.Element;
 

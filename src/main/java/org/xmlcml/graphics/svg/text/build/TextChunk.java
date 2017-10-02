@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,15 +21,23 @@ import org.xmlcml.graphics.html.HtmlLi;
 import org.xmlcml.graphics.html.HtmlP;
 import org.xmlcml.graphics.html.HtmlUl;
 import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.text.horizontal.LineChunk;
+import org.xmlcml.graphics.svg.rule.horizontal.LineChunk;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Element;
 
-/** holds a list of PhraseLists 
- * renamed from PhraseListList
+/** 
+ * currently a container of PhraseChunks.
+ * A TextChunk depends on an association between phraseChunks. It may often have only a 
+ * single PhraseChunk. PhraseChunks are usually collected into a TextChunk by heuristics, such as
+ * <ul>
+ * <li>geometry such as common/overlapping X-coordinates (a paragraph or ladder)</li>
+ * <li>Font styles and sizes</li>
+ * <li>containment or proximity to graphic objects (boxes)</li>
+ * <li>related content</li>
+ * <li>whitespace</li>
+ * </ul>
  * 
- * This is often a paragraph but can be any set of phrase lists.
  * 
  * @author pm286
  */
@@ -47,7 +55,7 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 	public final static String TAG = "textChunk";
 	private static final int EPS = 5;
 
-	private List<PhraseChunk> childPhraseListList;
+	private List<PhraseChunk> childPhraseChunkList;
 	private List<PhraseNew> phrases;
 	private RealArray ySpacings; 
 	private double paraSpacingTrigger;
@@ -57,98 +65,98 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 		this.setClassName(TAG);
 	}
 	
-	public TextChunk(TextChunk phraseListList) {
+	public TextChunk(TextChunk textChunk) {
 		this();
-		getOrCreateChildPhraseListList();
-		childPhraseListList.addAll(phraseListList.getOrCreateChildPhraseListList());
+		getOrCreateChildPhraseChunkList();
+		childPhraseChunkList.addAll(textChunk.getOrCreateChildPhraseChunkList());
 	}
 
-	public TextChunk(List<PhraseChunk> phraseLists) {
+	public TextChunk(List<PhraseChunk> phraseChunkList) {
 		this();
-		getOrCreateChildPhraseListList();
-		for (PhraseChunk phraseList : phraseLists) {
-			this.add(phraseList);
+		getOrCreateChildPhraseChunkList();
+		for (PhraseChunk phraseChunk : phraseChunkList) {
+			this.add(phraseChunk);
 		}
 	}
 
 	public Iterator<PhraseChunk> iterator() {
-		getOrCreateChildPhraseListList();
-		return childPhraseListList.iterator();
+		getOrCreateChildPhraseChunkList();
+		return childPhraseChunkList.iterator();
 	}
 
-	public List<PhraseChunk> getOrCreateChildPhraseListList() {
-		if (childPhraseListList == null) {
+	public List<PhraseChunk> getOrCreateChildPhraseChunkList() {
+		if (childPhraseChunkList == null) {
 			List<Element> phraseChildren = XMLUtil.getQueryElements(this, "*[local-name()='"+SVGG.TAG+"' and @class='"+PhraseChunk.TAG+"']");
-			childPhraseListList = new ArrayList<PhraseChunk>();
+			childPhraseChunkList = new ArrayList<PhraseChunk>();
 			for (Element child : phraseChildren) {
-				PhraseChunk phraseList = (PhraseChunk)child;
-				childPhraseListList.add(phraseList);
+				PhraseChunk phraseChunk = (PhraseChunk)child;
+				childPhraseChunkList.add(phraseChunk);
 			}
 		}
-		return childPhraseListList;
+		return childPhraseChunkList;
 	}
 
 	public String getStringValue() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		StringBuilder sb = new StringBuilder();
-		for (PhraseChunk phraseList : childPhraseListList) {
-			sb.append(""+phraseList.getStringValue()+"//");
+		for (PhraseChunk phraseChunk : childPhraseChunkList) {
+			sb.append(""+phraseChunk.getStringValue()+"//");
 		}
 		this.setStringValueAttribute(sb.toString());
 		return sb.toString();
 	}
 
-	public void add(PhraseChunk phraseList) {
-		this.appendChild(new PhraseChunk(phraseList));
-		childPhraseListList = null;
-		getOrCreateChildPhraseListList();
+	public void add(PhraseChunk phraseChunk) {
+		this.appendChild(new PhraseChunk(phraseChunk));
+		childPhraseChunkList = null;
+		getOrCreateChildPhraseChunkList();
 	}
 
 	public PhraseChunk get(int i) {
-		getOrCreateChildPhraseListList();
-		return (i < 0 || i >= childPhraseListList.size()) ? null : childPhraseListList.get(i);
+		getOrCreateChildPhraseChunkList();
+		return (i < 0 || i >= childPhraseChunkList.size()) ? null : childPhraseChunkList.get(i);
 	}
 	
 	protected List<? extends LineChunk> getChildChunks() {
-		getOrCreateChildPhraseListList();
-		return childPhraseListList;
+		getOrCreateChildPhraseChunkList();
+		return childPhraseChunkList;
 	}
 
 
 	public List<IntArray> getLeftMarginsList() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		List<IntArray> leftMarginsList = new ArrayList<IntArray>();
-		for (PhraseChunk phraseList : childPhraseListList) {
-			IntArray leftMargins = phraseList.getLeftMargins();
+		for (PhraseChunk phraseChunk : childPhraseChunkList) {
+			IntArray leftMargins = phraseChunk.getLeftMargins();
 			leftMarginsList.add(leftMargins);
 		}
 		return leftMarginsList;
 	}
 	
-	/** assumes the largest index in phraseList is main body of table.
+	/** assumes the largest index in phraseChunk is main body of table.
 	 * 
 	 * @return
 	 */
 	public int getMaxColumns() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		int maxColumns = 0;
-		for (PhraseChunk phraseList : childPhraseListList) {
-			maxColumns = Math.max(maxColumns, phraseList.size());
+		for (PhraseChunk phraseChunk : childPhraseChunkList) {
+			maxColumns = Math.max(maxColumns, phraseChunk.size());
 		}
 		return maxColumns;
 	}
 
 	public IntRangeArray getBestColumnRanges() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		int maxColumns = getMaxColumns();
 		IntRangeArray columnRanges = new IntRangeArray();
 		for (int i = 0; i < maxColumns; i++) {
 			columnRanges.set(i, (IntRange)null);
 		}
-		for (PhraseChunk phraseList : childPhraseListList) {
-			if (phraseList.size() == maxColumns) {
-				for (int i = 0; i < phraseList.size(); i++) {
-					PhraseNew phrase = phraseList.get(i);
+		for (PhraseChunk phraseChunk : childPhraseChunkList) {
+			if (phraseChunk.size() == maxColumns) {
+				for (int i = 0; i < phraseChunk.size(); i++) {
+					PhraseNew phrase = phraseChunk.get(i);
 					IntRange range = phrase.getIntRange();
 					IntRange oldRange = columnRanges.get(i);
 					range = (oldRange == null) ? range : range.plus(oldRange);
@@ -160,7 +168,7 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 	}
 	
 	public IntRangeArray getBestWhitespaceRanges() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		int maxColumns = getMaxColumns();
 		IntRangeArray bestColumnRanges = getBestColumnRanges();
 		IntRangeArray bestWhitespaces = new IntRangeArray();
@@ -189,34 +197,34 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 	}
 
 	public int size() {
-		getOrCreateChildPhraseListList();
-		return childPhraseListList.size();
+		getOrCreateChildPhraseChunkList();
+		return childPhraseChunkList.size();
 	}
 
 	public Real2Range getBoundingBox() {
-		getOrCreateChildPhraseListList();
+		getOrCreateChildPhraseChunkList();
 		Real2Range bbox = null;
-		if (childPhraseListList.size() > 0) {
-			bbox = childPhraseListList.get(0).getBoundingBox();
-			for (int i = 1; i < childPhraseListList.size(); i++) {
-				bbox = bbox.plus(childPhraseListList.get(i).getBoundingBox());
+		if (childPhraseChunkList.size() > 0) {
+			bbox = childPhraseChunkList.get(0).getBoundingBox();
+			for (int i = 1; i < childPhraseChunkList.size(); i++) {
+				bbox = bbox.plus(childPhraseChunkList.get(i).getBoundingBox());
 			}
 		}
 		return bbox;
 	}
 
 	public void rotateAll(Real2 centreOfRotation, Angle angle) {
-		getOrCreateChildPhraseListList();
-		for (PhraseChunk phraseList : childPhraseListList) {
-			phraseList.rotateAll(centreOfRotation, angle);
-			LOG.trace("PL: "+phraseList.toXML());
+		getOrCreateChildPhraseChunkList();
+		for (PhraseChunk phraseChunk : childPhraseChunkList) {
+			phraseChunk.rotateAll(centreOfRotation, angle);
+			LOG.trace("PL: "+phraseChunk.toXML());
 		}
 		updatePhraseListList();
 	}
 	
 	public void updatePhraseListList() {
-		for (int i = 0; i < childPhraseListList.size(); i++) {
-			this.replaceChild(this.getChildElements().get(i), childPhraseListList.get(i));
+		for (int i = 0; i < childPhraseChunkList.size(); i++) {
+			this.replaceChild(this.getChildElements().get(i), childPhraseChunkList.get(i));
 		}
 	}
 
@@ -224,20 +232,20 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 		return this.getBoundingBox().getLLURCorners()[0];
 	}
 
-	public boolean remove(PhraseChunk phraseList) {
+	public boolean remove(PhraseChunk phraseChunk) {
 		boolean remove = false;
-		if (childPhraseListList != null && phraseList != null) {
-			remove = childPhraseListList.remove(phraseList);
+		if (childPhraseChunkList != null && phraseChunk != null) {
+			remove = childPhraseChunkList.remove(phraseChunk);
 		}
 		return remove;
 	}
 	
 	public boolean replace(PhraseChunk oldPhraseList, PhraseChunk newPhraseList) {
 		boolean replace = false;
-		if (childPhraseListList != null) {
-			int idx = this.childPhraseListList.indexOf(oldPhraseList);
+		if (childPhraseChunkList != null) {
+			int idx = this.childPhraseChunkList.indexOf(oldPhraseList);
 			if (idx != -1) {
-				replace = this.childPhraseListList.set(idx, newPhraseList) != null;
+				replace = this.childPhraseChunkList.set(idx, newPhraseList) != null;
 			}
 		}
 		return replace;
@@ -248,10 +256,10 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 	/**
 	 * analyses neighbouring PhraseLists to see if the font sizes and Y-coordinates
 	 * are consistent with sub or superscripts. If so, merges the lines 
-	 * phraseList.mergeByXCoord(lastPhraseList)
+	 * phraseChunk.mergeByXCoord(lastPhraseList)
 	 * and removes the sub/super line
-	 * lines. The merged phraseList contains all the characters and coordinates in 
-	 * phraseLists with sub/superscript boolean flags.
+	 * lines. The merged phraseChunk contains all the characters and coordinates in 
+	 * phraseChunks with sub/superscript boolean flags.
 	 * 
 	 * getStringValue() represents the sub and superscripts by TeX notation (_{foo} and ^{bar})
 	 * but the actual content retains coordinates and can be output to HTML
@@ -264,38 +272,38 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 		Double deltaY = null;
 		PhraseChunk lastPhraseList = null;
 		List<PhraseChunk> removeList = new ArrayList<PhraseChunk>();
-		for (PhraseChunk phraseList : this) {
-			Double fontSize = Util.format(phraseList.getFontSize(), 1);
-			Double y = Util.format(phraseList.getXY().getY(), 1);
+		for (PhraseChunk phraseChunk : this) {
+			Double fontSize = Util.format(phraseChunk.getFontSize(), 1);
+			Double y = Util.format(phraseChunk.getXY().getY(), 1);
 			if (lastY != null) {
 				double fontRatio = fontSize / lastFontSize;
 				deltaY = y - lastY;
 				if (deltaY > 0 && deltaY < fontSize * SUPERSCRIPT_Y_RATIO && fontRatio >= 1.0) {
-					LOG.trace("SUPER "+lastPhraseList.getStringValue()+" => "+phraseList.getStringValue());
+					LOG.trace("SUPER "+lastPhraseList.getStringValue()+" => "+phraseChunk.getStringValue());
 					lastPhraseList.setSuperscript(true);
-					phraseList.mergeByXCoord(lastPhraseList);
+					phraseChunk.mergeByXCoord(lastPhraseList);
 					removeList.add(lastPhraseList);
 				} else if (deltaY > 0 && deltaY < lastFontSize * SUBSCRIPT_Y_RATIO && fontRatio <= 1.0) {
-					LOG.trace("SUB "+phraseList.getStringValue()+" => "+lastPhraseList.getStringValue());
-					phraseList.setSubscript(true);
-					lastPhraseList.mergeByXCoord(phraseList);
-					removeList.add(phraseList);
+					LOG.trace("SUB "+phraseChunk.getStringValue()+" => "+lastPhraseList.getStringValue());
+					phraseChunk.setSubscript(true);
+					lastPhraseList.mergeByXCoord(phraseChunk);
+					removeList.add(phraseChunk);
 				}
 			}
-			lastPhraseList = phraseList;
+			lastPhraseList = phraseChunk;
 			lastFontSize = fontSize;
 			lastY = y;
 		}
-		for (PhraseChunk phraseList : removeList) {
-			remove(phraseList);
+		for (PhraseChunk phraseChunk : removeList) {
+			remove(phraseChunk);
 		}
 	}
 
 	public List<PhraseNew> getOrCreatePhrases() {
 		if (phrases == null) {
 			phrases = new ArrayList<PhraseNew>();
-			for (PhraseChunk phraseList : this) {
-				for (PhraseNew phrase : phraseList) {
+			for (PhraseChunk phraseChunk : this) {
+				for (PhraseNew phrase : phraseChunk) {
 					phrases.add(phrase);
 				}
 			}
@@ -305,8 +313,8 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (PhraseChunk phraseList : this) {
-			sb.append(phraseList.toString()+"\n");
+		for (PhraseChunk phraseChunk : this) {
+			sb.append(phraseChunk.toString()+"\n");
 		}
 		return sb.toString();
 	}
@@ -318,9 +326,9 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 		HtmlP p = new HtmlP();
 		div.appendChild(p);
 		for (int i = 0; i < this.size(); i++) {
-			PhraseChunk phraseList = this.get(i);
+			PhraseChunk phraseChunk = this.get(i);
 			if (lastPhraseList != null) {
-				boolean newPara = triggerNewPara(lastPhraseList, phraseList);
+				boolean newPara = triggerNewPara(lastPhraseList, phraseChunk);
 				if (newPara) {
 					p = new HtmlP();
 					div.appendChild(p);
@@ -328,19 +336,19 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 					p.appendChild(" ");
 				}
 			}
-			XMLUtil.transferChildren((Element)phraseList.toHtml().copy(), p);
-			lastPhraseList = phraseList;
+			XMLUtil.transferChildren((Element)phraseChunk.toHtml().copy(), p);
+			lastPhraseList = phraseChunk;
 		}
 		return div;
 	}
 
-	private boolean triggerNewPara(PhraseChunk lastPhraseList, PhraseChunk phraseList) {
+	private boolean triggerNewPara(PhraseChunk lastPhraseList, PhraseChunk phraseChunk) {
 		boolean newPara = false;
 		String lastString = lastPhraseList.getStringValue();
 		if (lastString.length() > 0) {
 			char lastEnd = lastString.charAt(lastString.length() - 1);
-			double deltaY = phraseList.getY() - lastPhraseList.getY();
-			double deltaX = phraseList.getX() - lastPhraseList.getX();
+			double deltaY = phraseChunk.getY() - lastPhraseList.getY();
+			double deltaX = phraseChunk.getX() - lastPhraseList.getX();
 			// just do paras on separation at present
 			if (deltaY > paraSpacingTrigger) {
 				newPara = true;
@@ -377,9 +385,9 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 
 	public HtmlElement toHtmlUL() {
 		HtmlUl ul = new HtmlUl();
-		for (PhraseChunk phraseList : this) {
+		for (PhraseChunk phraseChunk : this) {
 			HtmlLi li = new HtmlLi();
-			li.appendChild(phraseList.toHtml());
+			li.appendChild(phraseChunk.toHtml());
 			ul.appendChild(li);
 		}
 		return ul;
@@ -387,18 +395,18 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 
 	public HtmlUl getPhraseListUl() {
 		HtmlUl ul = new HtmlUl();
-		for (PhraseChunk phraseList : this) {
+		for (PhraseChunk phraseChunk : this) {
 			HtmlLi li = new HtmlLi();
 			ul.appendChild(li);
-			li.appendChild(phraseList.toHtml().copy());
+			li.appendChild(phraseChunk.toHtml().copy());
 		}
 		return ul;
 	}
 
 	public String getCSSStyle() {
 		String pllStyle = null;
-		for (PhraseChunk phraseList : this) {
-			String plStyle = phraseList.getCSSStyle();
+		for (PhraseChunk phraseChunk : this) {
+			String plStyle = phraseChunk.getCSSStyle();
 			if (pllStyle == null) {
 				plStyle = pllStyle;
 			} else if (pllStyle.equals(plStyle)) {
@@ -408,6 +416,15 @@ public class TextChunk extends SVGG implements Iterable<PhraseChunk> {
 			}
 		}
 		return pllStyle;
+	}
+
+	public PhraseChunk getLastPhraseChunk() {
+		getOrCreateChildPhraseChunkList();
+		if (childPhraseChunkList.size() == 0) {
+			PhraseChunk phraseChunk = new PhraseChunk();
+			childPhraseChunkList.add(phraseChunk);
+		}
+		return childPhraseChunkList.get(0);
 	}
 
 

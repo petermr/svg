@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +21,7 @@ import org.xmlcml.graphics.html.HtmlElement;
 import org.xmlcml.graphics.html.HtmlI;
 import org.xmlcml.graphics.html.HtmlSpan;
 import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.text.horizontal.LineChunk;
+import org.xmlcml.graphics.svg.rule.horizontal.LineChunk;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Element;

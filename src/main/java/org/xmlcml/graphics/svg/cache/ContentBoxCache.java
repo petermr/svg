@@ -6,12 +6,12 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.euclid.Real2Range;
-import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.objects.ContentBoxGrid;
 import org.xmlcml.graphics.svg.objects.SVGContentBox;
-import org.xmlcml.graphics.svg.text.phrase.TextChunk;
+import org.xmlcml.graphics.svg.text.build.TextChunk;
+import org.xmlcml.graphics.svg.text.build.TextChunkList;
 
 public class ContentBoxCache extends AbstractCache {
 
@@ -32,7 +32,8 @@ public class ContentBoxCache extends AbstractCache {
 		super(containingComponentCache);
 		this.rectCache = containingComponentCache.getOrCreateRectCache();
 		// FIXME
-		throw new RuntimeException("TextChunkCache NYI");
+		LOG.error("FIXME TextChunkCache NYI");
+//		throw new RuntimeException("TextChunkCache NYI");
 //		this.textChunkCache = containingComponentCache.getOrCreateTextChunkCache();
 	}
 
@@ -49,23 +50,31 @@ public class ContentBoxCache extends AbstractCache {
 
 	/** nxm operation - slow can be be optimised by using sorted y coords.
 	 * 
-	 * @param rectCache
-	 * @param phraseListList
+	 * @param rectCache rectCache
+	 * @param textChunkCache textChunkCache
 	 * @return
 	 */
-	public static ContentBoxCache createCache(RectCache rectCache, TextChunk phraseListList) {
+	public static ContentBoxCache createCache(RectCache rectCache, TextChunkCache textChunkCache) {
 		ContentBoxCache contentBoxCache = null;
-		if (rectCache != null && phraseListList != null) {
+		if (rectCache != null && textChunkCache != null) {
 			contentBoxCache = new ContentBoxCache(rectCache.getOwnerComponentCache());
 			SVGElement.setBoundingBoxCached(rectCache.getOrCreateRectList(), true);
-			phraseListList.setBoundingBoxCached(true);
+			textChunkCache.setBoundingBoxCached(true);
 			LOG.debug("ContentBoxCache");
-			contentBoxCache.createContentBoxList(rectCache.getOrCreateRectList(), phraseListList);
+			contentBoxCache.createContentBoxList(rectCache, textChunkCache);
 		}
 		return contentBoxCache;
 	}
 
-	private List<SVGContentBox> createContentBoxList(List<SVGRect> rectList, GraphicsElement phraseListList) {
+	/** crude at first - does not check that rects do not overlap.
+	 * 
+	 * @param rectCache
+	 * @param textChunkCache
+	 * @return
+	 */
+	private List<SVGContentBox> createContentBoxList(RectCache rectCache, TextChunkCache textChunkCache) {
+		List<SVGRect> rectList = rectCache.getOrCreateRectList();
+		TextChunkList textChunkList = textChunkCache.getOrCreateTextChunkList();
 		Real2Range ownerBBox = getOwnerComponentCache().getBoundingBox();
 		LOG.trace("own "+ownerBBox);
 		contentBoxList = new ArrayList<SVGContentBox>();
@@ -78,7 +87,10 @@ public class ContentBoxCache extends AbstractCache {
 			} else {
 				LOG.trace("RECTBOX "+irect+"; "+rectBox);
 				SVGContentBox contentBox = new SVGContentBox(rect);
-				contentBox.addContainedElements(phraseListList);
+				// there might be several text chunks in a box
+				for (TextChunk textChunk : textChunkList) {
+					contentBox.addContainedElements(textChunk);
+				}
 				if (contentBox.size() > 0) {
 					LOG.trace("CB "+contentBox.toString());
 					contentBoxList.add(contentBox);

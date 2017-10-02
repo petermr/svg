@@ -1,21 +1,21 @@
 package org.xmlcml.graphics.svg.objects;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.xmlcml.graphics.svg.GraphicsElement;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGG;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.SVGRect;
 import org.xmlcml.graphics.svg.SVGUtil;
-import org.xmlcml.graphics.svg.text.horizontal.GenericRowNew;
-import org.xmlcml.graphics.svg.text.phrase.PhraseChunk;
-import org.xmlcml.graphics.svg.text.phrase.PhraseChunkList;
-import org.xmlcml.graphics.svg.text.phrase.PhraseNew;
+import org.xmlcml.graphics.svg.rule.GenericRowNew;
+import org.xmlcml.graphics.svg.text.build.PhraseChunk;
+import org.xmlcml.graphics.svg.text.build.PhraseNew;
+import org.xmlcml.graphics.svg.text.build.TextChunk;
 
 /** a contentBox is (usually) a Rect which contains other material.
  * Examples are textboxes, legend boxes or author-marked areas
@@ -40,7 +40,7 @@ public class SVGContentBox extends SVGG {
 	}
 
 	private SVGRect rect = null;
-	private PhraseChunkList phraseListList;
+	private TextChunk textChunk;
 	private SVGLineList lineList;
 	private SVGG svgElement;
 	private ArrayList<SVGLineList> lineListList;
@@ -59,30 +59,30 @@ public class SVGContentBox extends SVGG {
 		}
 	}
 
-	public static SVGContentBox createContentBox(SVGRect rect, PhraseChunkList phraseListList) {
+	public static SVGContentBox createContentBox(SVGRect rect, /*PhraseChunkList*/ TextChunk textChunk) {
 		SVGContentBox contentBox = null;
-		if (rect != null && phraseListList != null) {
-			if (rect.getBoundingBox().includes(phraseListList.getBoundingBox())) {
+		if (rect != null && textChunk != null) {
+			if (rect.getBoundingBox().includes(textChunk.getBoundingBox())) {
 				contentBox = new SVGContentBox(rect);
-				contentBox.phraseListList = phraseListList;
+				contentBox.textChunk = textChunk;
 			}
 		}
 		return contentBox;
 	}
 
 	public void addPhrase(PhraseNew phrase) {
-		getOrCreatePhraseListList();
-		PhraseChunk phraseList = new PhraseChunk();
+		getOrCreateTextChunk();
+		PhraseChunk phraseChunk = new PhraseChunk();
 		// maybe we should detach
-		phraseList.add(new PhraseNew(phrase));
-		phraseListList.add(phraseList);
+		phraseChunk.add(new PhraseNew(phrase));
+		textChunk.add(phraseChunk);
 	}
 
-	public PhraseChunkList getOrCreatePhraseListList() {
-		if (phraseListList == null) {
-			phraseListList = new PhraseChunkList();
+	public TextChunk getOrCreateTextChunk() {
+		if (textChunk == null) {
+			textChunk = new TextChunk();
 		}
-		return phraseListList;
+		return textChunk;
 	}
 
 	public SVGRect getRect() {
@@ -98,30 +98,29 @@ public class SVGContentBox extends SVGG {
 	
 	public int size() {
 		int size = 0;
-		size += getOrCreatePhraseListList().size();
+		size += getOrCreateTextChunk().size();
 		return size;
 	}
 
-	public void addContainedElements(GraphicsElement phraseListList) {
-		LOG.error("addContainedElements NYI");
-//		for (PhraseList phraseList : phraseListList) {
-//			for (int iPhrase = 0; iPhrase < phraseList.size(); iPhrase++) {
-//				Phrase phrase = phraseList.get(iPhrase);
-//				phrase.setBoundingBoxCached(true);
-//				//this is inefficient but it keeps the phrases in order
-//				if (getRect().getBoundingBox().includes(phrase.getBoundingBox())) {
-//					addPhrase(phrase);
-//					this.appendChild(phrase.copy());
-//				}
-//			}
-//		}
+	public void addContainedElements(TextChunk textChunk) {
+		for (PhraseChunk phraseChunk : textChunk) {
+			for (int iPhrase = 0; iPhrase < phraseChunk.size(); iPhrase++) {
+				PhraseNew phrase = phraseChunk.get(iPhrase);
+				phrase.setBoundingBoxCached(true);
+				//this is inefficient but it keeps the phrases in order
+				if (getRect().getBoundingBox().includes(phrase.getBoundingBox())) {
+					addPhrase(phrase);
+					this.appendChild(phrase.copy());
+				}
+			}
+		}
 	}
 
 	@Override
 	public String toString() {
 		String s = ""
 			+ "rect "+rect.getBoundingBox()+""
-			+ " pll "+phraseListList;
+			+ " pll "+textChunk;
 		return s;
 	}
 		
@@ -134,7 +133,7 @@ public class SVGContentBox extends SVGG {
 				rectCopy.setCSSStyle("stroke-width:1.0;fill:yellow;opacity:0.3;");
 				svgElement.appendChild(rectCopy);
 			}
-			svgElement.appendChild(phraseListList.copy());
+			svgElement.appendChild(textChunk.copy());
 		}
 		return svgElement;
 	}
@@ -144,14 +143,6 @@ public class SVGContentBox extends SVGG {
 	 * may be in wrong place
 	 * 
 	 * @param row
-	 */
-	/*
-	private SVGLine line;
-	private RowType type;
-	private Real2Range box;
-	private PhraseList phraseList;
-	private SVGLineList lineList;
-	private SVGContentBox contentBox;
 	 */
 	public void add(GenericRowNew row) {
 		boolean added = row.addLineToContentBox(this);
@@ -187,9 +178,9 @@ public class SVGContentBox extends SVGG {
 		return lineListList;
 	}
 
-	public boolean addPhraseList(PhraseChunk phraseList) {
-		getOrCreatePhraseListList();
-		phraseListList.add(phraseList);
-		return phraseList != null;
+	public boolean addPhraseList(PhraseChunk phraseChunk) {
+		getOrCreateTextChunk();
+		textChunk.add(phraseChunk);
+		return phraseChunk != null;
 	}
 }

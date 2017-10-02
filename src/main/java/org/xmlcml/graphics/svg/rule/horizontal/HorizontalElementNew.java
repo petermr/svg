@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.horizontal;
+package org.xmlcml.graphics.svg.rule.horizontal;
 
 import java.util.List;
 

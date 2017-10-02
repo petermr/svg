@@ -155,6 +155,8 @@ public class ComponentCache extends AbstractCache {
 	private LineCache lineCache;
 	private RectCache rectCache;
 	private ShapeCache shapeCache;
+	private ContentBoxCache contentBoxCache;
+	private TextChunkCache textChunkCache;
 	// other caches as they are developed
 	private List<AbstractCache> abstractCacheList;
 	
@@ -244,16 +246,13 @@ public class ComponentCache extends AbstractCache {
 		g.appendChild(new SVGTitle("image"));
 	//		gg.appendChild(g.copy());
 		
-		
 		g = this.getOrCreateShapeCache().debugToSVG(shapeDebug + fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("shape"));
 		gg.appendChild(g.copy());
 
-		
 		g = this.textCache.debug(textDebug + this.fileRoot+".debug.svg");
 		g.appendChild(new SVGTitle("text"));
 		gg.appendChild(g.copy());
-		
 		
 		SVGSVG.wrapAndWriteAsSVG(gg, new File(plotDebug, fileRoot+".debug.svg"));
 	}
@@ -310,6 +309,24 @@ public class ComponentCache extends AbstractCache {
 			this.rectCache = new RectCache(this);
 		}
 		return rectCache;
+	}
+
+	public TextChunkCache getOrCreateTextChunkCache() {
+		if (textChunkCache == null) {
+			this.textChunkCache = new TextChunkCache(this);
+		}
+		return textChunkCache;
+	}
+
+	public ContentBoxCache getOrCreateContentBoxCache() {
+		if (contentBoxCache == null) {
+//			this.contentBoxCache = new ContentBoxCache(this);
+			contentBoxCache = ContentBoxCache.createCache(rectCache, textChunkCache);
+			contentBoxCache.getOrCreateConvertedSVGElement();
+			contentBoxCache.getOrCreateContentBoxGrid();
+
+		}
+		return contentBoxCache;
 	}
 
 	private void addElementsToExtractedElement(List<? extends SVGElement> elementList) {
@@ -595,9 +612,19 @@ public class ComponentCache extends AbstractCache {
 		getOrCreateImageCache();
 		
 		// first pass creates raw caches which may be elaborated later
+		// GEOMETRY
 		getOrCreateShapeCache();
 		getOrCreateLineCache();
 		getOrCreateRectCache();
+		// TEXT
+		getOrCreateTextChunkCache();
+		// COMBINED OBJECTS
+		getOrCreateContentBoxCache();
+// omit		RectCache rectCache = ownerComponentCache.getOrCreateRectCache();
+		// tidying heuristics
+//		ownerComponentCache.removeBorderingRects();
+		this.removeBorderingRects();
+
 	}
 
 	public List<Real2Range> getBoundingBoxList() {
@@ -686,9 +713,9 @@ public class ComponentCache extends AbstractCache {
 		return s;
 	}
 
-	// because it's in svg2xml
-//	public void setContentBoxCache(ContentBoxCache contentBoxCache) {
-//	}
+	public void setContentBoxCache(ContentBoxCache contentBoxCache) {
+		
+	}
 	
 	public void addCache(AbstractCache abstractCache) {
 		if (abstractCacheList == null) {
@@ -734,6 +761,7 @@ public class ComponentCache extends AbstractCache {
 		lineCache = null;
 		rectCache = null;
 		shapeCache = null;
+		contentBoxCache = null;
 		abstractCacheList = null;
 		
 		positiveXBox = null;
@@ -747,5 +775,10 @@ public class ComponentCache extends AbstractCache {
 
 		whitespaceSpixels = null;
 
+	}
+
+	public void addContentBoxCache(ContentBoxCache contentBoxCache) {
+		// TODO Auto-generated method stub
+		
 	}
 }

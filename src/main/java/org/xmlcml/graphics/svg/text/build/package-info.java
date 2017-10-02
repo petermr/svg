@@ -8,4 +8,4 @@
  * @author pm286
  *
  */
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;

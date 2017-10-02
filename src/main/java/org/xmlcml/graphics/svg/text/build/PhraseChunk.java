@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +18,7 @@ import org.xmlcml.graphics.html.HtmlElement;
 import org.xmlcml.graphics.html.HtmlSpan;
 import org.xmlcml.graphics.html.HtmlTh;
 import org.xmlcml.graphics.svg.SVGG;
-import org.xmlcml.graphics.svg.text.horizontal.LineChunk;
+import org.xmlcml.graphics.svg.rule.horizontal.LineChunk;
 import org.xmlcml.xml.XMLUtil;
 
 import nu.xom.Element;
@@ -31,7 +31,7 @@ public class PhraseChunk extends LineChunk implements Iterable<PhraseNew> {
 		LOG.setLevel(Level.DEBUG);
 	}
 	
-	public final static String TAG = "phraseList";
+	public final static String TAG = "phraseChunk";
 
 	// this is not exposed
 	private List<PhraseNew> childPhraseList; 
@@ -41,8 +41,8 @@ public class PhraseChunk extends LineChunk implements Iterable<PhraseNew> {
 		this.setClassName(TAG);
 	}
 	
-	public PhraseChunk(PhraseChunk phraseList) {
-		super(phraseList);
+	public PhraseChunk(PhraseChunk phraseChunk) {
+		super(phraseChunk);
 	}
 
 	public Iterator<PhraseNew> iterator() {
@@ -278,7 +278,7 @@ public class PhraseChunk extends LineChunk implements Iterable<PhraseNew> {
 
 	public HtmlElement toHtml() {
 		HtmlElement span = new HtmlSpan();
-		span.setClassAttribute("phraseList");
+		span.setClassAttribute(TAG);
 		span = addSuscriptsAndStyle(span);
 		PhraseNew lastPhrase = null;
 		for (int i = 0; i < this.size(); i++) {

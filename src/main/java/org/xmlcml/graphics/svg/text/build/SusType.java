@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.phrase;
+package org.xmlcml.graphics.svg.text.build;
 
 public enum SusType {
 	SUB,

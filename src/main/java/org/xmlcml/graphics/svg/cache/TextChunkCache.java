@@ -7,10 +7,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.xmlcml.graphics.svg.SVGElement;
 import org.xmlcml.graphics.svg.SVGText;
-import org.xmlcml.graphics.svg.cache.AbstractCache;
-import org.xmlcml.graphics.svg.cache.ComponentCache;
-import org.xmlcml.graphics.svg.cache.TextCache;
-import org.xmlcml.graphics.svg.text.phrase.TextChunk;
+import org.xmlcml.graphics.svg.text.build.TextChunk;
+import org.xmlcml.graphics.svg.text.build.TextChunkList;
+import org.xmlcml.graphics.svg.text.structure.TextStructurer;
 
 /** creates textChunks 
  * uses TextCache as raw input and systematically builds PhraseList and TextChunks
@@ -26,8 +25,9 @@ public class TextChunkCache extends AbstractCache {
 	}
 
 	private List<SVGText> rawTextList;
-	private List<TextChunk> textChunkList;
+	private TextChunkList textChunkList;
 	private TextCache siblingTextCache;
+	private TextStructurer textStructurer;
 
 	private TextChunkCache() {
 	}
@@ -37,23 +37,26 @@ public class TextChunkCache extends AbstractCache {
 	}
 
 	public List<? extends SVGElement> getOrCreateElementList() {
-		return getOrCreateTextChunkList();
+		getOrCreateTextChunkList();
+		List<TextChunk> textChunks = new ArrayList<TextChunk>();
+		return textChunks;
 	}
 	
 	public List<SVGText> getOrCreateRawTextList() {
-		if (textChunkList == null) {
-			 rawTextList = siblingTextCache == null ? null : siblingTextCache.getTextList();
-			if (textChunkList == null) {
-				textChunkList = new ArrayList<TextChunk>();
-			}
+		if (rawTextList == null) {
+			getOrCreateSiblingTextCache();
+			rawTextList = siblingTextCache.getTextList();
 		}
 		return rawTextList;
 	}
 
-	public List<TextChunk> getOrCreateTextChunkList() {
+	public TextChunkList getOrCreateTextChunkList() {
 		if (textChunkList == null) {
 			getOrCreateRawTextList();
-			throw new RuntimeException("TextChunks NYI");
+			getOrCreateTextStructurer();
+			textChunkList = textStructurer.getOrCreateTextChunkListFromWords();
+			LOG.debug("TC"+textChunkList);
+//			throw new RuntimeException("TextChunks NYI");
 		}
 		return textChunkList;
 	}
@@ -73,6 +76,48 @@ public class TextChunkCache extends AbstractCache {
 	public void clearAll() {
 		superClearAll();
 		textChunkList = null;
+	}
+
+	/** sets bbox caching on all contained TextChunks.
+	 * 
+	 * @param boundingBoxCached 
+	 */
+	public void setBoundingBoxCached(boolean boundingBoxCached) {
+		getOrCreateTextChunkList();
+		for (TextChunk textChunk : textChunkList) {
+			textChunk.setBoundingBoxCached(boundingBoxCached);
+		}
+	}
+	
+	/** if there is exactly one TextChunk, returns it.
+	 * convenience method for single textChunk cases that avoids 
+	 * for loop or if test
+	 * @return the single textChunk or null.
+	 */
+	public TextChunk getSingleTextChunk() {
+		getOrCreateTextChunkList();
+		return textChunkList.size() != 1 ? null : textChunkList.get(0);
+	}
+
+	/** create a TextStructurer.
+	 * maybe temporary if unctions get transferred to TextChunkCache
+	 * 
+	 * @return noew or existoin TS
+	 */
+	public TextStructurer getOrCreateTextStructurer() {
+		if (textStructurer == null) {
+			getOrCreateSiblingTextCache();
+			List<SVGText> textList = siblingTextCache.getOrCreateHorizontalTexts();
+			textStructurer = TextStructurer.createTextStructurerWithSortedLines(textList);
+		}
+		return textStructurer;
+	}
+
+	private TextCache getOrCreateSiblingTextCache() {
+		if (siblingTextCache == null) {
+			siblingTextCache = this.getOwnerComponentCache().getOrCreateTextCache();
+		}
+		return siblingTextCache;
 	}
 
 }

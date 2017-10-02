@@ -38,6 +38,7 @@ public class BarTest {
 			plotBox.readAndCreateCSVPlot(inputSVGFile);
 		} catch (RuntimeException e) {
 			Assert.assertEquals("No axial tickbox: BOTTOM", e.getMessage());
+//			Assert.assertEquals("no axial tickbox", "null", String.valueOf(e.getMessage()));
 		}
 		plotBox.writeProcessedSVG(new File("target/bar/"+fileRoot+".svg"));
 	}

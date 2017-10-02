@@ -1,4 +1,4 @@
-package org.xmlcml.graphics.svg.text.horizontal;
+package org.xmlcml.graphics.svg.rule;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -8,7 +8,7 @@ import org.xmlcml.euclid.RealRange;
 import org.xmlcml.graphics.svg.SVGLine;
 import org.xmlcml.graphics.svg.SVGLineList;
 import org.xmlcml.graphics.svg.objects.SVGContentBox;
-import org.xmlcml.graphics.svg.text.phrase.PhraseChunk;
+import org.xmlcml.graphics.svg.text.build.PhraseChunk;
 
 /** generic horizontally-based object in a table.
  * replaces HorizontalElement
@@ -54,7 +54,7 @@ public class GenericRowNew {
 	private SVGLine line;
 	private RowType type;
 	private Real2Range box;
-	private PhraseChunk phraseList;
+	private PhraseChunk phraseChunk;
 	private SVGLineList lineList;
 	private SVGContentBox contentBox;
 
@@ -75,9 +75,9 @@ public class GenericRowNew {
 		this.box = box;
 	}
 	
-	public GenericRowNew(PhraseChunk phraseList, RowType type) {
+	public GenericRowNew(PhraseChunk phraseChunk, RowType type) {
 		this(type);
-		this.phraseList = phraseList;
+		this.phraseChunk = phraseChunk;
 	}
 	
 	public GenericRowNew(SVGLineList lineList, RowType type) {
@@ -99,7 +99,7 @@ public class GenericRowNew {
 			} else if (type.equals(RowType.CONTENT_BOX) || type.equals(RowType.CONTENT_GRID_PANEL)) {
 				bbox = box;
 			} else if (type.equals(RowType.PHRASE_LIST)) {
-				bbox = phraseList == null ? null: phraseList.getBoundingBox();
+				bbox = phraseChunk == null ? null: phraseChunk.getBoundingBox();
 			} else if (type.equals(RowType.SIBLING_RULES)) {
 				bbox = lineList == null ? null: lineList.getBoundingBox();
 			} else {
@@ -126,13 +126,6 @@ public class GenericRowNew {
 		return s;
 	}
 	
-	/*
-	private SVGLine line;
-	private RowType type;
-	private Real2Range box;
-	private PhraseList phraseList;
-	private SVGLineList lineList;
-	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -141,7 +134,7 @@ public class GenericRowNew {
 		sb.append((line == null ? "" : line.toString()));
 		sb.append((contentBox == null ? "" : contentBox.toString()));
 		sb.append((box == null ? "" : box.toString()));
-		sb.append((phraseList == null ? "" : phraseList.toString()));
+		sb.append((phraseChunk == null ? "" : phraseChunk.toString()));
 		sb.append((lineList == null ? "" : lineList.toString()));
 		return sb.toString();
 	}
@@ -194,7 +187,7 @@ public class GenericRowNew {
 	}
 
 	public PhraseChunk getPhraseList() {
-		return phraseList;
+		return phraseChunk;
 	}
 
 	public boolean addLineToContentBox(SVGContentBox contentBox) {
@@ -215,8 +208,8 @@ public class GenericRowNew {
 
 	public boolean addPhraseListToContentBox(SVGContentBox contentBox) {
 		boolean added = false;
-		if (phraseList != null) {
-			added = contentBox.addPhraseList(phraseList);
+		if (phraseChunk != null) {
+			added = contentBox.addPhraseList(phraseChunk);
 		}
 		return added;
 	}

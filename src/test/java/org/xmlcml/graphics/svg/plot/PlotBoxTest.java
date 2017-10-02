@@ -102,8 +102,8 @@ public class PlotBoxTest {
 			plotBox.readAndCreateCSVPlot(inputSVGFile);
 			Assert.fail("should throw exception as cannot yet do glyphs");
 		} catch (RuntimeException e) {
-//			Assert.assertEquals("cannot parse glyphs", "No axial tickbox: BOTTOM", e.getMessage());
 			Assert.assertEquals("cannot parse glyphs", "No axial tickbox: BOTTOM", e.getMessage());
+//			Assert.assertEquals("cannot parse glyphs", "null", String.valueOf(e.getMessage()));
 		}
 		plotBox.writeProcessedSVG(new File(TARGET_PLOT+fileRoot+".svg"));
 	}
