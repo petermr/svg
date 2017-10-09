@@ -43,6 +43,7 @@ public class SVGSVG extends SVGElement {
 	private final static Logger LOG = Logger.getLogger(SVGSVG.class);
 	public final static String TAG = "svg";
 	private static String svgSuffix = "svg";
+	private static Double BBOX_TOL = 10.0;
 	private Double begin = null;
 	private Double dur = null;
 	private SVGWordPageList wordPageList;
@@ -117,8 +118,9 @@ public class SVGSVG extends SVGElement {
 	/** defaults to heigh=800 width=700.
 	 * 
 	 * */
-	public static SVGSVG wrapAndWriteAsSVG(GraphicsElement svgg, File file) {
-		return wrapAndWriteAsSVG(svgg, file, 800.0, 700.0);
+	public static SVGSVG wrapAndWriteAsSVG(SVGElement svgg, File file) {
+		Real2Range bbox = svgg.getBoundingBox();
+		return wrapAndWriteAsSVG(svgg, file, bbox.getXMax() + BBOX_TOL , bbox.getYMax() + BBOX_TOL);
 	}
 	
 	/**	creates an SVGSVG wrapper for any element and outputs to file.
